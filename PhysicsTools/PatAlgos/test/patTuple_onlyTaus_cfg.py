@@ -2,6 +2,7 @@
 from PhysicsTools.PatAlgos.patTemplate_cfg import *
 
 ## load tau sequences up to selectedPatTaus
+process.load("RecoTauTag.Configuration.RecoPFTauTag_cff") # re-run tau discriminators (new version)
 process.load("PhysicsTools.PatAlgos.producersLayer1.tauProducer_cff")
 process.load("PhysicsTools.PatAlgos.selectionLayer1.tauSelector_cfi")
 
@@ -10,6 +11,7 @@ process.out.outputCommands = ['keep *_selectedPat*_*_*',]
 
 ## let it run
 process.p = cms.Path(
+    process.recoTauClassicHPSSequence * # re-run tau discriminators (new version)
     process.makePatTaus *
     process.selectedPatTaus
 )

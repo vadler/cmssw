@@ -1,0 +1,101 @@
+
+FitFunction       : 	[0]*exp(-0.5*((x-[1])/[2])**2)/([2]*sqrt(2*pi))	(constructed from C++ class)
+DependencyFunction: 	[0]+[1]*x+[2]*x**2	(constructed from C++ class) 	on E_parton
+Comment           : 	E_parton <= 400, E_parton >= 30, DeltaR(parton, reco) <= 0.1
+
+Parameters 1D:
+[0]: 	0.520366
+[1]: 	0.00870966
+[2]: 	1.05223
+[all]: 	(0.52036598944791979)*exp(-0.5*((x-(0.0087096569284660641))/(1.052226136899068))**2)/((1.052226136899068)*sqrt(2*pi))
+
+Parameters 2D (DependencyFunction):
+[0]: 	(-0.0710282+(0.00405983*E_parton))+(6.06418e-06*sq(E_parton))
+[1]: 	(-0.00547707+(-1.92345e-05*E_parton))+(4.83997e-06*sq(E_parton))
+[2]: 	(-0.246753+(0.0157505*E_parton))+(2.40267e-05*sq(E_parton))
+[all]: 	((-0.0710282+(0.00405983*E_parton))+(6.06418e-06*sq(E_parton)))*exp(-0.5*((x-((-0.00547707+(-1.92345e-05*E_parton))+(4.83997e-06*sq(E_parton))))/((-0.246753+(0.0157505*E_parton))+(2.40267e-05*sq(E_parton))))**2)/(((-0.246753+(0.0157505*E_parton))+(2.40267e-05*sq(E_parton)))*sqrt(2*pi))
+
+================================================================================
+
+for 0 <= eta < 0.9
+
+
+FitFunction       : 	[0]*exp(-0.5*((x-[1])/[2])**2)/([2]*sqrt(2*pi))	(constructed from C++ class)
+DependencyFunction: 	[0]+[1]*x+[2]*x**2	(constructed from C++ class) 	on E_parton
+Comment           : 	E_parton <= 400, E_parton >= 30, DeltaR(parton, reco) <= 0.1
+
+Parameters 1D:
+[0]: 	NAN
+[1]: 	NAN
+[2]: 	NAN
+[all]: 	(NAN)*exp(-0.5*((x-(NAN))/(NAN))**2)/((NAN)*sqrt(2*pi))
+
+Parameters 2D (DependencyFunction):
+[0]: 	(-0.049925+(0.00332551*E_parton))+(1.00937e-05*sq(E_parton))
+[1]: 	(0.00653242+(-0.000236804*E_parton))+(4.10251e-06*sq(E_parton))
+[2]: 	(-0.158624+(0.0132204*E_parton))+(2.82798e-05*sq(E_parton))
+[all]: 	((-0.049925+(0.00332551*E_parton))+(1.00937e-05*sq(E_parton)))*exp(-0.5*((x-((0.00653242+(-0.000236804*E_parton))+(4.10251e-06*sq(E_parton))))/((-0.158624+(0.0132204*E_parton))+(2.82798e-05*sq(E_parton))))**2)/(((-0.158624+(0.0132204*E_parton))+(2.82798e-05*sq(E_parton)))*sqrt(2*pi))
+
+--------------------------------------------------------------------------------
+
+for 0.9 <= eta < 1.3
+
+
+FitFunction       : 	[0]*exp(-0.5*((x-[1])/[2])**2)/([2]*sqrt(2*pi))	(constructed from C++ class)
+DependencyFunction: 	[0]+[1]*x+[2]*x**2	(constructed from C++ class) 	on E_parton
+Comment           : 	E_parton <= 400, E_parton >= 30, DeltaR(parton, reco) <= 0.1
+
+Parameters 1D:
+[0]: 	0.593963
+[1]: 	0.0240302
+[2]: 	1.42476
+[all]: 	(0.59396274715849451)*exp(-0.5*((x-(0.024030197931040755))/(1.4247643986030534))**2)/((1.4247643986030534)*sqrt(2*pi))
+
+Parameters 2D (DependencyFunction):
+[0]: 	(-0.0388135+(0.00398245*E_parton))+(6.34252e-06*sq(E_parton))
+[1]: 	(-0.0649792+(0.00187574*E_parton))+(-6.07945e-06*sq(E_parton))
+[2]: 	(-0.0609178+(0.0159607*E_parton))+(2.27251e-05*sq(E_parton))
+[all]: 	((-0.0388135+(0.00398245*E_parton))+(6.34252e-06*sq(E_parton)))*exp(-0.5*((x-((-0.0649792+(0.00187574*E_parton))+(-6.07945e-06*sq(E_parton))))/((-0.0609178+(0.0159607*E_parton))+(2.27251e-05*sq(E_parton))))**2)/(((-0.0609178+(0.0159607*E_parton))+(2.27251e-05*sq(E_parton)))*sqrt(2*pi))
+
+--------------------------------------------------------------------------------
+
+for 1.3 <= eta < 2.1
+
+
+FitFunction       : 	[0]*exp(-0.5*((x-[1])/[2])**2)/([2]*sqrt(2*pi))	(constructed from C++ class)
+DependencyFunction: 	[0]+[1]*x+[2]*x**2	(constructed from C++ class) 	on E_parton
+Comment           : 	E_parton <= 400, E_parton >= 30, DeltaR(parton, reco) <= 0.1
+
+Parameters 1D:
+[0]: 	0.859995
+[1]: 	0.100768
+[2]: 	2.48054
+[all]: 	(0.85999539129793989)*exp(-0.5*((x-(0.10076779488145358))/(2.4805368722770735))**2)/((2.4805368722770735)*sqrt(2*pi))
+
+Parameters 2D (DependencyFunction):
+[0]: 	(-0.0328447+(0.00388778*E_parton))+(5.35077e-06*sq(E_parton))
+[1]: 	(-0.225106+(0.00350579*E_parton))+(-3.41663e-06*sq(E_parton))
+[2]: 	(0.110377+(0.0142672*E_parton))+(2.40666e-05*sq(E_parton))
+[all]: 	((-0.0328447+(0.00388778*E_parton))+(5.35077e-06*sq(E_parton)))*exp(-0.5*((x-((-0.225106+(0.00350579*E_parton))+(-3.41663e-06*sq(E_parton))))/((0.110377+(0.0142672*E_parton))+(2.40666e-05*sq(E_parton))))**2)/(((0.110377+(0.0142672*E_parton))+(2.40666e-05*sq(E_parton)))*sqrt(2*pi))
+
+--------------------------------------------------------------------------------
+
+for 2.1 <= eta < 2.4
+
+
+FitFunction       : 	[0]*exp(-0.5*((x-[1])/[2])**2)/([2]*sqrt(2*pi))	(constructed from C++ class)
+DependencyFunction: 	[0]+[1]*x+[2]*x**2	(constructed from C++ class) 	on E_parton
+Comment           : 	E_parton <= 400, E_parton >= 30, DeltaR(parton, reco) <= 0.1
+
+Parameters 1D:
+[0]: 	NAN
+[1]: 	NAN
+[2]: 	NAN
+[all]: 	(NAN)*exp(-0.5*((x-(NAN))/(NAN))**2)/((NAN)*sqrt(2*pi))
+
+Parameters 2D (DependencyFunction):
+[0]: 	(NAN+(NAN*E_parton))+(NAN*sq(E_parton))
+[1]: 	(NAN+(NAN*E_parton))+(NAN*sq(E_parton))
+[2]: 	(NAN+(NAN*E_parton))+(NAN*sq(E_parton))
+[all]: 	((NAN+(NAN*E_parton))+(NAN*sq(E_parton)))*exp(-0.5*((x-((NAN+(NAN*E_parton))+(NAN*sq(E_parton))))/((NAN+(NAN*E_parton))+(NAN*sq(E_parton))))**2)/(((NAN+(NAN*E_parton))+(NAN*sq(E_parton)))*sqrt(2*pi))
+

@@ -110,7 +110,7 @@ useElectronCutBasePF  = False # use minimal (veto) electron selection cut on top
 # jets are corrected to L3Absolute (MC), L2L3Residual (data) automatically, if enabled here
 # and remain uncorrected, if none of these levels is enabled here
 useL1FastJet    = True  # needs useL1Offset being off, error otherwise
-useL1Offset     = False # needs useL1FastJet being off, error otherwise
+useL1Offset     = False # needs useL1FastJet being off, error otherwise; not available from current GT!!!
 useL2Relative   = True
 useL3Absolute   = True
 useL2L3Residual = True  # takes effect only on data
@@ -131,8 +131,8 @@ maxEvents = options.maxEvents
 ### Conditions
 
 # GlobalTags
-globalTagData = 'GR_R_53_V15::All'
-globalTagMC   = 'START53_V14::All'
+globalTagData = 'FT53_V21A_AN6::All'
+globalTagMC   = 'START53_V27::All'
 
 ### Output
 
@@ -202,10 +202,7 @@ process.out.SelectEvents.SelectEvents = []
 if runOnMC:
   triggerSelection = triggerSelectionMC
 else:
-  if useRelVals:
-    triggerSelection = triggerSelectionDataRelVals
-  else:
-    triggerSelection = triggerSelectionData
+  triggerSelection = triggerSelectionData
 from TopQuarkAnalysis.Configuration.patRefSel_triggerSelection_cff import triggerResults
 process.step0a = triggerResults.clone(
   triggerConditions = [ triggerSelection ]
@@ -455,10 +452,7 @@ if addTriggerMatching:
   if runOnMC:
     triggerObjectSelection = triggerObjectSelectionMC
   else:
-    if useRelVals:
-      triggerObjectSelection = triggerObjectSelectionDataRelVals
-    else:
-      triggerObjectSelection = triggerObjectSelectionData
+    triggerObjectSelection = triggerObjectSelectionData
   ### Trigger matching configuration
   from PhysicsTools.PatAlgos.triggerLayer1.triggerProducer_cfi import patTrigger
   from TopQuarkAnalysis.Configuration.patRefSel_triggerMatching_cfi import patMuonTriggerMatch

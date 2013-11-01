@@ -99,7 +99,7 @@ useElectronCutBasePF  = False # use minimal (veto) electron selection cut on top
 # jets are corrected to L3Absolute (MC), L2L3Residual (data) automatically, if enabled here
 # and remain uncorrected, if none of these levels is enabled here
 useL1FastJet    = True  # needs useL1Offset being off, error otherwise
-useL1Offset     = False # needs useL1FastJet being off, error otherwise
+useL1Offset     = False # needs useL1FastJet being off, error otherwise; not available from current GT!!!
 useL2Relative   = True
 useL3Absolute   = True
 useL2L3Residual = True
@@ -121,8 +121,8 @@ maxEvents = options.maxEvents
 ### Conditions
 
 # GlobalTags (w/o suffix '::All')
-globalTagData = 'GR_R_53_V15::All'
-globalTagMC   = 'START53_V14::All'
+globalTagData = 'FT53_V21A_AN6::All'
+globalTagMC   = 'START53_V27::All'
 
 ### Output
 
@@ -165,13 +165,13 @@ if useRelVals:
     inputFiles = filesRelValProdTTbarAODSIM
   else:
     print 'running on *Jet* data stream (instead of MultiJet) as no better stream exists as RelVal'
-    #from PhysicsTools.PatAlgos.tools.cmsswVersionTools import pickRelValInputFiles
-    #inputFiles = pickRelValInputFiles( cmsswVersion = 'CMSSW_5_3_6'
-                                     #, dataTier     = 'RECO'
-                                     #, relVal       = 'Jet'
-                                     #, globalTag    = 'GR_R_53_V15_RelVal_jet2012B'
-                                     #, maxVersions  = 1
-                                     #)
+    from PhysicsTools.PatAlgos.tools.cmsswVersionTools import pickRelValInputFiles
+    inputFiles = pickRelValInputFiles( cmsswVersion = 'CMSSW_5_3_6'
+                                     , dataTier     = 'RECO'
+                                     , relVal       = 'Jet'
+                                     , globalTag    = 'GR_R_53_V15_RelVal_jet2012A'
+                                     , maxVersions  = 2
+                                     )
 process.source.fileNames = inputFiles
 process.maxEvents.input  = maxEvents
 

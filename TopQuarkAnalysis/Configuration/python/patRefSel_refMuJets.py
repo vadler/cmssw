@@ -26,9 +26,8 @@ from TopQuarkAnalysis.Configuration.patRefSel_PF2PAT import *
 ### Trigger selection
 
 # HLT selection
-triggerSelectionDataRelVals = 'HLT_IsoMu17_eta2p1_TriCentralPFJet30_v*' # 2012A RelVals
-triggerSelectionData        = 'HLT_IsoMu17_eta2p1_TriCentralPFNoPUJet30_30_20_v*'
-triggerSelectionMC          = 'HLT_*' # not recommended
+triggerSelectionData = 'HLT_IsoMu17_eta2p1_TriCentralPFNoPUJet30_30_20_v*'
+triggerSelectionMC   = 'HLT_*' # not recommended
 
 ### Muon selection
 
@@ -83,6 +82,5 @@ electronCut += ' && (chargedHadronIso+max(0.,neutralHadronIso)+photonIso-0.5*puC
 ### Trigger matching
 
 # Trigger object selection
-triggerObjectSelectionDataRelVals = 'type("TriggerMuon") && ( path("HLT_IsoMu17_eta2p1_TriCentralPFJet30_v*") )' # 2012A RelVals
-triggerObjectSelectionData        = 'type("TriggerMuon") && ( path("HLT_IsoMu17_eta2p1_TriCentralPFNoPUJet30_30_20_v*") )'
-triggerObjectSelectionMC          = 'type("TriggerMuon") && ( path("HLT_*") )' # not recommended
+triggerObjectSelectionData = 'type("TriggerMuon") && ( path("HLT_IsoMu17_eta2p1_TriCentralPFNoPUJet30_30_20_v*") )'
+triggerObjectSelectionMC   = 'type("TriggerMuon") && ( path("HLT_*") )' # not recommended

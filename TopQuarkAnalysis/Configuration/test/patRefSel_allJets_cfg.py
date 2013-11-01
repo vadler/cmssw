@@ -85,11 +85,13 @@ from TopQuarkAnalysis.Configuration.patRefSel_PF2PAT import *
 # muons
 #pfMuonSelectionCut = 'pt > 5.'
 useMuonCutBasePF = True # use minimal (veto) muon selection cut on top of 'pfMuonSelectionCut'
+#muonCutPF = 'pt > 10. && abs(eta) < 2.5'
 #pfMuonIsoConeR03 = False
 #pfMuonCombIsoCut = 0.2
 # electrons
 #pfElectronSelectionCut  = 'pt > 5. && gsfTrackRef.isNonnull && gsfTrackRef.trackerExpectedHitsInner.numberOfLostHits < 2'
 useElectronCutBasePF  = True # use minimal (veto) electron selection cut on top of 'pfElectronSelectionCut'
+#electronCutPF = 'pt > 20. && abs(eta) < 2.5'
 #pfElectronIsoConeR03 = True
 #pfElectronCombIsoCut  = 0.2
 

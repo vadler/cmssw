@@ -31,12 +31,16 @@ triggerSelectionMC   = 'HLT_*' # not recommended
 
 ### Muon selection
 
+# Minimal selection for PF muons, also basis for signal and veto muons
+muonCutPF  =     'pt > 10.'                                                                      # transverse momentum
+muonCutPF += ' && abs(eta) < 2.5'                                                                # pseudo-rapisity range
+
 # Minimal selection for all muons, also basis for signal and veto muons
 muonCut  =     'isPFMuon'                                                                      # general reconstruction property
 muonCut += ' && (isGlobalMuon || isTrackerMuon)'                                               # general reconstruction property
 muonCut += ' && pt > 10.'                                                                      # transverse momentum
 muonCut += ' && abs(eta) < 2.5'                                                                # pseudo-rapisity range
-muonCut += ' && (chargedHadronIso+neutralHadronIso+photonIso-0.5*puChargedHadronIso)/pt < 0.2' # relative isolation w/ Delta beta corrections (factor 0.5)
+muonCut += ' && (chargedHadronIso+max(0.,neutralHadronIso+photonIso-0.50*puChargedHadronIso))/pt < 0.2' # relative isolation w/ Delta beta corrections (factor 0.5)
 
 # Signal muon selection on top of 'muonCut'
 signalMuonCut  =     'isPFMuon'                                                                       # general reconstruction property
@@ -49,7 +53,7 @@ signalMuonCut += ' && globalTrack.hitPattern.numberOfValidMuonHits > 0'         
 signalMuonCut += ' && abs(dB) < 0.2'                                                                  # 2-dim impact parameter with respect to beam spot (s. "PAT muon configuration" above)
 signalMuonCut += ' && innerTrack.hitPattern.numberOfValidPixelHits > 0'                               # tracker reconstruction
 signalMuonCut += ' && numberOfMatchedStations > 1'                                                    # muon chamber reconstruction
-signalMuonCut += ' && (chargedHadronIso+neutralHadronIso+photonIso-0.5*puChargedHadronIso)/pt < 0.12' # relative isolation w/ Delta beta corrections (factor 0.5)
+signalMuonCut += ' && (chargedHadronIso+max(0.,neutralHadronIso+photonIso-0.50*puChargedHadronIso))/pt < 0.12' # relative isolation w/ Delta beta corrections (factor 0.5)
 
 muonVertexMaxDZ = 0.5 # DeltaZ between muon vertex and PV
 
@@ -71,10 +75,15 @@ tightJetCut     = 'pt > 45.' # transverse momentum (leading jets)
 ### Electron selection
 
 # Minimal selection for all electrons, also basis for signal and veto muons
+electronCutPF  =     'pt > 20.'                                                                              # transverse energy
+electronCutPF += ' && abs(eta) < 2.5'                                                                        # pseudo-rapisity range
+
+# Minimal selection for all electrons, also basis for signal and veto muons
 electronCut  =     'pt > 20.'                                                                              # transverse energy
 electronCut += ' && abs(eta) < 2.5'                                                                        # pseudo-rapisity range
 electronCut += ' && electronID("mvaTrigV0") > 0.'                                                          # MVA electrons ID
-electronCut += ' && (chargedHadronIso+max(0.,neutralHadronIso)+photonIso-0.5*puChargedHadronIso)/et < 0.2' # relative isolation with Delta beta corrections
+#electronCut += ' && (chargedHadronIso+max(0.,neutralHadronIso)+photonIso-0.5*puChargedHadronIso)/et < 0.15' # relative isolation with Delta beta corrections
+electronCut += ' && (chargedHadronIso+max(0.,neutralHadronIso+photonIso-1.0*userIsolation("User1Iso")))/et < 0.15' # relative isolation with EA corrections
 
 ### ------------------------------------------------------------------------ ###
 

@@ -95,14 +95,14 @@ useNoTau      = True # before MET top projection
 #pfDzCut     = 0.5
 # muons
 #pfMuonSelectionCut = 'pt > 5.'
-useMuonCutBasePF = False # use minimal (veto) muon selection cut on top of 'pfMuonSelectionCut'
+useMuonCutBasePF = True # use minimal (veto) muon selection cut on top of 'pfMuonSelectionCut'
 #pfMuonIsoConeR03 = False
 #pfMuonCombIsoCut = 0.2
 # electrons
 #pfElectronSelectionCut  = 'pt > 5. && gsfTrackRef.isNonnull && gsfTrackRef.trackerExpectedHitsInner.numberOfLostHits < 2'
-useElectronCutBasePF  = False # use minimal (veto) electron selection cut on top of 'pfElectronSelectionCut'
+useElectronCutBasePF  = True # use minimal (veto) electron selection cut on top of 'pfElectronSelectionCut'
 #pfElectronIsoConeR03 = True
-#pfElectronCombIsoCut  = 0.2
+#pfElectronCombIsoCut = 0.15
 
 ### JEC levels
 
@@ -270,9 +270,16 @@ usePF2PAT( process
          )
 
 if useMuonCutBasePF:
-  pfMuonSelectionCut += ' && %s'%( muonCut )
+  pfMuonSelectionCut += ' && %s'%( muonCutPF )
 if useElectronCutBasePF:
-  pfElectronSelectionCut += ' && %s'%( electronCut )
+  from TopQuarkAnalysis.Configuration.patRefSel_pfIdentifiedElectrons_cfi import pfIdentifiedElectrons
+  setattr( process, 'pfIdentifiedElectrons' + postfix, pfIdentifiedElectrons )
+  getattr( process, 'pfIdentifiedElectrons' + postfix ).src = cms.InputTag( 'pfElectronsFromVertex' + postfix )
+  getattr( process, 'pfSelectedElectrons'   + postfix ).src = cms.InputTag( 'pfIdentifiedElectrons' + postfix )
+  getattr( process, 'patPF2PATSequence' + postfix ).replace( getattr( process, 'pfSelectedElectrons' + postfix )
+                                                           , getattr( process, 'pfIdentifiedElectrons' + postfix ) + getattr( process, 'pfSelectedElectrons' + postfix )
+                                                           )
+  pfElectronSelectionCut += ' && %s'%( electronCutPF )
 
 getattr( process, 'pfNoPileUp'   + postfix ).enable = usePFnoPU
 getattr( process, 'pfNoMuon'     + postfix ).enable = useNoMuon
@@ -286,7 +293,9 @@ if useL1FastJet:
 getattr( process, 'pfMuonsFromVertex' + postfix ).d0Cut = pfD0Cut
 getattr( process, 'pfMuonsFromVertex' + postfix ).dzCut = pfDzCut
 getattr( process, 'pfSelectedMuons'   + postfix ).cut = pfMuonSelectionCut
-getattr( process, 'pfIsolatedMuons'   + postfix ).isolationCut = pfMuonCombIsoCut
+getattr( process, 'pfIsolatedMuons'   + postfix ).doDeltaBetaCorrection = True
+getattr( process, 'pfIsolatedMuons'   + postfix ).deltaBetaFactor       = -0.5
+getattr( process, 'pfIsolatedMuons'   + postfix ).isolationCut          = pfMuonCombIsoCut
 
 if pfMuonIsoConeR03:
   getattr( process, 'pfIsolatedMuons' + postfix ).isolationValueMapsCharged  = cms.VInputTag( cms.InputTag( 'muPFIsoValueCharged03' + postfix )
@@ -310,18 +319,28 @@ if pfMuonIsoConeR03:
 getattr( process, 'pfElectronsFromVertex' + postfix ).d0Cut = pfD0Cut
 getattr( process, 'pfElectronsFromVertex' + postfix ).dzCut = pfDzCut
 getattr( process, 'pfSelectedElectrons'   + postfix ).cut = pfElectronSelectionCut
-getattr( process, 'pfIsolatedElectrons'   + postfix ).isolationCut = pfElectronCombIsoCut
+getattr( process, 'pfIsolatedElectrons'   + postfix ).doDeltaBetaCorrection = True # applies EA corrections here!
+getattr( process, 'pfIsolatedElectrons'   + postfix ).deltaBetaFactor       = -1.0
+getattr( process, 'pfIsolatedElectrons'   + postfix ).isolationCut          = pfElectronCombIsoCut
 
 if pfElectronIsoConeR03:
+  from EgammaAnalysis.ElectronTools.electronIsolatorFromEffectiveArea_cfi import elPFIsoValueEA03
+  setattr( process, 'elPFIsoValueEA03' + postfix, elPFIsoValueEA03 )
+  getattr( process, 'elPFIsoValueEA03' + postfix ).pfElectrons = cms.InputTag( 'pfSelectedElectrons' + postfix )
+  getattr( process, 'patPF2PATSequence' + postfix ).replace( getattr( process, 'pfSelectedElectrons' + postfix )
+                                                           , getattr( process, 'pfSelectedElectrons' + postfix ) + getattr( process, 'elPFIsoValueEA03' + postfix )
+                                                           )
   getattr( process, 'pfIsolatedElectrons' + postfix ).isolationValueMapsCharged  = cms.VInputTag( cms.InputTag( 'elPFIsoValueCharged03PFId' + postfix )
                                                                                                 )
-  getattr( process, 'pfIsolatedElectrons' + postfix ).deltaBetaIsolationValueMap = cms.InputTag( 'elPFIsoValuePU03PFId' + postfix )
+  #getattr( process, 'pfIsolatedElectrons' + postfix ).deltaBetaIsolationValueMap = cms.InputTag( 'elPFIsoValuePU03PFId' + postfix )
+  getattr( process, 'pfIsolatedElectrons' + postfix ).deltaBetaIsolationValueMap = cms.InputTag( 'elPFIsoValueEA03' + postfix ) # EA corrections
   getattr( process, 'pfIsolatedElectrons' + postfix ).isolationValueMapsNeutral  = cms.VInputTag( cms.InputTag( 'elPFIsoValueNeutral03PFId' + postfix )
                                                                                                 , cms.InputTag( 'elPFIsoValueGamma03PFId'   + postfix )
                                                                                                 )
   getattr( process, 'pfElectrons' + postfix ).isolationValueMapsCharged  = cms.VInputTag( cms.InputTag( 'elPFIsoValueCharged03PFId' + postfix )
                                                                                         )
-  getattr( process, 'pfElectrons' + postfix ).deltaBetaIsolationValueMap = cms.InputTag( 'elPFIsoValuePU03PFId' + postfix )
+  #getattr( process, 'pfElectrons' + postfix ).deltaBetaIsolationValueMap = cms.InputTag( 'elPFIsoValuePU03PFId' + postfix )
+  getattr( process, 'pfElectrons' + postfix ).deltaBetaIsolationValueMap = cms.InputTag( 'elPFIsoValueEA03' + postfix ) # EA corrections
   getattr( process, 'pfElectrons' + postfix ).isolationValueMapsNeutral  = cms.VInputTag( cms.InputTag( 'elPFIsoValueNeutral03PFId' + postfix )
                                                                                         , cms.InputTag( 'elPFIsoValueGamma03PFId'   + postfix )
                                                                                         )
@@ -330,6 +349,17 @@ if pfElectronIsoConeR03:
   getattr( process, 'patElectrons' + postfix ).isolationValues.pfPUChargedHadrons = cms.InputTag( 'elPFIsoValuePU03PFId' + postfix )
   getattr( process, 'patElectrons' + postfix ).isolationValues.pfPhotons          = cms.InputTag( 'elPFIsoValueGamma03PFId' + postfix )
   getattr( process, 'patElectrons' + postfix ).isolationValues.pfChargedHadrons   = cms.InputTag( 'elPFIsoValueCharged03PFId' + postfix )
+  getattr( process, 'patElectrons' + postfix ).isolationValues.user               = cms.VInputTag( cms.InputTag( "elPFIsoValueEA03%s"%( postfix ) ) )
+else:
+  from EgammaAnalysis.ElectronTools.electronIsolatorFromEffectiveArea_cfi import elPFIsoValueEA04
+  setattr( process, 'elPFIsoValueEA04' + postfix, elPFIsoValueEA04 )
+  getattr( process, 'elPFIsoValueEA04' + postfix ).pfElectrons = cms.InputTag( 'pfSelectedElectrons' + postfix )
+  getattr( process, 'patPF2PATSequence' + postfix ).replace( getattr( process, 'pfSelectedElectrons' + postfix )
+                                                           , getattr( process, 'pfSelectedElectrons' + postfix ) + getattr( process, 'elPFIsoValueEA04' + postfix )
+                                                           )
+  getattr( process, 'pfIsolatedElectrons' + postfix ).deltaBetaIsolationValueMap = cms.InputTag( 'elPFIsoValueEA04' + postfix ) # EA corrections
+  getattr( process, 'pfElectrons' + postfix ).deltaBetaIsolationValueMap = cms.InputTag( 'elPFIsoValueEA04' + postfix ) # EA corrections
+  getattr( process, 'patElectrons' + postfix ).isolationValues.user = cms.VInputTag( cms.InputTag( "elPFIsoValueEA04%s"%( postfix ) ) )
 
 
 from PhysicsTools.PatAlgos.tools.coreTools import *

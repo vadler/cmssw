@@ -1,23 +1,13 @@
 import sys
 
 import FWCore.ParameterSet.Config as cms
-import FWCore.ParameterSet.VarParsing as VarParsing
 
-# setup 'standard' options
-options = VarParsing.VarParsing ('standard')
-options.register('runOnMC', True, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.bool, "decide if run on MC or data")
-# parsing command line arguments
+from FWCore.ParameterSet.VarParsing import VarParsing
+options = VarParsing ('standard')
+options.register('runOnMC', True, VarParsing.multiplicity.singleton, VarParsing.varType.bool, "decide if run on MC or data")
+options.register('outputFile', 'patRefSel_allJets.root', VarParsing.multiplicity.singleton, VarParsing.varType.string, "name of output file")
 if( hasattr(sys, "argv") ):
-  #options.parseArguments()
-  if(len(sys.argv) > 1):
-    print "Parsing command line arguments:"
-  for args in sys.argv :
-    arg = args.split(',')
-    for val in arg:
-      val = val.split('=')
-      if(len(val)==2):
-        print "Setting *", val[0], "* to:", val[1]
-        setattr(options,val[0], val[1])
+  options.parseArguments()
 
 
 process = cms.Process( 'PAT' )
@@ -126,18 +116,18 @@ inputFiles = []   # overwritten, if "useRelVals" is 'True'
 
 
 # maximum number of events
-maxEvents = -1 # reduce for testing
+maxEvents = options.maxEvents
 
 ### Conditions
 
 # GlobalTags (w/o suffix '::All')
-globalTagData = 'GR_R_53_V13::All'
-globalTagMC   = 'START53_V11::All'
+globalTagData = 'GR_R_53_V15::All'
+globalTagMC   = 'START53_V14::All'
 
 ### Output
 
 # output file
-outputFile = 'patRefSel_allJets.root'
+outputFile = options.outputFile
 
 # event frequency of Fwk report
 fwkReportEvery = 1000
@@ -170,22 +160,18 @@ else:
 
 process.load( "TopQuarkAnalysis.Configuration.patRefSel_inputModule_cfi" )
 if useRelVals:
-  from PhysicsTools.PatAlgos.tools.cmsswVersionTools import pickRelValInputFiles
   if runOnMC:
-    inputFiles = pickRelValInputFiles( cmsswVersion = 'CMSSW_5_3_4_cand1'
-                                     , dataTier     = 'AODSIM'
-                                     , relVal       = 'RelValProdTTbar'
-                                     , globalTag    = 'START53_V10'
-                                     , maxVersions  = 1
-                                     )
+    from PhysicsTools.PatAlgos.patInputFiles_cff import filesRelValProdTTbarAODSIM
+    inputFiles = filesRelValProdTTbarAODSIM
   else:
     print 'running on *Jet* data stream (instead of MultiJet) as no better stream exists as RelVal'
-    inputFiles = pickRelValInputFiles( cmsswVersion = 'CMSSW_5_3_4_cand1'
-                                     , dataTier     = 'RECO'
-                                     , relVal       = 'Jet'
-                                     , globalTag    = 'GR_R_53_V12_RelVal_jet2012A'
-                                     , maxVersions  = 1
-                                     )
+    #from PhysicsTools.PatAlgos.tools.cmsswVersionTools import pickRelValInputFiles
+    #inputFiles = pickRelValInputFiles( cmsswVersion = 'CMSSW_5_3_6'
+                                     #, dataTier     = 'RECO'
+                                     #, relVal       = 'Jet'
+                                     #, globalTag    = 'GR_R_53_V15_RelVal_jet2012B'
+                                     #, maxVersions  = 1
+                                     #)
 process.source.fileNames = inputFiles
 process.maxEvents.input  = maxEvents
 
@@ -470,7 +456,7 @@ if addTriggerMatching:
 
 # MVA electron ID
 
-process.load( "EGamma.EGammaAnalysisTools.electronIdMVAProducer_cfi" )
+process.load( "EgammaAnalysis.ElectronTools.electronIdMVAProducer_cfi" )
 process.eidMVASequence = cms.Sequence(
   process.mvaTrigV0
 + process.mvaNonTrigV0

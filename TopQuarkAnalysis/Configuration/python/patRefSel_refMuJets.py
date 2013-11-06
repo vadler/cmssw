@@ -5,7 +5,7 @@
 ### Muon configuration
 
 # PAT muons
-muonsUsePV     = False # use beam spot rather than PV, which is necessary for 'dB' cut
+muonsUsePV     = True  # use PV (True) or BS (False)
 muonEmbedTrack = True  # embedded track needed for muon ID cuts
 
 ### Jet configuration
@@ -50,7 +50,7 @@ signalMuonCut += ' && abs(eta) < 2.1'                                           
 signalMuonCut += ' && globalTrack.normalizedChi2 < 10.'                                               # muon ID: 'isGlobalMuonPromptTight'
 signalMuonCut += ' && track.hitPattern.trackerLayersWithMeasurement > 5'                              # muon ID: 'isGlobalMuonPromptTight'
 signalMuonCut += ' && globalTrack.hitPattern.numberOfValidMuonHits > 0'                               # muon ID: 'isGlobalMuonPromptTight'
-signalMuonCut += ' && abs(dB) < 0.2'                                                                  # 2-dim impact parameter with respect to beam spot (s. "PAT muon configuration" above)
+signalMuonCut += ' && abs(dB("PV2D")) < 0.2'                                                          # 2-dim impact parameter with respect to primary vertex
 signalMuonCut += ' && innerTrack.hitPattern.numberOfValidPixelHits > 0'                               # tracker reconstruction
 signalMuonCut += ' && numberOfMatchedStations > 1'                                                    # muon chamber reconstruction
 signalMuonCut += ' && (chargedHadronIso+max(0.,neutralHadronIso+photonIso-0.50*puChargedHadronIso))/pt < 0.12' # relative isolation w/ Delta beta corrections (factor 0.5)

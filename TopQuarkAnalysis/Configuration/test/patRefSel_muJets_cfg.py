@@ -53,7 +53,7 @@ addTriggerMatching = True
 
 from TopQuarkAnalysis.Configuration.patRefSel_refMuJets import *
 # Muons general
-#muonsUsePV     = False
+#muonsUsePV     = True
 #muonEmbedTrack = True
 # Muons
 #muonCut       = ''

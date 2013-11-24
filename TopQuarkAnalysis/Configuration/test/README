@@ -2,29 +2,19 @@
 Environment:
 ============
 
-cmsrel CMSSW_5_3_11
-cd CMSSW_5_3_11/src
+ssh lxplus5.cern.ch
+cmsrel CMSSW_5_3_13
+cd CMSSW_5_3_13/src
 cmsenv
-cvs co -r V03-03-11-01    DataFormats/METReco
-cvs co -r V06-05-06-12    DataFormats/PatCandidates
-cvs co -r V04-06-09-02    JetMETCorrections/Type1MET
-cvs co -r V08-09-62       PhysicsTools/PatAlgos
-cvs co -r V03-09-28       PhysicsTools/PatUtils
-cvs co -r V00-00-08       RecoMET/METAnalyzers
-cvs co -r V09-00-01       RecoEgamma/EgammaTools
-cvs co -r SE_PhotonIsoProducer_MovedIn EgammaAnalysis/ElectronTools
-cd EgammaAnalysis/ElectronTools/data/
+git cms-addpkg TopQuarkAnalysis/Configuration
+git cms-merge-topic -u cms-analysis-tools:53X-updateTopRefSel
+git cms-merge-topic -u cms-analysis-tools:53X-addMETAnalyzers
+git cms-addpkg EgammaAnalysis/ElectronTools
+cd EgammaAnalysis/ElectronTools/data
 cat download.url | xargs wget
 cd -
-scram b -j 9
-
-If the steering parameters "addGenEvt" and/or "filterDecayChannels" are set to 'true',
-also the following packages should be checked out:
-
-cvs co -r V06-08-07       AnalysisDataFormats/TopObjects
-cvs co -r V06-09-12       TopQuarkAnalysis/TopEventProducers
-cvs co -r V07-01-04       TopQuarkAnalysis/TopSkimming
-cvs co -r V06-07-13       TopQuarkAnalysis/TopTools
+git cms-merge-topic vadler:Gent-53X-updateTopRefSel
+scram b -j 20
 
 
 Steering:

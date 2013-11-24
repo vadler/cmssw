@@ -15,12 +15,11 @@ createNTuples = True
 if lxplusTest:
   gc            = False
   createNTuples = False
-  maxEvents     = 100
-  if not runOnMC:
-    maxEvents = 1000
+  maxEvents     = 1000
 else:
   runOnRelVal = False # If 'False', define input files in l. 228ff.
 
+runMetFilters = True
 runMatch  = True
 runMVA    = True
 runCiC    = False
@@ -61,8 +60,9 @@ pfMuonSelect = 'pt > 5.' # PF2PAT: 'pt > 5.'
 # muon isolation cone
 usePfMuonIsoConeR03 = False
 # muon top projection isolation
-pfMuonIso = 0.2 # PF2PAT: 0.15
-pfMuonIsoUseDeltaBeta = True
+pfMuonIso                = 0.2 # PF2PAT: 0.15
+pfMuonIsoUseDeltaBeta    = True
+pfMuonIsoDeltaBetaFactor = -0.5 # PF2PAT: -0.5
 postfixNonIsoMu = 'NonIsoMu'
 # muon object selection
 #muonSelect = 'isPFMuon && (isGlobalMuon || isTrackerMuon) && pt > 10. && abs(eta) < 2.5' # RefSel (min. for veto)
@@ -77,8 +77,10 @@ pfElectronSelect = 'pt > 10. && gsfTrackRef.isNonnull' # PF2PAT: 'pt > 5. && gsf
 # electron isolation cone
 usePfElectronIsoConeR03 = True
 # electron top projection isolation
-pfElectronIso = 0.2 # PF2PAT: 0.2
-pfElectronIsoUseDeltaBeta = False
+pfElectronIso                = 0.15 # PF2PAT: 0.2
+pfElectronIsoUseEArho        = True
+pfElectronIsoUseDeltaBeta    = False
+pfElectronIsoDeltaBetaFactor = -0.5 # PF2PAT: -0.5
 postfixNonIsoE = 'NonIsoE'
 # electron object selection
 #electronSelect = 'pt > 20. && abs(eta) < 2.5 && electronID("mvaTrigV0") > 0.' # RefSel (min. for veto)
@@ -86,6 +88,10 @@ electronSelect = ''
 # electron event selection
 electronCut  = 'et > 10. && abs(eta) < 2.5'
 electronsMin = 0
+if pfElectronIsoUseEArho:
+  # Used Delta beta machinerie
+  pfElectronIsoUseDeltaBeta    = True
+  pfElectronIsoDeltaBetaFactor = -1.0
 
 # x-leptons event selection
 leptonsMin = 0
@@ -132,9 +138,9 @@ process.load( "Configuration.Geometry.GeometryIdeal_cff" )
 process.load( "Configuration.StandardSequences.MagneticField_cff" )
 process.load( "Configuration.StandardSequences.FrontierConditions_GlobalTag_cff" )
 if runOnMC:
-  process.GlobalTag.globaltag = 'START53_V21::All'
+  process.GlobalTag.globaltag = 'START53_V27::All'
 else:
-  process.GlobalTag.globaltag = 'FT_53_V21_AN3::All'
+  process.GlobalTag.globaltag = 'FT_53_V21A_AN6::All'
 
 if gc:
 	runOnMC   = eval('@MC@')
@@ -186,13 +192,13 @@ if lxplusTest:
 process.options = cms.untracked.PSet(
   wantSummary = cms.untracked.bool( True )
 )
-if lxplusTest:
-  process.Timing = cms.Service( "Timing"
-  , summaryOnly = cms.untracked.bool( True )
-  )
-  process.SimpleMemoryCheck = cms.Service( "SimpleMemoryCheck"
-  , ignoreTotal = cms.untracked.int32( 1 )
-  )
+# if lxplusTest:
+#   process.Timing = cms.Service( "Timing"
+#   , summaryOnly = cms.untracked.bool( True )
+#   )
+#   process.SimpleMemoryCheck = cms.Service( "SimpleMemoryCheck"
+#   , ignoreTotal = cms.untracked.int32( 1 )
+#   )
 
 ### Input
 
@@ -275,8 +281,6 @@ if not createNTuples:
 
 ### Cleaning
 
-process.load("RecoMET.METFilters.metFilters_cff")
-
 # Scraping filter
 process.scrapingFilter = cms.EDFilter( "FilterOutScraping"
 , applyfilter = cms.untracked.bool( True )
@@ -318,6 +322,9 @@ if not runOnMC:
   process.vertexSelection *= process.goodOfflinePrimaryVertexFilter
 
 process.eventCleaning = cms.Sequence()
+if runMetFilters:
+  process.load( "RecoMET.METFilters.metFilters_cff" )
+  process.eventCleaning *= process.metFilters
 if triggerSelection != '':
   process.eventCleaning *= process.triggerResultsFilter
 if not runOnMC:
@@ -511,6 +518,7 @@ if usePfMuonIsoConeR03:
                                                             )
 process.pfIsolatedMuons.isolationCut          = pfMuonIso
 process.pfIsolatedMuons.doDeltaBetaCorrection = pfMuonIsoUseDeltaBeta
+process.pfIsolatedMuons.deltaBetaFactor       = pfMuonIsoDeltaBetaFactor
 process.patMuons.embedTrack = True
 if usePfMuonIsoConeR03:
   process.patMuons.isolationValues.pfNeutralHadrons   = cms.InputTag( 'muPFIsoValueNeutral03' )
@@ -539,8 +547,28 @@ if usePfElectronIsoConeR03:
   process.pfElectrons.isolationValueMapsNeutral  = cms.VInputTag( cms.InputTag( 'elPFIsoValueNeutral03PFId' )
                                                                 , cms.InputTag( 'elPFIsoValueGamma03PFId' )
                                                                 )
+  if pfElectronIsoUseEArho:
+    from EgammaAnalysis.ElectronTools.electronIsolatorFromEffectiveArea_cfi import elPFIsoValueEA03
+    setattr( process, 'elPFIsoValueEA03', elPFIsoValueEA03 )
+    process.elPFIsoValueEA03.pfElectrons = cms.InputTag( 'pfSelectedElectrons' )
+    process.patPF2PATSequence.replace( process.pfSelectedElectrons
+                                     , process.pfSelectedElectrons + process.elPFIsoValueEA03
+                                     )
+    process.pfIsolatedElectrons.deltaBetaIsolationValueMap = cms.InputTag( 'elPFIsoValueEA03' ) # EA corrections
+    process.pfElectrons.deltaBetaIsolationValueMap = cms.InputTag( 'elPFIsoValueEA03' ) # EA corrections
+else:
+  if pfElectronIsoUseEArho:
+    from EgammaAnalysis.ElectronTools.electronIsolatorFromEffectiveArea_cfi import elPFIsoValueEA04
+    setattr( process, 'elPFIsoValueEA04', elPFIsoValueEA04 )
+    process.elPFIsoValueEA04.pfElectrons = cms.InputTag( 'pfSelectedElectrons' )
+    process.patPF2PATSequence.replace( process.pfSelectedElectrons
+                                     , process.pfSelectedElectrons + process.elPFIsoValueEA04
+                                     )
+    process.pfIsolatedElectrons.deltaBetaIsolationValueMap = cms.InputTag( 'elPFIsoValueEA04' ) # EA corrections
+    process.pfElectrons.deltaBetaIsolationValueMap = cms.InputTag( 'elPFIsoValueEA04' ) # EA corrections
 process.pfIsolatedElectrons.isolationCut          = pfElectronIso
 process.pfIsolatedElectrons.doDeltaBetaCorrection = pfElectronIsoUseDeltaBeta
+process.pfIsolatedElectrons.deltaBetaFactor       = pfElectronIsoDeltaBetaFactor
 process.patElectrons.embedTrack = True
 if usePfElectronIsoConeR03:
   process.patElectrons.isolationValues.pfNeutralHadrons   = cms.InputTag( 'elPFIsoValueNeutral03PFId' )
@@ -548,6 +576,11 @@ if usePfElectronIsoConeR03:
   process.patElectrons.isolationValues.pfPUChargedHadrons = cms.InputTag( 'elPFIsoValuePU03PFId' )
   process.patElectrons.isolationValues.pfPhotons          = cms.InputTag( 'elPFIsoValueGamma03PFId' )
   process.patElectrons.isolationValues.pfChargedHadrons   = cms.InputTag( 'elPFIsoValueCharged03PFId' )
+  if pfElectronIsoUseEArho:
+    process.patElectrons.isolationValues.user = cms.VInputTag( cms.InputTag( "elPFIsoValueEA03" ) )
+else:
+  if pfElectronIsoUseEArho:
+    process.patElectrons.isolationValues.user = cms.VInputTag( cms.InputTag( "elPFIsoValueEA04" ) )
 process.selectedPatElectrons.cut = electronSelect
 process.cleanPatElectrons.src           = cms.InputTag( 'patElectrons' )
 process.cleanPatElectrons.preselection  = electronCut
@@ -636,14 +669,10 @@ if writeNonIsoMuons:
   if runOnMC:
     getattr(process,'muonMatch'+postfixNonIsoMu).src = "pfSelectedMuons" + postfixNonIsoMu
   getattr(process,'patMuons'+postfixNonIsoMu).pfMuonSource = "pfSelectedMuons" + postfixNonIsoMu
-  #getattr(process,'pfIsolatedMuons'+postfixNonIsoMu).isolationCut = 999999.
 if writeNonIsoElectrons:
   cloneProcessingSnippet(process,process.patPF2PATSequence,postfixNonIsoE)
   getattr(process,'pfNoElectron'+postfixNonIsoE).topCollection = "pfSelectedElectrons" + postfixNonIsoE
-  #if runOnMC:
-    #getattr(process,'electronMatch'+postfixNonIsoE).src = "pfElectrons" + postfixNonIsoE
   getattr(process,'patElectrons'+postfixNonIsoE).pfElectronSource = "pfSelectedElectrons" + postfixNonIsoE
-  #getattr(process,'pfIsolatedElectrons'+postfixNonIsoE).isolationCut = 999999.
 
 ### TQAF
 
@@ -766,26 +795,26 @@ if createNTuples:
 					, "eidHyperTight2MC_no_iso"
 					, "eidHyperTight3MC_no_iso"
 					, "eidHyperTight4MC_no_iso"
-					#, "mvaTrigV0"
-					#, "mvaNonTrigV0"
+					, "mvaTrigV0"
+					, "mvaNonTrigV0"
 					),
 	TriggerList      = cms.vstring("HLT_Ele[2-9]\\\d+(?:(?!(No|Anti)BPTX|Tau|MT|MHT|Deta|SC17).)*","HLT_(Iso)?Mu([1-9]\\\d|9)_(?:(?!(Photon|Deta|MT|Ele|HT|MET|Track|Tk|Vertex|NoBPTX|AntiBPTX|Jpsi|Single|Tau|MR|R0)).)*","HLT_(Central)?(Tri|Quad)Jet(?:(?!(No|Anti)BPTX|BTag|Tau|MT|MHT|MET|NoJetID).)*"),
 	VetoObjectTriggers = cms.vstring("HLT_.*MET.*"),
 	BTagAlgorithms	= cms.vstring(
 #BTag algorithms for PAT::Jets
-				      "trackCountingHighEffBJetTags",
-				      "trackCountingHighPurBJetTags",
-				      "jetBProbabilityBJetTags",
-      				      "jetProbabilityBJetTags",
-				      "softMuonByPtBJetTags",
-				      "softMuonByIP3dBJetTags",
-				      "softMuonBJetTags",
-				      "simpleSecondaryVertexHighEffBJetTags",
-				      "simpleSecondaryVertexHighPurBJetTags",
-				      "combinedSecondaryVertexMVABJetTags",
-				      "combinedSecondaryVertexBJetTags",
-				      #"softElectronByPtBJetTags",
-				      #"softElectronByIP3dBJetTags"
+        			      "combinedSecondaryVertexBJetTags",
+        			      "combinedSecondaryVertexMVABJetTags",
+        			      "jetBProbabilityBJetTags",
+        			      "jetProbabilityBJetTags",
+        			      "simpleSecondaryVertexHighEffBJetTags",
+        			      "simpleSecondaryVertexHighPurBJetTags",
+        			      #"softElectronByPtBJetTags",
+        			      #"softElectronByIP3dBJetTags",
+        			      "softMuonBJetTags",
+        			      "softMuonByPtBJetTags",
+        			      "softMuonByIP3dBJetTags",
+        			      "trackCountingHighEffBJetTags",
+        			      "trackCountingHighPurBJetTags"
 ### BTag algorithms for PF or JPT jets, after rerunning btag
 #				      "newTrackCountingHighEffBJetTags",
 #				      "newTrackCountingHighPurBJetTags",

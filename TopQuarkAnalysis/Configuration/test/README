@@ -7,14 +7,17 @@ cmsrel CMSSW_5_3_13
 cd CMSSW_5_3_13/src
 cmsenv
 git cms-addpkg TopQuarkAnalysis/Configuration
-git cms-merge-topic -u cms-analysis-tools:53X-updateTopRefSel
-git cms-merge-topic -u cms-analysis-tools:53X-addMETAnalyzers
 git cms-addpkg EgammaAnalysis/ElectronTools
 cd EgammaAnalysis/ElectronTools/data
 cat download.url | xargs wget
 cd -
 git cms-merge-topic vadler:Gent-53X-updateTopRefSel
 scram b -j 20
+
+The feature branch 'vadler/Gent-53X-updateTopRefSel' incorporates also
+- cms-analysis-tools/53X-updateTopRefSel and
+- cms-analysis-tools/53X-addMETAnalyzers
+S. https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideTopRefEventSel#CMSSW_5_3_13
 
 
 Steering:

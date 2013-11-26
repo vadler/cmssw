@@ -6,13 +6,13 @@ import FWCore.ParameterSet.Config as cms
 ### Steering
 
 # Misc
-runCrab    = True
+runCrab    = False
 runTest    = True
 reportTime = False
 
 # MC Input (only for 'runCrab' = True)
-mc = 'Summer12_MadGraph'
-#mc = 'Summer12_MCatNLO'
+#mc = 'Summer12_MadGraph'
+mc = 'Summer12_MCatNLO'
 
 # Trigger
 hltProcess                = 'HLT'
@@ -165,7 +165,7 @@ process.out = cms.OutputModule( "PoolOutputModule"
 , dropMetaData   = cms.untracked.string( 'ALL' )
 )
 
-outputFile = '%s/output/skimHitFit.root'%( os.getenv( "CMSSW_BASE" ) )
+outputFile = '%s/output/skimHitFit_%s.root'%( os.getenv( "CMSSW_BASE" ), mc )
 if runTest:
   outputFile = outputFile.replace( 'root', 'test.root' )
 if not runCrab:

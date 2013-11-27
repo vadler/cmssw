@@ -68,8 +68,8 @@ int main( int argc, char * argv[] )
   const edm::ParameterSet & process_( edm::readPSetsFrom( argv[ 1 ] )->getParameter< edm::ParameterSet >( "process" ) );
   const bool verbose_( process_.getParameter< bool >( "verbose" ) );
   const std::vector< std::string > objCats_( process_.getParameter< std::vector< std::string > >( "objectCategories" ) );   // object categories
-  const bool overwrite_(  process_.getParameter< bool >( "overwrite" ));
-  const bool usePileUp_( process_.getParameter< bool >( "usePileUp" ) );
+//   const bool overwrite_(  process_.getParameter< bool >( "overwrite" ));
+//   const bool usePileUp_( process_.getParameter< bool >( "usePileUp" ) );
   const bool useAlt_( process_.getParameter< bool >( "useAlt" ) );
   const bool useSymm_( process_.getParameter< bool >( "useSymm" ) );
   const bool refGen_( process_.getParameter< bool >( "refGen" ) );
@@ -246,7 +246,7 @@ int main( int argc, char * argv[] )
       }
     }
     etaBins.push_back( histBinsEta->GetBinLowEdge( histBinsEta->GetNbinsX() ) + histBinsEta->GetBinWidth( histBinsEta->GetNbinsX() ) );
-    const unsigned nEtaBins_( etaBins.size() - 1 );
+//     const unsigned nEtaBins_( etaBins.size() - 1 );
 
     // Pt binning
     std::vector< double > ptBins;
@@ -298,8 +298,8 @@ int main( int argc, char * argv[] )
         const std::string titleYSigma( inverse && kinProp == "Pt" ? titleYPropInvSigma[ kinProp ] : titleYPropSigma[ kinProp ] );
 
         // Loop over eta bins
-        Double_t minY;
-        Double_t maxY;
+        Double_t minY( 9999. );
+        Double_t maxY( 9999. );// s. "FIXME 1"
         bool startMinMax( true );
         TList * listFit( dirFit_->GetListOfKeys() );
         TIter nextInListFit( listFit );
@@ -373,7 +373,7 @@ int main( int argc, char * argv[] )
           }
           else {
             minY = std::min( minYEta, minY );
-            maxY = std::min( maxYEta, maxY );
+            maxY = std::min( maxYEta, maxY ); // FIXME 1: Isn't it std::max?
           }
 
           resEtaSigma->SetLineColor( kRed );

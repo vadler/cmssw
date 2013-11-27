@@ -1,7 +1,9 @@
-<use   name="root"/>
-<use   name="rootcintex"/>
-<use   name="rootgraphics"/>
+<use name="root"/>
+<use name="rootcintex"/>
+<use name="rootgraphics"/>
 <use name="FWCore/Framework"/>
+<use name="FWCore/ParameterSet"/>
+<use name="CommonTools/MyTools"/>
 <export>
   <lib name="1"/>
 </export>

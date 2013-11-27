@@ -10,7 +10,9 @@ runTest = True
 # era    = 'Spring10'
 era    = 'Summer11'
 # Input sample
-sample = 'Fall11_R4_1_L3_unambiguousOnly'
+sample = 'Summer12_MadGraph_L3_unambiguousOnly'
+sample = 'Summer12_MCatNLO_L3_unambiguousOnly'
+#sample = 'Fall11_R4_1_L3_unambiguousOnly'
 #sample = 'Fall11_R4_1_L3_totalMinDist'
 #sample = 'Fall11_R4_L3_unambiguousOnly'
 
@@ -33,7 +35,7 @@ if refGen:
   name += 'Gen'
 if useSymm:
   name += 'Symm'
-inputFile = 'fitTopHitFit_from%s_%s.root'%( era, sample )
+inputFile = 'fitTopHitFitResolutionFunctions_from%s_%s.root'%( era, sample )
 if usePileUp:
   inputFile = inputFile.replace( '.root', '_PileUp.root' )
 if runTest:
@@ -43,8 +45,8 @@ if refSel:
   logFile = logFile.replace( '.', '_Ref.', 1 )
 logFile = logFile.replace( '.', '_' + name + '.', 1 )
 inputFile = 'file:%s/output/%s'%( os.getenv( "CMSSW_BASE" ), inputFile )
-outputFile = inputFile.replace( 'fitTopHitFit', 'plotTopHitFitResolutionFunctions' )
-logFile   = logFile.replace( 'fitTopHitFit', 'plotTopHitFitResolutionFunctions' )
+outputFile = inputFile.replace( 'fitTopHitFit', 'plotTopHitFit' )
+logFile   = logFile.replace( 'fitTopHitFit', 'plotTopHitFit' )
 cfgFile   = logFile.replace( '.', '_cfg.', 1 )
 cfgFile   = cfgFile.replace( '.log', '.py' )
 logFile   = '%s/output/%s'%( os.getenv( "CMSSW_BASE" ), logFile )

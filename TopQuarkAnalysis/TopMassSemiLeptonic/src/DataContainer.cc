@@ -1,4 +1,4 @@
-#include "TopQuarkAnalysis/TopMassSemiLeptonic/interface/FitTopTransferFunctionsDataContainer.h"
+#include "TopQuarkAnalysis/TopMassSemiLeptonic/interface/DataContainer.h"
 
 
 #include <TTree.h>
@@ -7,7 +7,7 @@
 using namespace my;
 
 
-void FitTopTransferFunctionsDataContainer::loadPileUpWeights( bool usePileUp, const std::string & pileUp, TDirectory* dirInSel )
+void DataContainer::loadPileUpWeights( bool usePileUp, const std::string & pileUp, TDirectory* dirInSel )
 {
   Double_t pileUpWeight;
   TTree * pileUpData( ( TTree* )( dirInSel->Get( "Data" ) ) );
@@ -15,7 +15,7 @@ void FitTopTransferFunctionsDataContainer::loadPileUpWeights( bool usePileUp, co
   Int_t nEntries( ( Int_t )pileUpData->GetEntries() );
   for ( Int_t iEntry = 0; iEntry < nEntries; ++iEntry ) {
     pileUpData->GetEntry( iEntry );
-    if ( usePileUp ) pileUpWeights.push_back( pileUpWeight );
-    else             pileUpWeights.push_back( 1. );
+    if ( usePileUp ) pileUpWeights_.push_back( pileUpWeight );
+    else             pileUpWeights_.push_back( 1. );
   }
 }

@@ -69,3 +69,51 @@ void my::setParametersBkg( TF1 * fit, TF1 * bkg )
   }
 }
 
+
+#include <TKey.h>
+#include <TDirectoryFile.h>
+
+std::string my::addDirectoryPointersSubFits( TDirectory* dirIn, std::vector< TDirectory* >& dirsInSubFit, TDirectory* dirOut, std::vector< TDirectory* >& dirsOutSubFit, std::vector< std::vector< TDirectory* > >& dirsOutSubFitEta, Bool_t useSymm, Bool_t useAlt, Bool_t refGen )
+{
+  TList* listProp( dirIn->GetListOfKeys() );
+  TIter nextInListProp( listProp );
+  while ( TKey* keyFit = ( TKey* )nextInListProp() ) {
+    if ( std::string( keyFit->GetClassName() ) != "TDirectoryFile" ) continue;
+    const std::string subFit( keyFit->GetName() );
+    if ( subFit.find( "Inv" ) != std::string::npos ) continue; // nothing to do for inverse
+    // These are real switches: depending on configuration, only one setting combination can be run at a time
+    if ( useAlt  == ( subFit.find( "Alt" )  == std::string::npos ) ) continue;
+    if ( useSymm == ( subFit.find( "Symm" ) == std::string::npos ) ) continue;
+    if ( refGen  == ( subFit.find( "Gen" )  == std::string::npos ) ) continue;
+    TDirectory* dirInSubFit( ( TDirectory* )( dirIn->Get( subFit.c_str() ) ) );
+    if ( ! dirInSubFit ) {
+      std::cout << "my::addDirectoryPointersSubFits --> ERROR:" << std::endl
+                << "    fit '" << subFit << "' does not exist in input file" << std::endl;
+      continue;
+    }
+    dirsInSubFit.push_back( dirInSubFit );
+    TDirectory* dirOutSubFit( ( TDirectory* )( dirOut->Get( subFit.c_str() ) ) );
+    if ( ! dirOutSubFit ) {
+      dirOut->cd();
+      dirOutSubFit = new TDirectoryFile( subFit.c_str(), "Particular fit" );
+    }
+    dirsOutSubFit.push_back( dirOutSubFit );
+    // Eta bins
+    std::vector< TDirectory* > dirsOutEta;
+    TList* listFit( dirInSubFit->GetListOfKeys() );
+    TIter nextInListFit( listFit );
+    while ( TKey* keyEta = ( TKey* )nextInListFit() ) {
+      if ( std::string( keyEta->GetClassName() ) != "TDirectoryFile" ) continue;
+      const std::string binEta( keyEta->GetName() );
+      TDirectory* dirOutEta( ( TDirectory* )( dirOutSubFit->Get( binEta.c_str() ) ) );
+      if ( ! dirOutEta ) {
+        dirOutSubFit->cd();
+        dirOutEta = new TDirectoryFile( binEta.c_str(), "Eta bin" );
+      }
+      dirsOutEta.push_back( dirOutEta );
+    }
+    dirsOutSubFitEta.push_back( dirsOutEta );
+    return subFit;
+  }
+  return std::string();
+}

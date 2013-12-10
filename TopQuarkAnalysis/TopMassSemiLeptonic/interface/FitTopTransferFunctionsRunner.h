@@ -5,31 +5,56 @@
 #include <vector>
 #include <string>
 
+#include <TCanvas.h>
+
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
-#include "TopQuarkAnalysis/TopMassSemiLeptonic/interface/FitTopTransferFunctionsDataContainer.h"
+#include "TopQuarkAnalysis/TopMassSemiLeptonic/interface/DataContainer.h"
+#include "TopQuarkAnalysis/TopMassSemiLeptonic/interface/ObjectDataContainer.h"
+#include "TopQuarkAnalysis/TopMassSemiLeptonic/interface/FitTopTransferFunctionsHistos.h"
 
 
 namespace my {
 
   class FitTopTransferFunctionsRunner {
 
-      std::string name_;
+      std::string myName_;
       int         status_;
       // Config
       edm::ParameterSet          config_;
-      bool                       verbose_;
-      bool                       overwrite_;
+      unsigned                   verbose_;
+      bool                       useSymm_;
+      bool                       useAlt_;
+      bool                       useNonT_;
+      bool                       refGen_;
+      bool                       scale_;
+      int                        overwrite_;
       std::vector< std::string > objCats_;
-      std::string fitFunction_;
-      std::string dependencyFunction_;
       // Input
       TFile*                                   fileIn_;
       TDirectory*                              dirInSel_;
-      my::FitTopTransferFunctionsDataContainer data_;
+      std::vector< TDirectory* >               dirsInObjCat_;
+      std::vector< TDirectory* >               dirsInObjCatSubFit_;
+      my::DataContainer                        data_;
       // Output
-      TFile*      fileOut_;
-      TDirectory* dirOutSel_;
+      TFile*                                    fileOut_;
+      TDirectory*                               dirOutSel_;
+      std::vector< TDirectory* >                dirsOutObjCat_;
+      std::vector< TDirectory* >                dirsOutObjCatSubFit_;
+      std::vector< std::vector< TDirectory* > > dirsOutObjCatSubFitEta_;
+      // Strings
+      std::string baseTitlePt_;
+      std::string titlePtT_;
+      std::string titlePt_;
+      std::string baseTitleEta_;
+      std::string titleEta_;
+      std::string titleTrans_;
+//       std::string titleTransMean_;
+//       std::string titleTransNorm_;
+//       std::string titleTransSigma_;
+      // Histograms
+      std::vector< HistosTrans >                   histosVecRebinTrans_;
+      std::vector< std::vector< HistosTransEta > > histosVecRebinVecTransEta_;
 
     public:
 
@@ -37,7 +62,9 @@ namespace my {
       ~FitTopTransferFunctionsRunner();
 
       int  run();
-      void runPerCategory( const std::string& objCat );
+      bool fillPerCategory( unsigned uCat );
+      void fillPerCategoryEta( const ObjectDataContainer& dataContainer, unsigned uEta, HistosTrans& histosTrans, HistosTransEta& histosTransEta, double minPt, double maxEta, double maxDR );
+      bool fitPerCategory( unsigned uCat );
 
   };
 

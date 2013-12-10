@@ -30,8 +30,9 @@ int main( int argc, char * argv[] )
   }
 
   // Run
-  my::FitTopTransferFunctionsRunner runner( name, edm::readPSetsFrom( argv[ 1 ] )->getParameter< edm::ParameterSet >( "fitTopTransferFunctions" ) );
-  oStatus += runner.run();
+  my::FitTopTransferFunctionsRunner* runner( new my::FitTopTransferFunctionsRunner( name, edm::readPSetsFrom( argv[ 1 ] )->getParameter< edm::ParameterSet >( "fitTopTransferFunctions" ) ) );
+  oStatus += runner->run();
+  delete runner;
 
   return oStatus;
 

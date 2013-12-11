@@ -1,5 +1,7 @@
 #include "TopQuarkAnalysis/TopMassSemiLeptonic/interface/MyTools.h"
 
+#include <TROOT.h>
+
 
 void my::setParametersFitFrac( TF1 * fit, TH1D * histo, bool useBkgFunction )
 {
@@ -68,6 +70,152 @@ void my::setParametersBkg( TF1 * fit, TF1 * bkg )
     bkg->SetParameter( i, fit->GetParameter( i ) );
   }
 }
+
+
+#include <cmath>
+
+
+void my::initialiseFitParameters( TF1* fit, TH1D const* histo, const std::string& fitFuncId, bool scale )
+{
+  //. This function assumes fit functions of the forms
+  // - [0]*exp(-0.5*((x-[1])/[2])**2)/([2]*sqrt(2*pi)) (single Gaissian) or
+  // - [0]*(exp(-0.5*((x-[1])/[2])**2)+[3]*exp(-0.5*((x-[4])/[5])**2))/(([2]+[3]*[5])*sqrt(2*pi)) (double Gaussian)
+
+  // Starting points
+  const Double_t c( scale ? 1. : histo->Integral("width") );         // Constant
+  const Double_t m( histo->GetMean() );                              // Mean
+  const Double_t p( histo->GetBinCenter( histo->GetMaximumBin() ) ); // Peak
+  const Double_t s( histo->GetRMS() );                               // RMS
+  Double_t fitMin, fitMax;
+  fit->GetRange( fitMin, fitMax );                                   // function's fit limits
+
+  // Single Gaussian case
+  if ( fitFuncId == "sGauss" ) {
+    fit->SetParameter( 0, c );
+    fit->SetParName( 0, "c" );
+    fit->SetParameter( 1, p );
+    fit->SetParName( 1, "#mu" );
+    fit->SetParameter( 2, sqrt( s - m ) );
+    fit->SetParName( 2, "#sigma" );
+  }
+
+  // Double Gaussian case
+  if ( fitFuncId == "dGauss" ) {
+    fit->SetParName( 0, "Signal c" );
+    fit->SetParName( 1, "Signal #mu" );
+    fit->SetParName( 2, "Signal #sigma" );
+    fit->SetParName( 3, "Bkg c" );
+    fit->SetParName( 4, "Bkg #mu" );
+    fit->SetParName( 5, "Bkg #sigma" );
+    fit->SetParameter( 0, 10. * c );
+    fit->SetParameter( 1, p );
+    fit->SetParLimits( 1, fitMin, fitMax );
+    fit->SetParameter( 2, sqrt( s - m ) );
+    fit->SetParLimits( 2, 0., 2. * s );
+    fit->SetParameter( 3, 0.25 );
+    fit->SetParLimits( 3, 0., 100. );
+    fit->SetParameter( 4, 2 * m - p );
+    fit->SetParLimits( 4, fitMin, fitMax );
+    fit->SetParameter( 5, ( fitMax - fitMin ) / 4. );
+    fit->SetParLimits( 5, 0., fitMax - fitMin );
+  }
+
+  // Crystal Ball cases
+  if ( fitFuncId == "lCB" ) {
+    // par = 1: mean
+    // par = 2: sigma > 0.
+    // par = 3: alpha > 0.
+    // par = 4: exponent > 0.
+    fit->SetParameter( 0, c );
+    fit->SetParLimits( 0, 0., 100. ); //
+    fit->SetParName( 0, "c" );
+    fit->SetParameter( 1, p );
+    fit->SetParName( 1, "#mu" );
+    fit->SetParameter( 2, sqrt( s - m ) );
+    fit->SetParLimits( 2, 0., 100. ); // 6, 7, 8, 9, 10
+    fit->SetParName( 2, "#sigma" );
+    fit->SetParameter( 3, 1. );
+    fit->SetParLimits( 3, 0., 100. ); // 3, 9, 10
+    fit->SetParName( 3, "#alpha_{l}" );
+    fit->SetParameter( 4, 1. );
+    fit->SetParName( 4, "n_{l}" );
+//     fit->SetParLimits( 4, 1., 100. ); //
+  }
+  else if ( fitFuncId == "uCB" ) {
+    // par = 1: mean
+    // par = 2: sigma > 0.
+    // par = 3: alpha > 0.
+    // par = 4: exponent > 0.
+    fit->SetParameter( 0, c );
+    fit->SetParLimits( 0, 0., 100. ); //
+    fit->SetParName( 0, "c" );
+    fit->SetParameter( 1, p );
+    fit->SetParName( 1, "#mu" );
+    fit->SetParameter( 2, sqrt( s - m ) );
+    fit->SetParLimits( 2, 0., 100. ); // 6, 7, 8, 9, 10
+    fit->SetParName( 2, "#sigma" );
+    fit->SetParameter( 3, 1. );
+    fit->SetParLimits( 3, 0., 100. ); // 3, 9, 10
+    fit->SetParName( 3, "#alpha_{u}" );
+    fit->SetParameter( 4, 1. );
+    fit->SetParName( 4, "n_{u}" );
+//     fit->SetParLimits( 4, 1., 100. ); //
+  }
+  else if ( fitFuncId == "dCB" ) {
+    // par = 1: mean
+    // par = 2: sigma > 0.
+    // par = 3: alpha low > 0.
+    // par = 4: exponent low > 0.
+    // par = 5: alpha up > 0.
+    // par = 6: exponent up > 0.
+    fit->SetParameter( 0, c );
+    fit->SetParLimits( 0, 0., 100. ); //
+    fit->SetParName( 0, "c" );
+    fit->SetParameter( 1, p );
+    fit->SetParName( 1, "#mu" );
+    fit->SetParameter( 2, sqrt( s - m ) );
+    fit->SetParLimits( 2, 0., 100. );
+    fit->SetParName( 2, "#sigma" );
+    fit->SetParameter( 3, 1. );
+    fit->SetParLimits( 3, 0., 100. );
+    fit->SetParName( 3, "#alpha_{l}" );
+    fit->SetParameter( 4, 1. );
+    fit->SetParName( 4, "n_{l}" );
+//     fit->SetParLimits( 4, 1., 100. );
+    fit->SetParameter( 5, 1. );
+    fit->SetParLimits( 5, 0., 100. );
+    fit->SetParName( 5, "#alpha_{u}" );
+    fit->SetParameter( 6, 1. );
+    fit->SetParName( 6, "n_{u}" );
+//     fit->SetParLimits( 6, 1., 100. );
+  }
+
+}
+
+bool my::checkParametersDoubleGaussian( TF1 const* fit, const std::string& fitFuncId )
+{
+  //. This function assumes fit functions of the form
+  // - [0]*(exp(-0.5*((x-[1])/[2])**2) + [3]*exp(-0.5*((x-[4])/[5])**2))/(([2]+[3]*[5])*sqrt(2*pi)) (double Gaussian)
+  if ( fitFuncId != "dGauss" ) return false;
+  if ( fit->GetParameter( 2 ) < fit->GetParameter( 5 ) || std::fabs( fit->GetParameter( 3 ) ) < 1. ) return false;
+  std::cout << std::endl
+            << " --> WARNING:" << std::endl
+            << "    function " << fit->GetName() << " mixed parameters." << std::endl;
+  return true; // incorrect assignment assumed!
+}
+
+void my::mixParametersDoubleGaussian( TransferFunction& transfer, TF1 const* fit )
+{
+  //. This function assumes fit functions of the form
+  // - [0]*(exp(-0.5*((x-[1])/[2])**2) + [3]*exp(-0.5*((x-[4])/[5])**2))/(([2]+[3]*[5])*sqrt(2*pi)) (double Gaussian)
+  transfer.SetParameter( 0, fit->GetParameter( 0 ) );
+  transfer.SetParameter( 1, fit->GetParameter( 4 ) );
+  transfer.SetParameter( 2, fit->GetParameter( 5 ) );
+  transfer.SetParameter( 3, 1. / fit->GetParameter( 3 ) );
+  transfer.SetParameter( 4, fit->GetParameter( 1 ) );
+  transfer.SetParameter( 5, fit->GetParameter( 2 ) );
+}
+
 
 
 #include <TKey.h>

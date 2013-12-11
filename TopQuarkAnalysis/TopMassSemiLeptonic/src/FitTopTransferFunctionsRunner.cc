@@ -3,6 +3,7 @@
 #include <cassert>
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 
 #include <TROOT.h>
 #include <TStyle.h>
@@ -11,6 +12,7 @@
 #include <TCanvas.h>
 #include <TH1D.h>
 #include <TH2D.h>
+#include <TFitResult.h>
 #include <TKey.h>
 
 #include "DataFormats/Math/interface/deltaR.h"
@@ -53,6 +55,9 @@ FitTopTransferFunctionsRunner::FitTopTransferFunctionsRunner( const std::string&
   const bool         configIOUsePileUp( configIO.getParameter< bool >( "usePileUp" ) );
   const std::string& configIOPileUp( configIO.getParameter< std::string >( "pileUp" ) );
   const std::string& configIOOutFile( configIO.getParameter< std::string >( "outputFile" ) );
+  writeFiles_ = configIO.getParameter< bool >( "writeFiles" );
+  plot_       = configIO.getParameter< bool >( "plot" );
+  pathPlots_  = configIO.getParameter< std::string >( "pathPlots" );
 
   // Set up ROOT
   setPlotEnvironment( gStyle );
@@ -271,7 +276,7 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
     const std::string nameEta( name + "_" + binEta );
     HistosTransEta histosTransEta( objCat, nameEta, configObjDeltaPtBins, configObjDeltaPtMax, nPtBins, dataContainer.ptBins(), titleTrans_, baseTitlePt_, titlePtT_, titlePt_, titleEta_ );
     // Fill
-    fillPerCategoryEta( dataContainer, uEta, histosTrans, histosTransEta, configObjMinPt, configObjMaxEta, configObjMaxDR );
+    fillPerCategoryBin( dataContainer, uEta, histosTrans, histosTransEta, configObjMinPt, configObjMaxEta, configObjMaxDR );
     if ( scale_ ) histosTransEta.scale();
     histosVecTransEta.push_back( histosTransEta );
   } // loop:uEta < nEtaBins
@@ -300,7 +305,7 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
     const std::string nameEtaRebin( nameRebin + "_" + binEta );
     HistosTransEta histosRebinTransEta( objCat, nameEtaRebin, configObjDeltaPtBins, configObjDeltaPtMax, nPtBins, dataContainer.ptBins(), titleTrans_, baseTitlePt_, titlePtT_, titlePt_, titleEta_, histosVecTransEta.at( uEta), configObjWidthFactor );
     // Fill
-    fillPerCategoryEta( dataContainer, uEta, histosRebinTrans, histosRebinTransEta, configObjMinPt, configObjMaxEta, configObjMaxDR );
+    fillPerCategoryBin( dataContainer, uEta, histosRebinTrans, histosRebinTransEta, configObjMinPt, configObjMaxEta, configObjMaxDR );
     if ( scale_ ) histosRebinTransEta.scale();
     histosRebinVecTransEta.push_back( histosRebinTransEta );
   } // loop:uEta < nEtaBins
@@ -313,7 +318,7 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
 }
 
 
-void FitTopTransferFunctionsRunner::fillPerCategoryEta( const ObjectDataContainer& dataContainer, unsigned uEta, HistosTrans& histosTrans, HistosTransEta& histosTransEta, double minPt, double maxEta, double maxDR )
+void FitTopTransferFunctionsRunner::fillPerCategoryBin( const ObjectDataContainer& dataContainer, unsigned uEta, HistosTrans& histosTrans, HistosTransEta& histosTransEta, double minPt, double maxEta, double maxDR )
 {
   // Loop over pt bins
   for ( unsigned uPt = 0; uPt < dataContainer.nPtBins(); ++uPt ) {
@@ -358,14 +363,83 @@ bool FitTopTransferFunctionsRunner::fitPerCategory( unsigned uCat )
 
   // Get object configuration
   const edm::ParameterSet& configObj( config_.getParameter< edm::ParameterSet >( "objects" ).getParameter< edm::ParameterSet >( objCat ) );
+  const double configObjMinPt( configObj.getParameter< double >( "minPt" ) );
+//   const double configObjMaxEta( configObj.getParameter< double >( "maxEta" ) );
+  const double configObjMaxDR( configObj.getParameter< double >( "maxDR" ) );
   const std::string configObjFitFunction( configObj.getParameter< std::string >( "fitFunction" ) );
   const std::string configObjDependencyFunction( configObj.getParameter< std::string >( "dependencyFunction" ) );
   const bool configObjFitEtaBins( configObj.getParameter< bool >( "fitEtaBins" ) );
+  const double configObjFitMaxPt( configObj.getParameter< double >( "fitMaxPt" ) );
+  const double configObjFitRange( configObj.getParameter< double >( "fitRange" ) );
+  const std::string configObjFitOptions( configObj.getParameter< std::string >( "fitOptions" ) );
 
   HistosTrans&                   histosRebinTrans( histosVecRebinTrans_.at( uCat) );
   std::vector< HistosTransEta >& histosRebinVecTransEta( histosVecRebinVecTransEta_.at( uCat) );
   TDirectory*                    dirOutObjCatSubFit( dirsOutObjCatSubFit_.at( uCat ) );
   std::vector< TDirectory* >&    dirOutObjCatSubFitEta( dirsOutObjCatSubFitEta_.at( uCat ) );
+  const unsigned nEtaBins( dirOutObjCatSubFitEta.size() );
+
+  // Initialise Functions
+  // Dummies
+  TF1* fitFunction( new TF1( "fitFunction", "1" ) );
+  TF1* dependencyFunction( new TF1( "dependencyFunction", "1" ) );
+  TransferFunction transferPt;
+  // Initialisation
+  if ( configObjFitFunction == "sGauss" ) {
+    if ( configObjDependencyFunction == "linear" )          transferPt = initialiseFunctions< SingleGaussian, Line >( fitFunction, dependencyFunction );
+    else if ( configObjDependencyFunction == "squared" )    transferPt = initialiseFunctions< SingleGaussian, Parabola >( fitFunction, dependencyFunction );
+    else if ( configObjDependencyFunction == "resolution" ) transferPt = initialiseFunctions< SingleGaussian, ResolutionLike >( fitFunction, dependencyFunction );
+    else {
+      std::cout << myName_ << " --> ERROR:" << std::endl
+                << "    dependency function identifier '" << configObjDependencyFunction << "' unknown" << std::endl;
+      return false;
+    }
+  }
+  else if ( configObjFitFunction == "dGauss" ){
+    if ( configObjDependencyFunction == "linear" )          transferPt = initialiseFunctions< DoubleGaussian, Line >( fitFunction, dependencyFunction );
+    else if ( configObjDependencyFunction == "squared" )    transferPt = initialiseFunctions< DoubleGaussian, Parabola >( fitFunction, dependencyFunction );
+    else if ( configObjDependencyFunction == "resolution" ) transferPt = initialiseFunctions< DoubleGaussian, ResolutionLike >( fitFunction, dependencyFunction );
+    else {
+      std::cout << myName_ << " --> ERROR:" << std::endl
+                << "    dependency function identifier '" << configObjDependencyFunction << "' unknown" << std::endl;
+      return false;
+    }
+  }
+  else if ( configObjFitFunction == "lCB" ) {
+    if ( configObjDependencyFunction == "linear" )          transferPt = initialiseFunctions< LowerCrystalBall, Line >( fitFunction, dependencyFunction );
+    else if ( configObjDependencyFunction == "squared" )    transferPt = initialiseFunctions< LowerCrystalBall, Parabola >( fitFunction, dependencyFunction );
+    else if ( configObjDependencyFunction == "resolution" ) transferPt = initialiseFunctions< LowerCrystalBall, ResolutionLike >( fitFunction, dependencyFunction );
+    else {
+      std::cout << myName_ << " --> ERROR:" << std::endl
+                << "    dependency function identifier '" << configObjDependencyFunction << "' unknown" << std::endl;
+      return false;
+    }
+  }
+  else if ( configObjFitFunction == "uCB" ) {
+    if ( configObjDependencyFunction == "linear" )          transferPt = initialiseFunctions< UpperCrystalBall, Line >( fitFunction, dependencyFunction );
+    else if ( configObjDependencyFunction == "squared" )    transferPt = initialiseFunctions< UpperCrystalBall, Parabola >( fitFunction, dependencyFunction );
+    else if ( configObjDependencyFunction == "resolution" ) transferPt = initialiseFunctions< UpperCrystalBall, ResolutionLike >( fitFunction, dependencyFunction );
+    else {
+      std::cout << myName_ << " --> ERROR:" << std::endl
+                << "    dependency function identifier '" << configObjDependencyFunction << "' unknown" << std::endl;
+      return false;
+    }
+  }
+  else if ( configObjFitFunction == "dCB" ) {
+    if ( configObjDependencyFunction == "linear" )          transferPt = initialiseFunctions< DoubleCrystalBall, Line >( fitFunction, dependencyFunction );
+    else if ( configObjDependencyFunction == "squared" )    transferPt = initialiseFunctions< DoubleCrystalBall, Parabola >( fitFunction, dependencyFunction );
+    else if ( configObjDependencyFunction == "resolution" ) transferPt = initialiseFunctions< DoubleCrystalBall, ResolutionLike >( fitFunction, dependencyFunction );
+    else {
+      std::cout << myName_ << " --> ERROR:" << std::endl
+                << "    dependency function identifier '" << configObjDependencyFunction << "' unknown" << std::endl;
+      return false;
+    }
+  }
+  else {
+    std::cout << myName_ << " --> ERROR:" << std::endl
+              << "    fit function identifier '" << configObjFitFunction << "' unknown" << std::endl;
+    return false;
+  }
 
   // Fitting distribution
   if ( verbose_ > 2 ) {
@@ -374,18 +448,85 @@ bool FitTopTransferFunctionsRunner::fitPerCategory( unsigned uCat )
               << "    Fitting distributions... " << std::endl;
   }
 
+  // Transfer function parameters
+  std::stringstream comment( std::ios_base::out );
+  const std::string part( refGen_ ? "_parton" : "_reco" );
+  comment << baseTitlePt_ << part << " <= " << configObjFitMaxPt;
+  comment << ", " << baseTitlePt_ << part << " >= " << configObjMinPt << ", " << "DeltaR(parton, reco) <= " << configObjMaxDR;
+  transferPt.SetComment( comment.str() );
+  TransferFunctionCollection transferVecEtaPt( nEtaBins, transferPt );
+
+  // Create histograms
   dirOutObjCatSubFit->cd();
   if ( verbose_ > 2 ) gDirectory->pwd();
 
+  // Fit
+  fitPerCategoryBin( dirOutObjCatSubFit, transferPt, histosRebinTrans.histTrans, fitFunction, configObjFitFunction, configObjFitOptions, configObjFitRange );
+  // Loop over pt
+  for ( unsigned uPt = 0; uPt < histosRebinTrans.histVecPtTrans.size(); ++uPt ) {
+    fitPerCategoryBin( dirOutObjCatSubFit, transferPt, histosRebinTrans.histVecPtTrans.at( uPt ), fitFunction, configObjFitFunction, configObjFitOptions, configObjFitRange );
+  }
+
   // Loop over eta bins
   if ( configObjFitEtaBins ) {
-    const unsigned nEtaBins( dirsOutObjCatSubFitEta_.back().size() );
     for ( unsigned uEta = 0; uEta < nEtaBins; ++uEta ) {
+      // Create histograms
       dirOutObjCatSubFitEta.at( uEta )->cd();
       if ( verbose_ > 2 ) gDirectory->pwd();
+      // Fit
+      fitPerCategoryBin( dirOutObjCatSubFitEta.at( uEta ), transferPt, histosRebinTrans.histTrans, fitFunction, configObjFitFunction, configObjFitOptions, configObjFitRange );
+      // Loop over pt
+      for ( unsigned uPt = 0; uPt < histosRebinVecTransEta.at( uEta ).histVecPtTrans.size(); ++uPt ) {
+        fitPerCategoryBin( dirOutObjCatSubFitEta.at( uEta ), transferPt, histosRebinVecTransEta.at( uEta ).histVecPtTrans.at( uPt ), fitFunction, configObjFitFunction, configObjFitOptions, configObjFitRange );
+      }
     } // loop: uEta < nEtaBins
   }
 
   return true;
 
+}
+
+
+void FitTopTransferFunctionsRunner::fitPerCategoryBin( TDirectory const * dirOut, TransferFunction transferPt, TH1D* histoTrans, TF1* fitFunction, const std::string& fitFuncID, const std::string& fitOptions, const double fitRange )
+{
+  TCanvas     canvas;
+  const Int_t nParFit( fitFunction->GetNpar() );
+  const std::string nameTransRebin( histoTrans->GetName() );
+  const std::string nameTransRebinFit( nameTransRebin + "_fit" );
+  TF1* fitTransRebin( new TF1( nameTransRebinFit.c_str(), fitFunction, std::max( histoTrans->GetXaxis()->GetXmin(), histoTrans->GetMean() - histoTrans->GetRMS() * fitRange ), std::min( histoTrans->GetXaxis()->GetXmax(), histoTrans->GetMean() + histoTrans->GetRMS() * fitRange ), nParFit) );
+  initialiseFitParameters( fitTransRebin, &*histoTrans, fitFuncID, scale_ );
+  TFitResultPtr fitTransRebinResultPtr( histoTrans->Fit( fitTransRebin, fitOptions.c_str() ) );
+  if ( fitTransRebinResultPtr >= 0 ) {
+    if ( fitTransRebinResultPtr->Status() == 0 && fitTransRebinResultPtr->Prob() > 0. && fitTransRebinResultPtr->Ndf() != 0. ) {
+      if ( checkParametersDoubleGaussian( fitTransRebin, fitFuncID ) ) {
+        mixParametersDoubleGaussian( transferPt, fitTransRebin );
+      }
+      else {
+        for ( Int_t uPar = 0; uPar < nParFit; ++uPar ) {
+          transferPt.SetParameter( uPar, fitTransRebin->GetParameter( uPar ) );
+          transferPt.SetError( uPar, fitTransRebin->GetParError( uPar ) );
+        }
+      }
+    }
+    else {
+      if ( verbose_ > 1 ) {
+        std::cout << myName_ << " --> WARNING:" << std::endl
+                  << "    failing fit in directory '"; dirOut->pwd();
+        if ( fitTransRebinResultPtr->Status() != 0 ) std::cout << "    '" << nameTransRebin << "' status " << fitTransRebinResultPtr->Status() << std::endl;
+        if ( fitTransRebinResultPtr->Prob() <= 0. )  std::cout << "    '" << nameTransRebin << "' prob   " << fitTransRebinResultPtr->Prob()   << std::endl;
+        if ( fitTransRebinResultPtr->Ndf() == 0. )   std::cout << "    '" << nameTransRebin << "' ndf    " << fitTransRebinResultPtr->Ndf()    << std::endl;
+      }
+    }
+  }
+  else {
+    if ( verbose_ > 1 ) {
+      std::cout << myName_ << " --> WARNING:" << std::endl
+                << "    missing fit in directory '"; dirOut->pwd();
+      std::cout << "    '" << nameTransRebin << std::endl;
+    }
+  }
+  histoTrans->Draw();
+  if ( plot_ ) {
+    canvas.Print( std::string( pathPlots_ + histoTrans->GetName() + ".png" ).c_str() );
+  }
 }

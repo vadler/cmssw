@@ -25,6 +25,10 @@ linear     = 'linear'
 resolution = 'resolution'
 squared    = 'squared'
 
+# Fit options #
+fitOptions = 'IBRS+'
+#fitOptions = 'WWIBRS+'
+
 ### Configuration ###
 
 fitTopTransferFunctions = cms.PSet(
@@ -34,7 +38,7 @@ fitTopTransferFunctions = cms.PSet(
 , useNonT   = cms.bool( True )
 , refGen    = cms.bool( True )
 , scale     = cms.bool( True )
-, overwrite = cms.bool( False )
+, overwrite = cms.bool( True )
 )
 
 fitTopTransferFunctions.objects = cms.PSet(
@@ -45,43 +49,55 @@ fitTopTransferFunctions.objects = cms.PSet(
   , minPt              = cms.double( 0.0 )
   , maxEta             = cms.double( 999999. )
   , maxDR              = cms.double( 0.1 )
+  , fitFunction        = cms.string( dGauss )
+  , dependencyFunction = cms.string( squared )
+  , fitEtaBins         = cms.bool( True )
+  , fitMaxPt           = cms.double( 999999. )
+  , fitRange           = cms.double( 5.0 ) # if not 'sGauss', should be widthFactor
+  , fitOptions         = cms.string( fitOptions )
+  )
+, BJet = cms.PSet(
+    deltaPtBins        = cms.uint32( 50 )
+  , deltaPtMax         = cms.double( 50. )
+  , widthFactor        = cms.double( 5.0 )
+  , minPt              = cms.double( 0.0 )
+  , maxEta             = cms.double( 999999. )
+  , maxDR              = cms.double( 0.1 )
+  , fitFunction        = cms.string( dGauss )
+  , dependencyFunction = cms.string( squared )
+  , fitEtaBins         = cms.bool( True )
+  , fitMaxPt           = cms.double( 999999. )
+  , fitRange           = cms.double( 5.0 ) # if not 'sGauss', should be widthFactor
+  , fitOptions         = cms.string( fitOptions )
+  )
+, Mu = cms.PSet(
+    deltaPtBins        = cms.uint32( 50 )
+  , deltaPtMax         = cms.double( 50. )
+  , widthFactor        = cms.double( 5.0 )
+  , minPt              = cms.double( 0.0 )
+  , maxEta             = cms.double( 999999. )
+  , maxDR              = cms.double( 0.1 )
   , fitFunction        = cms.string( sGauss )
   , dependencyFunction = cms.string( linear )
   , fitEtaBins         = cms.bool( False )
+  , fitMaxPt           = cms.double( 999999. )
+  , fitRange           = cms.double( 1.0 ) # if not 'sGauss', should be widthFactor
+  , fitOptions         = cms.string( fitOptions )
   )
-#, BJet = cms.PSet(
-    #deltaPtBins        = cms.uint32( 50 )
-  #, deltaPtMax         = cms.double( 50. )
-  #, widthFactor        = cms.double( 5.0 )
-  #, minPt              = cms.double( 0.0 )
-  #, maxEta             = cms.double( 999999. )
-  #, maxDR              = cms.double( 0.1 )
-  #, fitFunction        = cms.string( sGauss )
-  #, dependencyFunction = cms.string( linear )
-  #, fitEtaBins         = cms.bool( False )
-  #)
-#, Mu = cms.PSet(
-    #deltaPtBins        = cms.uint32( 50 )
-  #, deltaPtMax         = cms.double( 50. )
-  #, widthFactor        = cms.double( 5.0 )
-  #, minPt              = cms.double( 0.0 )
-  #, maxEta             = cms.double( 999999. )
-  #, maxDR              = cms.double( 0.1 )
-  #, fitFunction        = cms.string( sGauss )
-  #, dependencyFunction = cms.string( linear )
-  #, fitEtaBins         = cms.bool( False )
-  #)
-#, Elec = cms.PSet(
-    #deltaPtBins        = cms.uint32( 50 )
-  #, deltaPtMax         = cms.double( 50. )
-  #, widthFactor        = cms.double( 5.0 )
-  #, minPt              = cms.double( 0.0 )
-  #, maxEta             = cms.double( 999999. )
-  #, maxDR              = cms.double( 0.1 )
-  #, fitFunction        = cms.string( sGauss )
-  #, dependencyFunction = cms.string( linear )
-  #, fitEtaBins         = cms.bool( False )
-  #)
+, Elec = cms.PSet(
+    deltaPtBins        = cms.uint32( 50 )
+  , deltaPtMax         = cms.double( 50. )
+  , widthFactor        = cms.double( 5.0 )
+  , minPt              = cms.double( 0.0 )
+  , maxEta             = cms.double( 999999. )
+  , maxDR              = cms.double( 0.1 )
+  , fitFunction        = cms.string( sGauss )
+  , dependencyFunction = cms.string( linear )
+  , fitEtaBins         = cms.bool( False )
+  , fitMaxPt           = cms.double( 999999. )
+  , fitRange           = cms.double( 1.0 ) # if not 'sGauss', should be widthFactor
+  , fitOptions         = cms.string( fitOptions )
+  )
 )
 
 fitTopTransferFunctions.io = cms.PSet(
@@ -92,11 +108,8 @@ fitTopTransferFunctions.io = cms.PSet(
 , pileUp     = cms.string( 'PileUpWeightTrue' ) # 'PileUpWeightTrue' or 'PileUpWeightObserved'
 , outputFile = cms.string( '' ) # defined below
 , writeFiles = cms.bool( False )
-, plot       = cms.bool( False )
-)
-
-fitTopTransferFunctions.fit = cms.PSet(
-  fitEtaBins = cms.bool( False )
+, plot       = cms.bool( True )
+, pathPlots  = cms.string( '' ) # defined below
 )
 
 ### Paths ###
@@ -145,6 +158,7 @@ if fitTopTransferFunctions.io.writeFiles.value() is True:
 
 fitTopTransferFunctions.io.inputFile  = inputFile
 fitTopTransferFunctions.io.outputFile = outputFile
+fitTopTransferFunctions.io.pathPlots  = pathPlots
 
 
 ### Messaging ###

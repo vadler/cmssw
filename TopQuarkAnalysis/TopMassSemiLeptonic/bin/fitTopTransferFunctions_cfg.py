@@ -4,8 +4,8 @@ import FWCore.ParameterSet.Config as cms
 ### Switches ###
 
 # Origin of existing resolution functions
-era    = 'Summer11'
-#era    = 'Summer11-coarseEta'
+#era    = 'Summer11'
+era    = 'Summer11-coarseEta'
 #era    = 'Summer11-coarsePt'
 # Input sample
 sample = 'Summer12_MadGraph_L3_unambiguousOnly'
@@ -27,18 +27,17 @@ squared    = 'squared'
 
 # Fit options #
 fitOptions = 'IBRS+'
-#fitOptions = 'WWIBRS+'
 
 ### Configuration ###
 
 fitTopTransferFunctions = cms.PSet(
-  verbose   = cms.uint32( 10 )
+  verbose   = cms.uint32( 3 )
 , useSymm   = cms.bool( True )
 , useAlt    = cms.bool( True )
 , useNonT   = cms.bool( True )
 , refGen    = cms.bool( True )
 , scale     = cms.bool( True )
-, overwrite = cms.bool( True )
+, overwrite = cms.bool( False )
 )
 
 fitTopTransferFunctions.objects = cms.PSet(
@@ -55,49 +54,53 @@ fitTopTransferFunctions.objects = cms.PSet(
   , fitMaxPt           = cms.double( 999999. )
   , fitRange           = cms.double( 5.0 ) # if not 'sGauss', should be widthFactor
   , fitOptions         = cms.string( fitOptions )
+  , minEntriesFactor   = cms.uint32( 3 )
   )
-, BJet = cms.PSet(
-    deltaPtBins        = cms.uint32( 50 )
-  , deltaPtMax         = cms.double( 50. )
-  , widthFactor        = cms.double( 5.0 )
-  , minPt              = cms.double( 0.0 )
-  , maxEta             = cms.double( 999999. )
-  , maxDR              = cms.double( 0.1 )
-  , fitFunction        = cms.string( dGauss )
-  , dependencyFunction = cms.string( squared )
-  , fitEtaBins         = cms.bool( True )
-  , fitMaxPt           = cms.double( 999999. )
-  , fitRange           = cms.double( 5.0 ) # if not 'sGauss', should be widthFactor
-  , fitOptions         = cms.string( fitOptions )
-  )
-, Mu = cms.PSet(
-    deltaPtBins        = cms.uint32( 50 )
-  , deltaPtMax         = cms.double( 50. )
-  , widthFactor        = cms.double( 5.0 )
-  , minPt              = cms.double( 0.0 )
-  , maxEta             = cms.double( 999999. )
-  , maxDR              = cms.double( 0.1 )
-  , fitFunction        = cms.string( sGauss )
-  , dependencyFunction = cms.string( linear )
-  , fitEtaBins         = cms.bool( False )
-  , fitMaxPt           = cms.double( 999999. )
-  , fitRange           = cms.double( 1.0 ) # if not 'sGauss', should be widthFactor
-  , fitOptions         = cms.string( fitOptions )
-  )
-, Elec = cms.PSet(
-    deltaPtBins        = cms.uint32( 50 )
-  , deltaPtMax         = cms.double( 50. )
-  , widthFactor        = cms.double( 5.0 )
-  , minPt              = cms.double( 0.0 )
-  , maxEta             = cms.double( 999999. )
-  , maxDR              = cms.double( 0.1 )
-  , fitFunction        = cms.string( sGauss )
-  , dependencyFunction = cms.string( linear )
-  , fitEtaBins         = cms.bool( False )
-  , fitMaxPt           = cms.double( 999999. )
-  , fitRange           = cms.double( 1.0 ) # if not 'sGauss', should be widthFactor
-  , fitOptions         = cms.string( fitOptions )
-  )
+#, BJet = cms.PSet(
+    #deltaPtBins        = cms.uint32( 50 )
+  #, deltaPtMax         = cms.double( 50. )
+  #, widthFactor        = cms.double( 5.0 )
+  #, minPt              = cms.double( 0.0 )
+  #, maxEta             = cms.double( 999999. )
+  #, maxDR              = cms.double( 0.1 )
+  #, fitFunction        = cms.string( dGauss )
+  #, dependencyFunction = cms.string( squared )
+  #, fitEtaBins         = cms.bool( False )
+  #, fitMaxPt           = cms.double( 999999. )
+  #, fitRange           = cms.double( 5.0 ) # if not 'sGauss', should be widthFactor
+  #, fitOptions         = cms.string( fitOptions )
+  #, minEntriesFactor   = cms.uint32( 3 )
+  #)
+#, Mu = cms.PSet(
+    #deltaPtBins        = cms.uint32( 50 )
+  #, deltaPtMax         = cms.double( 50. )
+  #, widthFactor        = cms.double( 5.0 )
+  #, minPt              = cms.double( 0.0 )
+  #, maxEta             = cms.double( 999999. )
+  #, maxDR              = cms.double( 0.1 )
+  #, fitFunction        = cms.string( sGauss )
+  #, dependencyFunction = cms.string( linear )
+  #, fitEtaBins         = cms.bool( False )
+  #, fitMaxPt           = cms.double( 999999. )
+  #, fitRange           = cms.double( 1.0 ) # if not 'sGauss', should be widthFactor
+  #, fitOptions         = cms.string( fitOptions )
+  #, minEntriesFactor   = cms.uint32( 3 )
+  #)
+#, Elec = cms.PSet(
+    #deltaPtBins        = cms.uint32( 50 )
+  #, deltaPtMax         = cms.double( 50. )
+  #, widthFactor        = cms.double( 5.0 )
+  #, minPt              = cms.double( 0.0 )
+  #, maxEta             = cms.double( 999999. )
+  #, maxDR              = cms.double( 0.1 )
+  #, fitFunction        = cms.string( sGauss )
+  #, dependencyFunction = cms.string( linear )
+  #, fitEtaBins         = cms.bool( False )
+  #, fitMaxPt           = cms.double( 999999. )
+  #, fitRange           = cms.double( 1.0 ) # if not 'sGauss', should be widthFactor
+  #, fitOptions         = cms.string( fitOptions )
+  #, minEntriesFactor   = cms.uint32( 3 )
+  #)
 )
 
 fitTopTransferFunctions.io = cms.PSet(

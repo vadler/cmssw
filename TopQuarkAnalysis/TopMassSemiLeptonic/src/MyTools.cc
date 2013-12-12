@@ -127,19 +127,19 @@ void my::initialiseFitParameters( TF1* fit, TH1D const* histo, const std::string
     // par = 3: alpha > 0.
     // par = 4: exponent > 0.
     fit->SetParameter( 0, c );
-    fit->SetParLimits( 0, 0., 100. ); //
+    fit->SetParLimits( 0, 0., 100. );
     fit->SetParName( 0, "c" );
     fit->SetParameter( 1, p );
     fit->SetParName( 1, "#mu" );
     fit->SetParameter( 2, sqrt( s - m ) );
-    fit->SetParLimits( 2, 0., 100. ); // 6, 7, 8, 9, 10
+    fit->SetParLimits( 2, 0., 100. );
     fit->SetParName( 2, "#sigma" );
     fit->SetParameter( 3, 1. );
-    fit->SetParLimits( 3, 0., 100. ); // 3, 9, 10
+    fit->SetParLimits( 3, 0., 100. );
     fit->SetParName( 3, "#alpha_{l}" );
     fit->SetParameter( 4, 1. );
     fit->SetParName( 4, "n_{l}" );
-//     fit->SetParLimits( 4, 1., 100. ); //
+//     fit->SetParLimits( 4, 1., 100. );
   }
   else if ( fitFuncId == "uCB" ) {
     // par = 1: mean
@@ -147,19 +147,19 @@ void my::initialiseFitParameters( TF1* fit, TH1D const* histo, const std::string
     // par = 3: alpha > 0.
     // par = 4: exponent > 0.
     fit->SetParameter( 0, c );
-    fit->SetParLimits( 0, 0., 100. ); //
+    fit->SetParLimits( 0, 0., 100. );
     fit->SetParName( 0, "c" );
     fit->SetParameter( 1, p );
     fit->SetParName( 1, "#mu" );
     fit->SetParameter( 2, sqrt( s - m ) );
-    fit->SetParLimits( 2, 0., 100. ); // 6, 7, 8, 9, 10
+    fit->SetParLimits( 2, 0., 100. );
     fit->SetParName( 2, "#sigma" );
     fit->SetParameter( 3, 1. );
-    fit->SetParLimits( 3, 0., 100. ); // 3, 9, 10
+    fit->SetParLimits( 3, 0., 100. );
     fit->SetParName( 3, "#alpha_{u}" );
     fit->SetParameter( 4, 1. );
     fit->SetParName( 4, "n_{u}" );
-//     fit->SetParLimits( 4, 1., 100. ); //
+//     fit->SetParLimits( 4, 1., 100. );
   }
   else if ( fitFuncId == "dCB" ) {
     // par = 1: mean
@@ -169,7 +169,7 @@ void my::initialiseFitParameters( TF1* fit, TH1D const* histo, const std::string
     // par = 5: alpha up > 0.
     // par = 6: exponent up > 0.
     fit->SetParameter( 0, c );
-    fit->SetParLimits( 0, 0., 100. ); //
+    fit->SetParLimits( 0, 0., 100. );
     fit->SetParName( 0, "c" );
     fit->SetParameter( 1, p );
     fit->SetParName( 1, "#mu" );
@@ -190,6 +190,36 @@ void my::initialiseFitParameters( TF1* fit, TH1D const* histo, const std::string
 //     fit->SetParLimits( 6, 1., 100. );
   }
 
+}
+
+void my::initialiseDependencyParameters( TF1* dep, TH1D const* histo, const std::string& depFuncId )
+{
+  // Starting points
+  Double_t x1( histo->GetBinCenter( 5 ) );
+  Double_t y1( histo->GetBinContent( 5 ) );
+  Double_t x2( histo->GetBinCenter( histo->GetNbinsX() - 2 ) );
+  Double_t y2( histo->GetBinContent( histo->GetNbinsX() - 2 ) );
+  if ( depFuncId == "linear" || depFuncId == "squared" ) {
+    // Constant
+    dep->SetParameter( 0, ( x2 * y1 - x1 * y2 ) / ( x2 - x1 ) );
+    dep->SetParName( 0, "Constant a" );
+    // Slope
+    dep->SetParameter( 1, ( y2 - y1 ) / ( x2 - x1 ) );
+    dep->SetParName( 1, "Slope b" );
+    // Curvature
+    if ( depFuncId == "squared" ) {
+      dep->SetParameter( 2, 0. );
+      dep->SetParName( 2, "Curvature c" );
+    }
+  }
+  else if ( depFuncId == "resolution" ) {
+    dep->SetParameter( 0, 0. );
+    dep->SetParName( 0, "Noise N" );
+    dep->SetParameter( 1, 0. );
+    dep->SetParName( 1, "Resolution R" );
+    dep->SetParameter( 2, 0. );
+    dep->SetParName( 2, "Constant C" );
+  }
 }
 
 bool my::checkParametersDoubleGaussian( TF1 const* fit, const std::string& fitFuncId )

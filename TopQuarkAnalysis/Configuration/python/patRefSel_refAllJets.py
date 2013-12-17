@@ -28,12 +28,16 @@ triggerSelectionMC          = 'HLT_*' # not recommended
 
 ### Muon selection
 
+# Minimal selection for PF muons, also basis for signal and veto muons
+muonCutPF  =     'pt > 10.'                                                                      # transverse momentum
+muonCutPF += ' && abs(eta) < 2.5'                                                                # pseudo-rapisity range
+
 # Minimal selection for all muons, also basis for signal and veto muons
 muonCut  =     'isPFMuon'                                                                      # general reconstruction property
 muonCut += ' && (isGlobalMuon || isTrackerMuon)'                                               # general reconstruction property
 muonCut += ' && pt > 10.'                                                                      # transverse momentum
 muonCut += ' && abs(eta) < 2.5'                                                                # pseudo-rapisity range
-muonCut += ' && (chargedHadronIso+neutralHadronIso+photonIso-0.5*puChargedHadronIso)/pt < 0.2' # relative isolation w/ Delta beta corrections (factor 0.5)
+muonCut += ' && (chargedHadronIso+max(0.,neutralHadronIso+photonIso-0.50*puChargedHadronIso))/pt < 0.2' # relative isolation w/ Delta beta corrections (factor 0.5)
 
 ### Jet selection
 
@@ -54,10 +58,15 @@ tightJetCut     = 'pt > 60.' # transverse momentum (leading jets)
 ### Electron selection
 
 # Minimal selection for all electrons, also basis for signal and veto muons
+electronCutPF  =     'pt > 20.'                                                                              # transverse energy
+electronCutPF += ' && abs(eta) < 2.5'                                                                        # pseudo-rapisity range
+
+# Minimal selection for all electrons, also basis for signal and veto muons
 electronCut  =     'pt > 20.'                                                                              # transverse energy
 electronCut += ' && abs(eta) < 2.5'                                                                        # pseudo-rapisity range
 electronCut += ' && electronID("mvaTrigV0") > 0.'                                                          # MVA electrons ID
-electronCut += ' && (chargedHadronIso+max(0.,neutralHadronIso)+photonIso-0.5*puChargedHadronIso)/et < 0.2' # relative isolation with Delta beta corrections
+#electronCut += ' && (chargedHadronIso+max(0.,neutralHadronIso)+photonIso-0.5*puChargedHadronIso)/et < 0.2' # relative isolation with Delta beta corrections
+electronCut += ' && (chargedHadronIso+max(0.,neutralHadronIso+photonIso-1.0*userIsolation("User1Iso")))/et < 0.2' # relative isolation with Delta beta corrections
 
 ### ------------------------------------------------------------------------ ###
 

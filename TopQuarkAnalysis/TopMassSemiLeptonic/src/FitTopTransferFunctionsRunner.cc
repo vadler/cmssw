@@ -230,7 +230,7 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
   // Open ROOT file directories
   TDirectory* dirInObjCat( ( TDirectory* )( dirInSel_->Get( objCat.c_str() ) ) );
   if ( ! dirInObjCat ) {
-    if ( verbose_ > 1 ) {
+    if ( verbose_ > 0 ) {
       std::cout << myName_ << " --> WARNING:" << std::endl
                 << "    object category '" << objCat << "' does not exist in input file" << std::endl;
     }
@@ -441,7 +441,8 @@ bool FitTopTransferFunctionsRunner::fitPerCategory( unsigned uCat )
   excludeVec_       = configObj.getParameter< std::vector< unsigned > >( "exclude" ); // FIXME: not yet set up for eta bins
   fitMaxPt_         = configObj.getParameter< double >( "fitMaxPt" );
 
-  const unsigned nEtaBins( dirsOutObjCatSubFitEta_.at( uCat ).size() );
+  const unsigned nPtBins( objectData_.back().nPtBins() );
+  const unsigned nEtaBins( objectData_.back().nEtaBins() );
 
   // Initialise Functions
   // Dummies
@@ -647,11 +648,17 @@ bool FitTopTransferFunctionsRunner::fitPerCategory( unsigned uCat )
   comment << baseTitlePt_ << part << " <= " << fitMaxPt_;
   comment << ", " << baseTitlePt_ << part << " >= " << configObjMinPt << ", " << "DeltaR(parton, reco) <= " << configObjMaxDR;
   transferPt.SetComment( comment.str() );
-  TransferFunctionCollection transferVecEtaPt( nEtaBins, transferPt );
+  TransferFunctionCollection transferVecPt( nPtBins, transferPt );
+  TransferFunctionCollection transferVecEta( nEtaBins, transferPt );
+  std::vector< TransferFunctionCollection > transferVecEtaPt( nEtaBins, transferVecPt );
   transferVecRebin_.push_back( transferPt );
+  transferVecRebinVecPt_.push_back( transferVecPt );
   transferVecRebinScale_.push_back( transferPt );
-  transferVecRebinVec_.push_back( transferVecEtaPt );
-  transferVecRebinScaleVec_.push_back( transferVecEtaPt );
+  transferVecRebinScaleVecPt_.push_back( transferVecPt );
+  transferVecRebinVecEta_.push_back( transferVecEta );
+  transferVecRebinVecEtaVecPt_.push_back( transferVecEtaPt );
+  transferVecRebinScaleVecEta_.push_back( transferVecEta );
+  transferVecRebinScaleVecEtaVecPt_.push_back( transferVecEtaPt );
 
   // Fitting unscaled distribution
   if ( ! scale_ ) {
@@ -682,15 +689,15 @@ bool FitTopTransferFunctionsRunner::fitPerCategory( unsigned uCat )
 
 void FitTopTransferFunctionsRunner::fitPerCategoryLoop( const std::string& objCat, bool scale )
 {
-  if ( scale ) fitPerCategoryBin( objCat, dirsOutObjCatSubFit_.back(), transferVecRebinScale_.back(), histosVecRebinScaleTrans_.back(), histosVecRebinScaleDependency_, scale );
-  else         fitPerCategoryBin( objCat, dirsOutObjCatSubFit_.back(), transferVecRebin_.back(), histosVecRebinTrans_.back(), histosVecRebinDependency_, scale );
+  if ( scale ) fitPerCategoryBin( objCat, dirsOutObjCatSubFit_.back(), transferVecRebinScale_.back(), transferVecRebinScaleVecPt_.back(), histosVecRebinScaleTrans_.back(), histosVecRebinScaleDependency_, scale );
+  else         fitPerCategoryBin( objCat, dirsOutObjCatSubFit_.back(), transferVecRebin_.back(), transferVecRebinVecPt_.back(), histosVecRebinTrans_.back(), histosVecRebinDependency_, scale );
 
   // Loop over eta bins
   if ( fitEtaBins_ ) {
     std::vector< HistosDependency > histosVecDependencyEta;
     for ( unsigned uEta = 0; uEta < dirsOutObjCatSubFitEta_.back().size(); ++uEta ) {
-      if ( scale ) fitPerCategoryBin( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecRebinScaleVec_.back().at( uEta ), histosVecRebinScaleVecTransEta_.back().at( uEta ), histosVecDependencyEta, scale );
-      else         fitPerCategoryBin( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecRebinVec_.back().at( uEta ), histosVecRebinVecTransEta_.back().at( uEta ), histosVecDependencyEta, scale );
+      if ( scale ) fitPerCategoryBin( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecRebinScaleVecEta_.back().at( uEta ), transferVecRebinScaleVecEtaVecPt_.back().at( uEta ), histosVecRebinScaleVecTransEta_.back().at( uEta ), histosVecDependencyEta, scale );
+      else         fitPerCategoryBin( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecRebinVecEta_.back().at( uEta ), transferVecRebinVecEtaVecPt_.back().at( uEta ), histosVecRebinVecTransEta_.back().at( uEta ), histosVecDependencyEta, scale );
     } // loop: uEta < nEtaBins
     if ( scale ) histosVecRebinScaleVecDependencyEta_.push_back( histosVecDependencyEta );
     else         histosVecRebinVecDependencyEta_.push_back( histosVecDependencyEta );
@@ -698,7 +705,7 @@ void FitTopTransferFunctionsRunner::fitPerCategoryLoop( const std::string& objCa
 }
 
 
-void FitTopTransferFunctionsRunner::fitPerCategoryBin( const std::string& objCat, TDirectory* dirOut, TransferFunction& transfer, HistosTransEta& histosTransEta, std::vector< HistosDependency >& histosVecDependency, bool scale )
+void FitTopTransferFunctionsRunner::fitPerCategoryBin( const std::string& objCat, TDirectory* dirOut, TransferFunction& transfer, TransferFunctionCollection& transferColl, HistosTransEta& histosTransEta, std::vector< HistosDependency >& histosVecDependency, bool scale )
 {
   // Create histograms
   dirOut->cd();
@@ -706,15 +713,15 @@ void FitTopTransferFunctionsRunner::fitPerCategoryBin( const std::string& objCat
   HistosDependency histosDependency( objCat, histosTransEta.name, objectData_.back().nPtBins(), objectData_.back().ptBins(), transfer.NParFit(), baseTitlePt_, titlePt_ );
 
   // Fit
-  fitPerCategoryFit( transfer, histosTransEta.histTrans, 0, -1, scale );
+  fitPerCategoryFit( transfer, transferColl, histosTransEta.histTrans, 0, -1, scale );
   for ( unsigned uPt = 0; uPt < histosTransEta.histVecPtTrans.size(); ++uPt ) {
-    fitPerCategoryFit( transfer, histosTransEta.histVecPtTrans.at( uPt ), &histosDependency, uPt, scale );
+    fitPerCategoryFit( transfer, transferColl, histosTransEta.histVecPtTrans.at( uPt ), &histosDependency, uPt, scale );
   }
   histosVecDependency.push_back( histosDependency );
 }
 
 
-void FitTopTransferFunctionsRunner::fitPerCategoryFit( TransferFunction& transfer, TH1D* histoTrans, HistosDependency* histosDependency, int uPt, bool scale )
+void FitTopTransferFunctionsRunner::fitPerCategoryFit( TransferFunction& transfer, TransferFunctionCollection& transferColl, TH1D* histoTrans, HistosDependency* histosDependency, int uPt, bool scale )
 {
   const Int_t nParFit( fitFunction_->GetNpar() );
   const std::string nameTrans( histoTrans->GetName() );
@@ -724,31 +731,41 @@ void FitTopTransferFunctionsRunner::fitPerCategoryFit( TransferFunction& transfe
   TFitResultPtr fitTransResultPtr( histoTrans->Fit( fitTrans, fitOptions_.c_str() ) );
   if ( fitTransResultPtr >= 0 ) {
     if ( histoTrans->GetEntries() >= minEntriesFactor_ * histoTrans->GetNbinsX()  && fitTransResultPtr->Status() == 0 && fitTransResultPtr->Prob() > 0. && fitTransResultPtr->Ndf() != 0. && std::find( excludeVec_.begin(), excludeVec_.end(), uPt ) == excludeVec_.end() ) {
-      if ( checkParametersDoubleGaussian( fitTrans, fitFuncID_ ) ) {
-        mixParametersDoubleGaussian( transfer, fitTrans );
-      }
-      else {
-        for ( Int_t uPar = 0; uPar < nParFit; ++uPar ) {
-          if ( histosDependency == 0 ) { // 1-D
+      if ( histosDependency == 0 && uPt <0 ) { // 1-D
+        if ( checkParametersDoubleGaussian( fitTrans, fitFuncID_ ) ) {
+          mixParametersDoubleGaussian( transfer, fitTrans );
+          if ( verbose_ > 0 ) {
+            std::cout << myName_ << " --> WARNING:" << std::endl
+                      << "    mixed fit parameters in directory '"; gDirectory->pwd()
+                      << "    '" << nameTrans << std::endl;
+          }
+        }
+        else {
+          for ( Int_t uPar = 0; uPar < nParFit; ++uPar ) {
             transfer.SetParameter( uPar, fitTrans->GetParameter( uPar ) );
             transfer.SetError( uPar, fitTrans->GetParError( uPar ) );
           }
-          else { // 2-D
-            if ( uPt >= 0 ) {
-              histosDependency->histVecPtPar.at( uPar )->SetBinContent( uPt + 1, fitTransResultPtr->Parameter( uPar ) );
-              histosDependency->histVecPtPar.at( uPar )->SetBinError( uPt + 1, fitTransResultPtr->ParError( uPar ) );
-            }
-          }
         }
       }
-      if ( histosDependency != 0 ) { // 2-D
-        if ( uPt >= 0 ) {
-          histosDependency->histPtProb->SetBinContent( uPt + 1, log10( fitTransResultPtr->Prob() ) );
+      else if ( histosDependency != 0 && uPt >= 0 ) { // 2-D
+        histosDependency->histPtProb->SetBinContent( uPt + 1, log10( fitTransResultPtr->Prob() ) );
+        if ( checkParametersDoubleGaussian( fitTrans, fitFuncID_  ) ) {
+          mixParametersDoubleGaussian( transferColl.at( uPt ), fitTrans );
+        }
+        else {
+          for ( Int_t uPar = 0; uPar < nParFit; ++uPar ) {
+            transferColl.at( uPt ).SetParameter( uPar, fitTrans->GetParameter( uPar ) );
+            transferColl.at( uPt ).SetError( uPar, fitTrans->GetParError( uPar ) );
+          }
+        }
+        for ( Int_t uPar = 0; uPar < nParFit; ++uPar ) {
+          histosDependency->histVecPtPar.at( uPar )->SetBinContent( uPt + 1, transferColl.at( uPt ).Parameter( uPar ) );
+          histosDependency->histVecPtPar.at( uPar )->SetBinError( uPt + 1, transferColl.at( uPt ).Error( uPar ) );
         }
       }
     }
     else {
-      if ( verbose_ > 1 ) {
+      if ( verbose_ > 0 ) {
         std::cout << myName_ << " --> WARNING:" << std::endl
                   << "    failing fit in directory '"; gDirectory->pwd();
         if ( fitTransResultPtr->Status() != 0 ) std::cout << "    '" << nameTrans << "' status " << fitTransResultPtr->Status() << std::endl;
@@ -758,7 +775,7 @@ void FitTopTransferFunctionsRunner::fitPerCategoryFit( TransferFunction& transfe
     }
   }
   else {
-    if ( verbose_ > 1 ) {
+    if ( verbose_ > 0 ) {
       std::cout << myName_ << " --> WARNING:" << std::endl
                 << "    missing fit in directory '"; gDirectory->pwd();
       std::cout << "    '" << nameTrans << std::endl;
@@ -817,8 +834,8 @@ void FitTopTransferFunctionsRunner::dependencyPerCategoryLoop( const std::string
   // Loop over eta bins
   if ( fitEtaBins_ ) {
     for ( unsigned uEta = 0; uEta < dirsOutObjCatSubFitEta_.back().size(); ++uEta ) {
-      if ( scale ) dependencyPerCategoryBin( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecRebinScaleVec_.back().at( uEta ), histosVecRebinScaleVecDependencyEta_.back().at( uEta ), scale );
-      else         dependencyPerCategoryBin( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecRebinVec_.back().at( uEta ), histosVecRebinVecDependencyEta_.back().at( uEta ), scale );
+      if ( scale ) dependencyPerCategoryBin( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecRebinScaleVecEta_.back().at( uEta ), histosVecRebinScaleVecDependencyEta_.back().at( uEta ), scale );
+      else         dependencyPerCategoryBin( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecRebinVecEta_.back().at( uEta ), histosVecRebinVecDependencyEta_.back().at( uEta ), scale );
     } // loop: uEta < nEtaBins
   }
 }
@@ -843,7 +860,7 @@ void FitTopTransferFunctionsRunner::dependencyPerCategoryBin( const std::string&
         }
       }
       else {
-        if ( verbose_ > 1 ) {
+        if ( verbose_ > 0 ) {
           std::cout << myName_ << " --> WARNING:" << std::endl
                     << "    failing fit in directory '"; dirOut->pwd();
           if ( fitDepResultPtr->Status() != 0 ) std::cout << "    '" << nameDep << "' status " << fitDepResultPtr->Status() << std::endl;
@@ -852,7 +869,7 @@ void FitTopTransferFunctionsRunner::dependencyPerCategoryBin( const std::string&
       }
     }
     else {
-      if ( verbose_ > 1 ) {
+      if ( verbose_ > 0 ) {
         std::cout << myName_ << " --> WARNING:" << std::endl
                   << "    missing dependency in directory '"; dirOut->pwd();
         std::cout << "    '" << nameDep << std::endl;
@@ -913,8 +930,8 @@ void FitTopTransferFunctionsRunner::transferPerCategoryLoop( const std::string& 
   // Loop over eta bins
   if ( fitEtaBins_ ) {
     for ( unsigned uEta = 0; uEta < dirsOutObjCatSubFitEta_.back().size(); ++uEta ) {
-      if ( scale ) transferPerCategoryBin( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecRebinScaleVec_.back().at( uEta ), histosVecRebinScaleVecTransEta_.back().at( uEta ), scale );
-      else         transferPerCategoryBin( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecRebinVec_.back().at( uEta ), histosVecRebinVecTransEta_.back().at( uEta ), scale );
+      if ( scale ) transferPerCategoryBin( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecRebinScaleVecEta_.back().at( uEta ), histosVecRebinScaleVecTransEta_.back().at( uEta ), scale );
+      else         transferPerCategoryBin( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecRebinVecEta_.back().at( uEta ), histosVecRebinVecTransEta_.back().at( uEta ), scale );
     } // loop: uEta < nEtaBins
   }
 }
@@ -1015,10 +1032,10 @@ void FitTopTransferFunctionsRunner::compatibilityPerCategoryLoop( const std::str
     avPKSVecRebinScaleTransEta_.push_back( std::vector< Double_t >() );
     for ( unsigned uEta = 0; uEta < dirsOutObjCatSubFitEta_.back().size(); ++uEta ) {
       if ( scale ) {
-        compatibilityPerCategoryBin( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecRebinScaleVec_.back().at( uEta ), histosVecRebinVecTransEta_.back().at( uEta ), uEta, scale );
+        compatibilityPerCategoryBin( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecRebinScaleVecEta_.back().at( uEta ), histosVecRebinVecTransEta_.back().at( uEta ), uEta, scale );
       }
       else {
-        compatibilityPerCategoryBin( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecRebinVec_.back().at( uEta ), histosVecRebinVecTransEta_.back().at( uEta ), uEta, scale );
+        compatibilityPerCategoryBin( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecRebinVecEta_.back().at( uEta ), histosVecRebinVecTransEta_.back().at( uEta ), uEta, scale );
       }
     } // loop: uEta < nEtaBins
   }
@@ -1167,8 +1184,8 @@ void FitTopTransferFunctionsRunner::writeFilesPerCategoryLoop( const std::string
   // Loop over eta bins
   if ( fitEtaBins_ ) {
     for ( unsigned uEta = 0; uEta < dirsOutObjCatSubFitEta_.back().size(); ++uEta ) {
-      if ( scale ) writeFilesPerCategoryBin( objCat, transferVecRebinScaleVec_.back().at( uEta ), histosVecRebinVecTransEta_.back().at( uEta ), uEta, scale );
-      else         writeFilesPerCategoryBin( objCat, transferVecRebinVec_.back().at( uEta ), histosVecRebinVecTransEta_.back().at( uEta ), uEta, scale );
+      if ( scale ) writeFilesPerCategoryBin( objCat, transferVecRebinScaleVecEta_.back().at( uEta ), histosVecRebinVecTransEta_.back().at( uEta ), uEta, scale );
+      else         writeFilesPerCategoryBin( objCat, transferVecRebinVecEta_.back().at( uEta ), histosVecRebinVecTransEta_.back().at( uEta ), uEta, scale );
     } // loop: uEta < nEtaBins
   }
 }

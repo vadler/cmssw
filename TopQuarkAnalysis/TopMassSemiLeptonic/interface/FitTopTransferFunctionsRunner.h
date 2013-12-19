@@ -86,10 +86,14 @@ namespace my {
       std::vector< HistosDependency >                histosVecRebinScaleDependency_;
       std::vector< std::vector< HistosDependency > > histosVecRebinScaleVecDependencyEta_;
       // Transfer functions
-      std::vector< TransferFunction >           transferVecRebin_;
-      std::vector< TransferFunctionCollection > transferVecRebinVec_;
-      std::vector< TransferFunction >           transferVecRebinScale_;
-      std::vector< TransferFunctionCollection > transferVecRebinScaleVec_;
+      std::vector< TransferFunction >                          transferVecRebin_;
+      std::vector< TransferFunctionCollection >                transferVecRebinVecPt_;            // for 1-D only
+      std::vector< TransferFunctionCollection >                transferVecRebinVecEta_;
+      std::vector< std::vector< TransferFunctionCollection > > transferVecRebinVecEtaVecPt_;      // for 1-D only
+      std::vector< TransferFunction >                          transferVecRebinScale_;
+      std::vector< TransferFunctionCollection >                transferVecRebinScaleVecPt_;       // for 1-D only
+      std::vector< TransferFunctionCollection >                transferVecRebinScaleVecEta_;
+      std::vector< std::vector< TransferFunctionCollection > > transferVecRebinScaleVecEtaVecPt_; // for 1-D only
       // Compatibility // FIXME: Still need to be filled
       std::vector< std::vector< Double_t > >                pChi2VecRebinVecTrans_;
       std::vector< Double_t >                               avPChi2VecRebinTrans_;
@@ -149,8 +153,8 @@ namespace my {
       /// - run only during first loop over categories due to the usage of std::vector::back().
       void fillPerCategoryBin( unsigned uEta, HistosTrans& histosTrans, HistosTransEta& histosTransEta, double minPt, double maxEta, double maxDR );
       void fitPerCategoryLoop( const std::string& objCat, bool scale = false );
-      void fitPerCategoryBin( const std::string& objCat, TDirectory* dirOut, TransferFunction& transfer, HistosTransEta& histosTransEta, std::vector< HistosDependency >& histosVecDependency, bool scale = false );
-      void fitPerCategoryFit( TransferFunction& transfer, TH1D* histoTrans, HistosDependency* histosDependency, int uPt, bool scale = false );
+      void fitPerCategoryBin( const std::string& objCat, TDirectory* dirOut, TransferFunction& transfer, TransferFunctionCollection& transferColl, HistosTransEta& histosTransEta, std::vector< HistosDependency >& histosVecDependency, bool scale = false );
+      void fitPerCategoryFit( TransferFunction& transfer, TransferFunctionCollection& transferColl, TH1D* histoTrans, HistosDependency* histosDependency, int uPt, bool scale = false );
       void dependencyPerCategoryLoop( const std::string& objCat, bool scale = false );
       void dependencyPerCategoryBin( const std::string& objCat, TDirectory* dirOut, TransferFunction& transfer, HistosDependency& histosVecDependency, bool scale = false );
       void transferPerCategoryLoop( const std::string& objCat, bool scale = false );

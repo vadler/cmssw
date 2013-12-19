@@ -59,11 +59,12 @@ FitTopTransferFunctionsRunner::FitTopTransferFunctionsRunner( const std::string&
   usePileup_ = configIO.getParameter< bool >( "usePileUp" );
   const std::string& configIOPileUp( configIO.getParameter< std::string >( "pileUp" ) );
   const std::string& configIOOutFile( configIO.getParameter< std::string >( "outputFile" ) );
-  writeFiles_ = configIO.getParameter< bool >( "writeFiles" );
-  sample_     = configIO.getParameter< std::string >( "sample" );
-  pathOut_    = configIO.getParameter< std::string >( "pathOut" );
-  plot_       = configIO.getParameter< bool >( "plot" );
-  pathPlots_  = configIO.getParameter< std::string >( "pathPlots" );
+  writeFiles_   = configIO.getParameter< bool >( "writeFiles" );
+  writeFilesPt_ = configIO.getParameter< bool >( "writeFilesPt" );
+  sample_       = configIO.getParameter< std::string >( "sample" );
+  pathOut_      = configIO.getParameter< std::string >( "pathOut" );
+  plot_         = configIO.getParameter< bool >( "plot" );
+  pathPlots_    = configIO.getParameter< std::string >( "pathPlots" );
 
   // Set up ROOT
   setPlotEnvironment( gStyle );
@@ -430,13 +431,15 @@ bool FitTopTransferFunctionsRunner::fitPerCategory( unsigned uCat )
   const double configObjMaxDR( configObj.getParameter< double >( "maxDR" ) );
   fitFuncID_  = configObj.getParameter< std::string >( "fitFunction" );
   depFuncID_  = configObj.getParameter< std::string >( "dependencyFunction" );
+  resFuncID_  = configObj.getParameter< std::string >( "resolutionFunction" );
   fitEtaBins_ = configObj.getParameter< bool >( "fitEtaBins" );
   fitRange_   = configObj.getParameter< double >( "fitRange" );
   fitOptions_ = configObj.getParameter< std::string >( "fitOptions" );
   if      ( verbose_ < 2 ) fitOptions_.append( "Q" );
   else if ( verbose_ > 3 ) fitOptions_.append( "V" );
   minEntriesFactor_ = configObj.getParameter< unsigned >( "minEntriesFactor" );
-  fitMaxPt_   = configObj.getParameter< double >( "fitMaxPt" );
+  excludeVec_       = configObj.getParameter< std::vector< unsigned > >( "exclude" ); // FIXME: not yet set up for eta bins
+  fitMaxPt_         = configObj.getParameter< double >( "fitMaxPt" );
 
   const unsigned nEtaBins( dirsOutObjCatSubFitEta_.at( uCat ).size() );
 
@@ -444,12 +447,40 @@ bool FitTopTransferFunctionsRunner::fitPerCategory( unsigned uCat )
   // Dummies
   fitFunction_ = new TF1( "fitFunction", "1" );
   dependencyFunction_ = new TF1( "dependencyFunction", "1" );
+  resolutionFunction_ = new TF1( "resolutionFunction", "1" );
   TransferFunction transferPt;
   // Initialisation
   if ( fitFuncID_ == "sGauss" ) {
-    if ( depFuncID_ == "linear" )          transferPt = initialiseFunctions< SingleGaussian, Line >( fitFunction_, dependencyFunction_ );
-    else if ( depFuncID_ == "squared" )    transferPt = initialiseFunctions< SingleGaussian, Parabola >( fitFunction_, dependencyFunction_ );
-    else if ( depFuncID_ == "resolution" ) transferPt = initialiseFunctions< SingleGaussian, ResolutionLike >( fitFunction_, dependencyFunction_ );
+    if ( depFuncID_ == "linear" ) {
+      if ( resFuncID_ == "linear" )          transferPt = initialiseFunctions< SingleGaussian, Line, Line >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "squared" )    transferPt = initialiseFunctions< SingleGaussian, Line, Parabola >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "resolution" ) transferPt = initialiseFunctions< SingleGaussian, Line, ResolutionLike >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else {
+        std::cout << myName_ << " --> ERROR:" << std::endl
+                  << "    resolution function identifier '" << resFuncID_ << "' unknown" << std::endl;
+        return false;
+      }
+    }
+    else if ( depFuncID_ == "squared" ) {
+      if ( resFuncID_ == "linear" )          transferPt = initialiseFunctions< SingleGaussian, Parabola, Line >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "squared" )    transferPt = initialiseFunctions< SingleGaussian, Parabola, Parabola >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "resolution" ) transferPt = initialiseFunctions< SingleGaussian, Parabola, ResolutionLike >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else {
+        std::cout << myName_ << " --> ERROR:" << std::endl
+                  << "    resolution function identifier '" << resFuncID_ << "' unknown" << std::endl;
+        return false;
+      }
+    }
+    else if ( depFuncID_ == "resolution" ) {
+      if ( resFuncID_ == "linear" )          transferPt = initialiseFunctions< SingleGaussian, ResolutionLike, Line >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "squared" )    transferPt = initialiseFunctions< SingleGaussian, ResolutionLike, Parabola >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "resolution" ) transferPt = initialiseFunctions< SingleGaussian, ResolutionLike, ResolutionLike >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else {
+        std::cout << myName_ << " --> ERROR:" << std::endl
+                  << "    resolution function identifier '" << resFuncID_ << "' unknown" << std::endl;
+        return false;
+      }
+    }
     else {
       std::cout << myName_ << " --> ERROR:" << std::endl
                 << "    dependency function identifier '" << depFuncID_ << "' unknown" << std::endl;
@@ -457,9 +488,36 @@ bool FitTopTransferFunctionsRunner::fitPerCategory( unsigned uCat )
     }
   }
   else if ( fitFuncID_ == "dGauss" ){
-    if ( depFuncID_ == "linear" )          transferPt = initialiseFunctions< DoubleGaussian, Line >( fitFunction_, dependencyFunction_ );
-    else if ( depFuncID_ == "squared" )    transferPt = initialiseFunctions< DoubleGaussian, Parabola >( fitFunction_, dependencyFunction_ );
-    else if ( depFuncID_ == "resolution" ) transferPt = initialiseFunctions< DoubleGaussian, ResolutionLike >( fitFunction_, dependencyFunction_ );
+    if ( depFuncID_ == "linear" ) {
+      if ( resFuncID_ == "linear" )          transferPt = initialiseFunctions< DoubleGaussian, Line, Line >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "squared" )    transferPt = initialiseFunctions< DoubleGaussian, Line, Parabola >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "resolution" ) transferPt = initialiseFunctions< DoubleGaussian, Line, ResolutionLike >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else {
+        std::cout << myName_ << " --> ERROR:" << std::endl
+                  << "    resolution function identifier '" << resFuncID_ << "' unknown" << std::endl;
+        return false;
+      }
+    }
+    else if ( depFuncID_ == "squared" ) {
+      if ( resFuncID_ == "linear" )          transferPt = initialiseFunctions< DoubleGaussian, Parabola, Line >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "squared" )    transferPt = initialiseFunctions< DoubleGaussian, Parabola, Parabola >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "resolution" ) transferPt = initialiseFunctions< DoubleGaussian, Parabola, ResolutionLike >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else {
+        std::cout << myName_ << " --> ERROR:" << std::endl
+                  << "    resolution function identifier '" << resFuncID_ << "' unknown" << std::endl;
+        return false;
+      }
+    }
+    else if ( depFuncID_ == "resolution" ) {
+      if ( resFuncID_ == "linear" )          transferPt = initialiseFunctions< DoubleGaussian, ResolutionLike, Line >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "squared" )    transferPt = initialiseFunctions< DoubleGaussian, ResolutionLike, Parabola >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "resolution" ) transferPt = initialiseFunctions< DoubleGaussian, ResolutionLike, ResolutionLike >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else {
+        std::cout << myName_ << " --> ERROR:" << std::endl
+                  << "    resolution function identifier '" << resFuncID_ << "' unknown" << std::endl;
+        return false;
+      }
+    }
     else {
       std::cout << myName_ << " --> ERROR:" << std::endl
                 << "    dependency function identifier '" << depFuncID_ << "' unknown" << std::endl;
@@ -467,9 +525,36 @@ bool FitTopTransferFunctionsRunner::fitPerCategory( unsigned uCat )
     }
   }
   else if ( fitFuncID_ == "lCB" ) {
-    if ( depFuncID_ == "linear" )          transferPt = initialiseFunctions< LowerCrystalBall, Line >( fitFunction_, dependencyFunction_ );
-    else if ( depFuncID_ == "squared" )    transferPt = initialiseFunctions< LowerCrystalBall, Parabola >( fitFunction_, dependencyFunction_ );
-    else if ( depFuncID_ == "resolution" ) transferPt = initialiseFunctions< LowerCrystalBall, ResolutionLike >( fitFunction_, dependencyFunction_ );
+    if ( depFuncID_ == "linear" ) {
+      if ( resFuncID_ == "linear" )          transferPt = initialiseFunctions< LowerCrystalBall, Line, Line >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "squared" )    transferPt = initialiseFunctions< LowerCrystalBall, Line, Parabola >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "resolution" ) transferPt = initialiseFunctions< LowerCrystalBall, Line, ResolutionLike >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else {
+        std::cout << myName_ << " --> ERROR:" << std::endl
+                  << "    resolution function identifier '" << resFuncID_ << "' unknown" << std::endl;
+        return false;
+      }
+    }
+    else if ( depFuncID_ == "squared" ) {
+      if ( resFuncID_ == "linear" )          transferPt = initialiseFunctions< LowerCrystalBall, Parabola, Line >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "squared" )    transferPt = initialiseFunctions< LowerCrystalBall, Parabola, Parabola >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "resolution" ) transferPt = initialiseFunctions< LowerCrystalBall, Parabola, ResolutionLike >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else {
+        std::cout << myName_ << " --> ERROR:" << std::endl
+                  << "    resolution function identifier '" << resFuncID_ << "' unknown" << std::endl;
+        return false;
+      }
+    }
+    else if ( depFuncID_ == "resolution" ) {
+      if ( resFuncID_ == "linear" )          transferPt = initialiseFunctions< LowerCrystalBall, ResolutionLike, Line >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "squared" )    transferPt = initialiseFunctions< LowerCrystalBall, ResolutionLike, Parabola >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "resolution" ) transferPt = initialiseFunctions< LowerCrystalBall, ResolutionLike, ResolutionLike >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else {
+        std::cout << myName_ << " --> ERROR:" << std::endl
+                  << "    resolution function identifier '" << resFuncID_ << "' unknown" << std::endl;
+        return false;
+      }
+    }
     else {
       std::cout << myName_ << " --> ERROR:" << std::endl
                 << "    dependency function identifier '" << depFuncID_ << "' unknown" << std::endl;
@@ -477,9 +562,36 @@ bool FitTopTransferFunctionsRunner::fitPerCategory( unsigned uCat )
     }
   }
   else if ( fitFuncID_ == "uCB" ) {
-    if ( depFuncID_ == "linear" )          transferPt = initialiseFunctions< UpperCrystalBall, Line >( fitFunction_, dependencyFunction_ );
-    else if ( depFuncID_ == "squared" )    transferPt = initialiseFunctions< UpperCrystalBall, Parabola >( fitFunction_, dependencyFunction_ );
-    else if ( depFuncID_ == "resolution" ) transferPt = initialiseFunctions< UpperCrystalBall, ResolutionLike >( fitFunction_, dependencyFunction_ );
+    if ( depFuncID_ == "linear" ) {
+      if ( resFuncID_ == "linear" )          transferPt = initialiseFunctions< UpperCrystalBall, Line, Line >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "squared" )    transferPt = initialiseFunctions< UpperCrystalBall, Line, Parabola >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "resolution" ) transferPt = initialiseFunctions< UpperCrystalBall, Line, ResolutionLike >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else {
+        std::cout << myName_ << " --> ERROR:" << std::endl
+                  << "    resolution function identifier '" << resFuncID_ << "' unknown" << std::endl;
+        return false;
+      }
+    }
+    else if ( depFuncID_ == "squared" ) {
+      if ( resFuncID_ == "linear" )          transferPt = initialiseFunctions< UpperCrystalBall, Parabola, Line >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "squared" )    transferPt = initialiseFunctions< UpperCrystalBall, Parabola, Parabola >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "resolution" ) transferPt = initialiseFunctions< UpperCrystalBall, Parabola, ResolutionLike >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else {
+        std::cout << myName_ << " --> ERROR:" << std::endl
+                  << "    resolution function identifier '" << resFuncID_ << "' unknown" << std::endl;
+        return false;
+      }
+    }
+    else if ( depFuncID_ == "resolution" ) {
+      if ( resFuncID_ == "linear" )          transferPt = initialiseFunctions< UpperCrystalBall, ResolutionLike, Line >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "squared" )    transferPt = initialiseFunctions< UpperCrystalBall, ResolutionLike, Parabola >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "resolution" ) transferPt = initialiseFunctions< UpperCrystalBall, ResolutionLike, ResolutionLike >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else {
+        std::cout << myName_ << " --> ERROR:" << std::endl
+                  << "    resolution function identifier '" << resFuncID_ << "' unknown" << std::endl;
+        return false;
+      }
+    }
     else {
       std::cout << myName_ << " --> ERROR:" << std::endl
                 << "    dependency function identifier '" << depFuncID_ << "' unknown" << std::endl;
@@ -487,9 +599,36 @@ bool FitTopTransferFunctionsRunner::fitPerCategory( unsigned uCat )
     }
   }
   else if ( fitFuncID_ == "dCB" ) {
-    if ( depFuncID_ == "linear" )          transferPt = initialiseFunctions< DoubleCrystalBall, Line >( fitFunction_, dependencyFunction_ );
-    else if ( depFuncID_ == "squared" )    transferPt = initialiseFunctions< DoubleCrystalBall, Parabola >( fitFunction_, dependencyFunction_ );
-    else if ( depFuncID_ == "resolution" ) transferPt = initialiseFunctions< DoubleCrystalBall, ResolutionLike >( fitFunction_, dependencyFunction_ );
+    if ( depFuncID_ == "linear" ) {
+      if ( resFuncID_ == "linear" )          transferPt = initialiseFunctions< DoubleCrystalBall, Line, Line >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "squared" )    transferPt = initialiseFunctions< DoubleCrystalBall, Line, Parabola >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "resolution" ) transferPt = initialiseFunctions< DoubleCrystalBall, Line, ResolutionLike >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else {
+        std::cout << myName_ << " --> ERROR:" << std::endl
+                  << "    resolution function identifier '" << resFuncID_ << "' unknown" << std::endl;
+        return false;
+      }
+    }
+    else if ( depFuncID_ == "squared" ) {
+      if ( resFuncID_ == "linear" )          transferPt = initialiseFunctions< DoubleCrystalBall, Parabola, Line >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "squared" )    transferPt = initialiseFunctions< DoubleCrystalBall, Parabola, Parabola >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "resolution" ) transferPt = initialiseFunctions< DoubleCrystalBall, Parabola, ResolutionLike >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else {
+        std::cout << myName_ << " --> ERROR:" << std::endl
+                  << "    resolution function identifier '" << resFuncID_ << "' unknown" << std::endl;
+        return false;
+      }
+    }
+    else if ( depFuncID_ == "resolution" ) {
+      if ( resFuncID_ == "linear" )          transferPt = initialiseFunctions< DoubleCrystalBall, ResolutionLike, Line >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "squared" )    transferPt = initialiseFunctions< DoubleCrystalBall, ResolutionLike, Parabola >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else if ( depFuncID_ == "resolution" ) transferPt = initialiseFunctions< DoubleCrystalBall, ResolutionLike, ResolutionLike >( fitFunction_, dependencyFunction_, resolutionFunction_ );
+      else {
+        std::cout << myName_ << " --> ERROR:" << std::endl
+                  << "    resolution function identifier '" << resFuncID_ << "' unknown" << std::endl;
+        return false;
+      }
+    }
     else {
       std::cout << myName_ << " --> ERROR:" << std::endl
                 << "    dependency function identifier '" << depFuncID_ << "' unknown" << std::endl;
@@ -584,7 +723,7 @@ void FitTopTransferFunctionsRunner::fitPerCategoryFit( TransferFunction& transfe
   initialiseFitParameters( fitTrans, &*histoTrans, fitFuncID_, scale );
   TFitResultPtr fitTransResultPtr( histoTrans->Fit( fitTrans, fitOptions_.c_str() ) );
   if ( fitTransResultPtr >= 0 ) {
-    if ( histoTrans->GetEntries() >= minEntriesFactor_ * histoTrans->GetNbinsX()  && fitTransResultPtr->Status() == 0 && fitTransResultPtr->Prob() > 0. && fitTransResultPtr->Ndf() != 0. ) {
+    if ( histoTrans->GetEntries() >= minEntriesFactor_ * histoTrans->GetNbinsX()  && fitTransResultPtr->Status() == 0 && fitTransResultPtr->Prob() > 0. && fitTransResultPtr->Ndf() != 0. && std::find( excludeVec_.begin(), excludeVec_.end(), uPt ) == excludeVec_.end() ) {
       if ( checkParametersDoubleGaussian( fitTrans, fitFuncID_ ) ) {
         mixParametersDoubleGaussian( transfer, fitTrans );
       }

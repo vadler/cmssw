@@ -32,6 +32,7 @@ namespace my {
       bool                       scale_;
       int                        overwrite_;
       bool                       writeFiles_;
+      bool                       writeFilesPt_;
       bool                       refSel_;
       bool                       usePileup_;
       std::string                sample_;
@@ -41,9 +42,11 @@ namespace my {
       std::vector< std::string > objCats_;
       std::string                fitFuncID_;
       std::string                depFuncID_;
+      std::string                resFuncID_;
       std::string                fitOptions_;
       double                     fitRange_;
       unsigned                   minEntriesFactor_;
+      std::vector< unsigned >    excludeVec_;
       bool                       fitEtaBins_;
       double                     fitMaxPt_;
       // Input
@@ -72,6 +75,7 @@ namespace my {
       // Functions
       TF1* fitFunction_;
       TF1* dependencyFunction_;
+      TF1* resolutionFunction_;
       // Histograms
       std::vector< HistosTrans >                   histosVecRebinTrans_;
       std::vector< std::vector< HistosTransEta > > histosVecRebinVecTransEta_;
@@ -118,18 +122,20 @@ namespace my {
       bool compatibilityPerCategory( unsigned uCat );
       bool writeFilesPerCategory( unsigned uCat );
 
-      template< typename FitFuncType, typename DepFuncType >
-      TransferFunction initialiseFunctions( TF1* fitFunction, TF1* dependencyFunction )
+      template< typename FitFuncType, typename DepFuncType, typename ResFuncType = my::ResolutionLike >
+      TransferFunction initialiseFunctions( TF1* fitFunction, TF1* dependencyFunction, TF1* resolutionFunction )
       {
         // ROOT functions
         FitFuncType* fitFunc( new FitFuncType() );
         *fitFunction = TF1( "fitFunction", fitFunc, 0., 1., FitFuncType::NPar() );
         DepFuncType* depFunc( new DepFuncType() );
         *dependencyFunction = TF1( "dependencyFunction", depFunc, 0., 1., DepFuncType::NPar() );
+        ResFuncType* resFunc( new ResFuncType() );
+        *resolutionFunction = TF1( "resolutionFunction", resFunc, 0., 1., ResFuncType::NPar() );
 
         // Transfer function
         const std::string part( refGen_ ? "_parton" : "_reco" );
-        TransferFunction transfer( fitFunction, dependencyFunction, std::string( titlePt_ + part ) );
+        TransferFunction transfer( fitFunction, dependencyFunction, std::string( titlePt_ + part ) ); // FIXME: does not take separate resolution function yet
         transfer.SetFitFunctionString( FitFuncType::String() );
         transfer.SetDependencyFunctionString( DepFuncType::String() );
 

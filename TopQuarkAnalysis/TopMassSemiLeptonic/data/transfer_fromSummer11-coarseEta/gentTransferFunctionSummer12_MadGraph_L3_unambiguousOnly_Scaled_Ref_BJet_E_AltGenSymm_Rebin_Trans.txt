@@ -1,0 +1,23 @@
+
+FitFunction       : 	[0]*(exp(-0.5*((x-[1])/[2])**2)+[3]*exp(-0.5*((x-[4])/[5])**2))/(([2]+[3]*[5])*sqrt(2*pi))	(constructed from C++ class)
+DependencyFunction: 	[0]+[1]*x+[2]*x**2	(constructed from C++ class) 	on E^{GEN} (GeV)_parton
+Comment           : 	E_parton <= 999999, E_parton >= 0, DeltaR(parton, reco) <= 0.1
+
+Parameters 1D:
+[0]: 	0.996721+-0.00197757
+[1]: 	-0.381321+-0.0382892
+[2]: 	10.3398+-0.0567604
+[3]: 	0.236281+-0.0040083
+[4]: 	7.01985+-0.12662
+[5]: 	29.414+-0.156287
+[all]: 	(0.99672099942586878)*(exp(-0.5*((x-(-0.38132052742317057))/(10.339798938178383))**2)+(0.23628134925847144)*exp(-0.5*((x-(7.0198478540093703))/(29.414031434175062))**2))/(((10.339798938178383)+(0.23628134925847144)*(29.414031434175062))*sqrt(2*pi))
+
+Parameters 2D (DependencyFunction):
+[0]: 	(0.993156+(-1.01829e-05*E^{GEN} (GeV)_parton))+(2.70861e-07*sq(E^{GEN} (GeV)_parton))
+[1]: 	(-0.369172+(0.00420593*E^{GEN} (GeV)_parton))+(-2.88532e-05*sq(E^{GEN} (GeV)_parton))
+[2]: 	(0.192222+(0.124909*E^{GEN} (GeV)_parton))+(-0.000149727*sq(E^{GEN} (GeV)_parton))
+[3]: 	(0.042228+(0.0014273*E^{GEN} (GeV)_parton))+(-4.28444e-07*sq(E^{GEN} (GeV)_parton))
+[4]: 	(-11.4877+(0.194492*E^{GEN} (GeV)_parton))+(-0.000259473*sq(E^{GEN} (GeV)_parton))
+[5]: 	(-1.96705+(0.23342*E^{GEN} (GeV)_parton))+(-0.000169747*sq(E^{GEN} (GeV)_parton))
+[all]: 	((0.993156+(-1.01829e-05*E^{GEN} (GeV)_parton))+(2.70861e-07*sq(E^{GEN} (GeV)_parton)))*(exp(-0.5*((x-((-0.369172+(0.00420593*E^{GEN} (GeV)_parton))+(-2.88532e-05*sq(E^{GEN} (GeV)_parton))))/((0.192222+(0.124909*E^{GEN} (GeV)_parton))+(-0.000149727*sq(E^{GEN} (GeV)_parton))))**2)+((0.042228+(0.0014273*E^{GEN} (GeV)_parton))+(-4.28444e-07*sq(E^{GEN} (GeV)_parton)))*exp(-0.5*((x-((-11.4877+(0.194492*E^{GEN} (GeV)_parton))+(-0.000259473*sq(E^{GEN} (GeV)_parton))))/((-1.96705+(0.23342*E^{GEN} (GeV)_parton))+(-0.000169747*sq(E^{GEN} (GeV)_parton))))**2))/((((0.192222+(0.124909*E^{GEN} (GeV)_parton))+(-0.000149727*sq(E^{GEN} (GeV)_parton)))+((0.042228+(0.0014273*E^{GEN} (GeV)_parton))+(-4.28444e-07*sq(E^{GEN} (GeV)_parton)))*((-1.96705+(0.23342*E^{GEN} (GeV)_parton))+(-0.000169747*sq(E^{GEN} (GeV)_parton))))*sqrt(2*pi))
+

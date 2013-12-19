@@ -107,7 +107,7 @@ void my::initialiseFitParameters( TF1* fit, TH1D const* histo, const std::string
     fit->SetParName( 3, "Bkg c" );
     fit->SetParName( 4, "Bkg #mu" );
     fit->SetParName( 5, "Bkg #sigma" );
-    fit->SetParameter( 0, 10. * c );
+    fit->SetParameter( 0, c );
     fit->SetParameter( 1, p );
     fit->SetParLimits( 1, fitMin, fitMax );
     fit->SetParameter( 2, sqrt( s - m ) );

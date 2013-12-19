@@ -32,6 +32,10 @@ namespace my {
       bool                       scale_;
       int                        overwrite_;
       bool                       writeFiles_;
+      bool                       refSel_;
+      bool                       usePileup_;
+      std::string                sample_;
+      std::string                pathOut_;
       bool                       plot_;
       std::string                pathPlots_;
       std::vector< std::string > objCats_;
@@ -82,6 +86,24 @@ namespace my {
       std::vector< TransferFunctionCollection > transferVecRebinVec_;
       std::vector< TransferFunction >           transferVecRebinScale_;
       std::vector< TransferFunctionCollection > transferVecRebinScaleVec_;
+      // Compatibility // FIXME: Still need to be filled
+      std::vector< std::vector< Double_t > >                pChi2VecRebinVecTrans_;
+      std::vector< Double_t >                               avPChi2VecRebinTrans_;
+      std::vector< std::vector< std::vector< Double_t > > > pChi2VecRebinVecTransEta_;
+      std::vector< std::vector< Double_t > >                avPChi2VecRebinTransEta_;
+      std::vector< std::vector< Double_t > >                pKSVecRebinVecTrans_;
+      std::vector< Double_t >                               avKSVecRebinTrans_;
+      std::vector< std::vector< std::vector< Double_t > > > pKSVecRebinVecTransEta_;
+      std::vector< std::vector< Double_t > >                avPKSVecRebinTransEta_;
+      //
+      std::vector< std::vector< Double_t > >                pChi2VecRebinScaleVecTrans_;
+      std::vector< Double_t >                               avPChi2VecRebinScaleTrans_;
+      std::vector< std::vector< std::vector< Double_t > > > pChi2VecRebinScaleVecTransEta_;
+      std::vector< std::vector< Double_t > >                avPChi2VecRebinScaleTransEta_;
+      std::vector< std::vector< Double_t > >                pKSVecRebinScaleVecTrans_;
+      std::vector< Double_t >                               avKSVecRebinScaleTrans_;
+      std::vector< std::vector< std::vector< Double_t > > > pKSVecRebinScaleVecTransEta_;
+      std::vector< std::vector< Double_t > >                avPKSVecRebinScaleTransEta_;
 
     public:
 
@@ -92,6 +114,9 @@ namespace my {
       bool fillPerCategory( unsigned uCat );
       bool fitPerCategory( unsigned uCat );
       bool dependencyPerCategory( unsigned uCat );
+      bool transferPerCategory( unsigned uCat );
+      bool compatibilityPerCategory( unsigned uCat );
+      bool writeFilesPerCategory( unsigned uCat );
 
       template< typename FitFuncType, typename DepFuncType >
       TransferFunction initialiseFunctions( TF1* fitFunction, TF1* dependencyFunction )
@@ -119,9 +144,15 @@ namespace my {
       void fillPerCategoryBin( unsigned uEta, HistosTrans& histosTrans, HistosTransEta& histosTransEta, double minPt, double maxEta, double maxDR );
       void fitPerCategoryLoop( const std::string& objCat, bool scale = false );
       void fitPerCategoryBin( const std::string& objCat, TDirectory* dirOut, TransferFunction& transfer, HistosTransEta& histosTransEta, std::vector< HistosDependency >& histosVecDependency, bool scale = false );
-      void fitPerCategoryFit( TransferFunction& transfer, TH1D* histoTrans, HistosDependency* histosDependency, unsigned uPt, bool scale = false );
+      void fitPerCategoryFit( TransferFunction& transfer, TH1D* histoTrans, HistosDependency* histosDependency, int uPt, bool scale = false );
       void dependencyPerCategoryLoop( const std::string& objCat, bool scale = false );
       void dependencyPerCategoryBin( const std::string& objCat, TDirectory* dirOut, TransferFunction& transfer, HistosDependency& histosVecDependency, bool scale = false );
+      void transferPerCategoryLoop( const std::string& objCat, bool scale = false );
+      void transferPerCategoryBin( const std::string& objCat, TDirectory* dirOut, TransferFunction& transfer, HistosTransEta& histosTransEta, bool scale = false );
+      void compatibilityPerCategoryLoop( const std::string& objCat, bool scale = false );
+      void compatibilityPerCategoryBin( const std::string& objCat, TDirectory* dirOut, TransferFunction& transfer, HistosTransEta& histosTransEta, int uEta, bool scale = false );
+      void writeFilesPerCategoryLoop( const std::string& objCat, bool scale = false );
+      void writeFilesPerCategoryBin( const std::string& objCat, TransferFunction& transfer, HistosTransEta& histosTransEta, int uEta, bool scale = false );
 
   };
 

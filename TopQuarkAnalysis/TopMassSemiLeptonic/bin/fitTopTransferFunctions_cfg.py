@@ -37,7 +37,21 @@ fitTopTransferFunctions = cms.PSet(
 , useNonT   = cms.bool( True )
 , refGen    = cms.bool( True )
 , scale     = cms.bool( True )
-, overwrite = cms.bool( False )
+, overwrite = cms.bool( True )
+)
+
+fitTopTransferFunctions.io = cms.PSet(
+  fullStats  = cms.bool( True )
+, sample     = cms.string( sample )
+, inputFile  = cms.string( '' ) # defined below
+, refSel     = cms.bool( True )
+, usePileUp  = cms.bool( False )
+, pileUp     = cms.string( 'PileUpWeightTrue' ) # 'PileUpWeightTrue' or 'PileUpWeightObserved'
+, outputFile = cms.string( '' ) # defined below
+, writeFiles = cms.bool( True )
+, pathOut    = cms.string( '' ) # defined below
+, plot       = cms.bool( True )
+, pathPlots  = cms.string( '' ) # defined below
 )
 
 fitTopTransferFunctions.objects = cms.PSet(
@@ -50,7 +64,7 @@ fitTopTransferFunctions.objects = cms.PSet(
   , maxDR              = cms.double( 0.1 )
   , fitFunction        = cms.string( dGauss )
   , dependencyFunction = cms.string( squared )
-  , fitEtaBins         = cms.bool( True )
+  , fitEtaBins         = cms.bool( False )
   , fitMaxPt           = cms.double( 999999. )
   , fitRange           = cms.double( 5.0 ) # if not 'sGauss', should be widthFactor
   , fitOptions         = cms.string( fitOptions )
@@ -103,18 +117,6 @@ fitTopTransferFunctions.objects = cms.PSet(
   #)
 )
 
-fitTopTransferFunctions.io = cms.PSet(
-  fullStats  = cms.bool( True )
-, inputFile  = cms.string( '' ) # defined below
-, refSel     = cms.bool( True )
-, usePileUp  = cms.bool( False )
-, pileUp     = cms.string( 'PileUpWeightTrue' ) # 'PileUpWeightTrue' or 'PileUpWeightObserved'
-, outputFile = cms.string( '' ) # defined below
-, writeFiles = cms.bool( False )
-, plot       = cms.bool( True )
-, pathPlots  = cms.string( '' ) # defined below
-)
-
 ### Paths ###
 
 name = ''
@@ -162,6 +164,7 @@ if fitTopTransferFunctions.io.writeFiles.value() is True:
 fitTopTransferFunctions.io.inputFile  = inputFile
 fitTopTransferFunctions.io.outputFile = outputFile
 fitTopTransferFunctions.io.pathPlots  = pathPlots
+fitTopTransferFunctions.io.pathOut    = pathOut
 
 
 ### Messaging ###
@@ -181,14 +184,14 @@ print
 print 'Output file:'
 print '-----------'
 print outputFile
-#if fitTopTransferFunctions.io.writeFiles.value() is True:
-  #pathOut = fitTopTransferFunctions.transfer.pathOut.value() + '/gentTransferFunction_' + sample + '_*' + name + '*.txt'
-  #if refSel:
-    #pathOut = pathOut.replace( sample, sample + '_Ref', 1)
-  #print
-  #print 'Output destination:'
-  #print '------------------'
-  #print pathOut
+if fitTopTransferFunctions.io.writeFiles.value() is True:
+  pathOut = fitTopTransferFunctions.io.pathOut.value() + '/gentTransferFunction_' + sample + '_*' + name + '*.txt'
+  if fitTopTransferFunctions.io.refSel.value() is True:
+    pathOut = pathOut.replace( sample, sample + '_Ref', 1)
+  print
+  print 'Output destination:'
+  print '------------------'
+  print pathOut
 if fitTopTransferFunctions.io.plot.value() is True:
   print
   print 'Plots destination:'

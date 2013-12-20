@@ -322,7 +322,7 @@ namespace my {
 
       /// Returns a formatted string for human readability with all important
       /// parameters of the transfer function.
-      std::string Print( bool useNan = true ) const;
+      std::string Print( bool only1D = false, bool useNan = true ) const;
 
       /// Returns a formatted string for human readability of the 1D fit
       /// function.

@@ -16,7 +16,7 @@ namespace my {
       DataContainer() {};
       ~DataContainer() {};
 
-      void loadPileUpWeights( bool usePileUp, const std::string & pileUp, TDirectory* dirInSel );
+      void loadPileUpWeights( bool usePileUp, const std::string & pileUp, TDirectory* dirInSel, Int_t maxEvents = -1 );
 
       std::vector< Double_t > pileUpWeights() const { return pileUpWeights_; };
 

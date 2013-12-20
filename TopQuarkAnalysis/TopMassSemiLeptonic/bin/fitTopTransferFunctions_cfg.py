@@ -8,8 +8,8 @@ import FWCore.ParameterSet.Config as cms
 era    = 'Summer11-coarseEta'
 #era    = 'Summer11-coarsePt'
 # Input sample
-sample = 'Summer12_MadGraph_L3_unambiguousOnly'
-#sample = 'Summer12_MCatNLO_L3_unambiguousOnly'
+#sample = 'Summer12_MadGraph_L3_unambiguousOnly'
+sample = 'Summer12_MCatNLO_L3_unambiguousOnly'
 
 ### Contstants ###
 
@@ -32,6 +32,7 @@ fitOptions = 'IBRS+'
 
 fitTopTransferFunctions = cms.PSet(
   verbose   = cms.uint32( 3 )
+, maxEvents = cms.int32( -1 )
 , useSymm   = cms.bool( True )
 , useAlt    = cms.bool( True )
 , useNonT   = cms.bool( True )
@@ -66,32 +67,33 @@ fitTopTransferFunctions.objects = cms.PSet(
   , fitFunction        = cms.string( dGauss )
   , dependencyFunction = cms.string( squared )
   , resolutionFunction = cms.string( resolution )
-  , fitEtaBins         = cms.bool( False )
+  , fitEtaBins         = cms.bool( True )
   , fitMaxPt           = cms.double( 999999. )
   , fitRange           = cms.double( 5.0 ) # if not 'sGauss', should be widthFactor
   , fitOptions         = cms.string( fitOptions )
-  , minEntriesFactor   = cms.uint32( 3 )
-  , exclude            = vuint32(  ) # MadGraph
-  , exclude            = vuint32(  ) # MC@NLO
+  , minEntriesFactor   = cms.uint32( 5 )
+  , exclude            = cms.vuint32(  ) # MadGraph
+  #, exclude            = cms.vuint32(  ) # MC@NLO
   )
-#, BJet = cms.PSet(
-    #deltaPtBins        = cms.uint32( 50 )
-  #, deltaPtMax         = cms.double( 50. )
-  #, widthFactor        = cms.double( 5.0 )
-  #, minPt              = cms.double( 0.0 )
-  #, maxEta             = cms.double( 999999. )
-  #, maxDR              = cms.double( 0.1 )
-  #, fitFunction        = cms.string( dGauss )
-  #, dependencyFunction = cms.string( squared )
-  #, resolutionFunction = cms.string( resolution )
-  #, fitEtaBins         = cms.bool( False )
-  #, fitMaxPt           = cms.double( 999999. )
-  #, fitRange           = cms.double( 5.0 ) # if not 'sGauss', should be widthFactor
-  #, fitOptions         = cms.string( fitOptions )
-  #, minEntriesFactor   = cms.uint32( 3 )
-  #, exclude            = vuint32(  ) # MadGraph
-  #, exclude            = vuint32(  ) # MC@NLO
-  #)
+, BJet = cms.PSet(
+  #BJet = cms.PSet(
+    deltaPtBins        = cms.uint32( 50 )
+  , deltaPtMax         = cms.double( 50. )
+  , widthFactor        = cms.double( 5.0 )
+  , minPt              = cms.double( 0.0 )
+  , maxEta             = cms.double( 999999. )
+  , maxDR              = cms.double( 0.1 )
+  , fitFunction        = cms.string( dGauss )
+  , dependencyFunction = cms.string( squared )
+  , resolutionFunction = cms.string( resolution )
+  , fitEtaBins         = cms.bool( True )
+  , fitMaxPt           = cms.double( 999999. )
+  , fitRange           = cms.double( 5.0 ) # if not 'sGauss', should be widthFactor
+  , fitOptions         = cms.string( fitOptions )
+  , minEntriesFactor   = cms.uint32( 5 )
+  , exclude            = cms.vuint32(  ) # MadGraph
+  #, exclude            = cms.vuint32(  ) # MC@NLO
+  )
 #, Mu = cms.PSet(
     #deltaPtBins        = cms.uint32( 50 )
   #, deltaPtMax         = cms.double( 50. )
@@ -106,9 +108,9 @@ fitTopTransferFunctions.objects = cms.PSet(
   #, fitMaxPt           = cms.double( 999999. )
   #, fitRange           = cms.double( 1.0 ) # if not 'sGauss', should be widthFactor
   #, fitOptions         = cms.string( fitOptions )
-  #, minEntriesFactor   = cms.uint32( 3 )
-  #, exclude            = vuint32(  ) # MadGraph
-  #, exclude            = vuint32(  ) # MC@NLO
+  #, minEntriesFactor   = cms.uint32( 5 )
+  #, exclude            = cms.vuint32(  ) # MadGraph
+  ##, exclude            = cms.vuint32(  ) # MC@NLO
   #)
 #, Elec = cms.PSet(
     #deltaPtBins        = cms.uint32( 50 )
@@ -124,9 +126,9 @@ fitTopTransferFunctions.objects = cms.PSet(
   #, fitMaxPt           = cms.double( 999999. )
   #, fitRange           = cms.double( 1.0 ) # if not 'sGauss', should be widthFactor
   #, fitOptions         = cms.string( fitOptions )
-  #, minEntriesFactor   = cms.uint32( 3 )
-  #, exclude            = vuint32(  ) # MadGraph
-  #, exclude            = vuint32(  ) # MC@NLO
+  #, minEntriesFactor   = cms.uint32( 5 )
+  #, exclude            = cms.vuint32(  ) # MadGraph
+  ##, exclude            = cms.vuint32(  ) # MC@NLO
   #)
 )
 

@@ -454,7 +454,7 @@ double TransferFunction::Eval( double dependencyValue, double value, int norm ) 
 
 // Communication
 
-std::string TransferFunction::Print( bool useNan ) const
+std::string TransferFunction::Print( bool only1D, bool useNan ) const
 {
   std::stringstream print( std::ios_base::out );
   print << std::endl;
@@ -474,11 +474,13 @@ std::string TransferFunction::Print( bool useNan ) const
   print << "[all]: \t" << PrintFit1D( useNan ) << std::endl;
   print << std::endl;
 
-  print << "Parameters 2D (DependencyFunction):" << std::endl;
-  for ( unsigned i = 0; i < NParFit(); ++i ) {
-    print << "[" << i << "]: \t"  << PrintDependency( i, useNan ) << std::endl;
+  if ( ! only1D ) {
+    print << "Parameters 2D (DependencyFunction):" << std::endl;
+    for ( unsigned i = 0; i < NParFit(); ++i ) {
+      print << "[" << i << "]: \t"  << PrintDependency( i, useNan ) << std::endl;
+    }
+    print << "[all]: \t" << PrintFit2D( useNan ) << std::endl;
   }
-  print << "[all]: \t" << PrintFit2D( useNan ) << std::endl;
 
   return print.str();
 }

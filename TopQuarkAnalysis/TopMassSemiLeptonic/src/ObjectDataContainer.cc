@@ -10,7 +10,7 @@
 using namespace my;
 
 
-ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory* dirInCat, Bool_t useSymm, Bool_t useAlt, Bool_t useNonT, Bool_t refGen, const my::DataContainer& data )
+ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory* dirInCat, Bool_t useSymm, Bool_t useAlt, Bool_t useNonT, Bool_t refGen, const my::DataContainer& data, Int_t maxEvents )
 {
 
   // Get eta binning
@@ -91,7 +91,14 @@ ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory*
     else               dataTree->SetBranchAddress( "BinEta"   , &iEta );
   }
   Int_t nEntries( ( Int_t )dataTree->GetEntries() );
-  if ( objCat == "UdscJet" || objCat == "BJet" ) assert( nEntries % 2 == 0 ); // need two jet entries per event
+  if ( objCat == "UdscJet" || objCat == "BJet" ) {
+    maxEvents *= 2;
+    if ( 0 <= maxEvents && maxEvents < nEntries ) nEntries = maxEvents;
+    assert( nEntries % 2 == 0 ); // need two jet entries per event
+  }
+  else {
+    if ( 0 <= maxEvents && maxEvents < nEntries ) nEntries = maxEvents;
+  }
   for ( int iEntry = 0; iEntry < nEntries; ++iEntry ) {
     dataTree->GetEntry( iEntry );
     assert( iEta < ( Int_t )( nEtaBins() ) ); // has to fit (and be consistent)

@@ -25,6 +25,7 @@ namespace my {
       // Config
       edm::ParameterSet          config_;
       unsigned                   verbose_;
+      int                        maxEvents_; // FIXME: still nedds to be propageted
       bool                       useSymm_;
       bool                       useAlt_;
       bool                       useNonT_;
@@ -94,7 +95,7 @@ namespace my {
       std::vector< TransferFunctionCollection >                transferVecRebinScaleVecPt_;       // for 1-D only
       std::vector< TransferFunctionCollection >                transferVecRebinScaleVecEta_;
       std::vector< std::vector< TransferFunctionCollection > > transferVecRebinScaleVecEtaVecPt_; // for 1-D only
-      // Compatibility // FIXME: Still need to be filled
+      // Compatibility // FIXME: Still need to be propagated to output
       std::vector< std::vector< Double_t > >                pChi2VecRebinVecTrans_;
       std::vector< Double_t >                               avPChi2VecRebinTrans_;
       std::vector< std::vector< std::vector< Double_t > > > pChi2VecRebinVecTransEta_;
@@ -154,7 +155,7 @@ namespace my {
       void fillPerCategoryBin( unsigned uEta, HistosTrans& histosTrans, HistosTransEta& histosTransEta, double minPt, double maxEta, double maxDR );
       void fitPerCategoryLoop( const std::string& objCat, bool scale = false );
       void fitPerCategoryBin( const std::string& objCat, TDirectory* dirOut, TransferFunction& transfer, TransferFunctionCollection& transferColl, HistosTransEta& histosTransEta, std::vector< HistosDependency >& histosVecDependency, bool scale = false );
-      void fitPerCategoryFit( TransferFunction& transfer, TransferFunctionCollection& transferColl, TH1D* histoTrans, HistosDependency* histosDependency, int uPt, bool scale = false );
+      void fitPerCategoryFit( TransferFunction& transfer, TH1D* histoTrans, HistosDependency* histosDependency, int uPt, bool scale = false );
       void dependencyPerCategoryLoop( const std::string& objCat, bool scale = false );
       void dependencyPerCategoryBin( const std::string& objCat, TDirectory* dirOut, TransferFunction& transfer, HistosDependency& histosVecDependency, bool scale = false );
       void transferPerCategoryLoop( const std::string& objCat, bool scale = false );
@@ -162,7 +163,7 @@ namespace my {
       void compatibilityPerCategoryLoop( const std::string& objCat, bool scale = false );
       void compatibilityPerCategoryBin( const std::string& objCat, TDirectory* dirOut, TransferFunction& transfer, HistosTransEta& histosTransEta, int uEta, bool scale = false );
       void writeFilesPerCategoryLoop( const std::string& objCat, bool scale = false );
-      void writeFilesPerCategoryBin( const std::string& objCat, TransferFunction& transfer, HistosTransEta& histosTransEta, int uEta, bool scale = false );
+      void writeFilesPerCategoryBin( const std::string& objCat, TransferFunction& transfer, const std::string& name, int uPt, int uEta, bool scale = false );
 
   };
 

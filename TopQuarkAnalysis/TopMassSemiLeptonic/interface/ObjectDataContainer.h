@@ -17,7 +17,7 @@ namespace my {
 
   struct ObjectDataContainer {
 
-      explicit ObjectDataContainer( const std::string& objCat, TDirectory* dirInCat, Bool_t useSymm, Bool_t useAlt, Bool_t useNonT, Bool_t refGen, const my::DataContainer& data );
+      explicit ObjectDataContainer( const std::string& objCat, TDirectory* dirInCat, Bool_t useSymm, Bool_t useAlt, Bool_t useNonT, Bool_t refGen, const my::DataContainer& data, Int_t maxEvents = -1 );
       ~ObjectDataContainer() {};
 
       /// Get binning

@@ -732,7 +732,7 @@ void FitTopTransferFunctionsRunner::fitPerCategoryFit( TransferFunction& transfe
   TFitResultPtr fitTransResultPtr( histoTrans->Fit( fitTrans, fitOptions_.c_str() ) );
   if ( fitTransResultPtr >= 0 ) {
     if ( histoTrans->GetEntries() >= minEntriesFactor_ * histoTrans->GetNbinsX()  && fitTransResultPtr->Status() == 0 && fitTransResultPtr->Prob() > 0. && fitTransResultPtr->Ndf() != 0. && std::find( excludeVec_.begin(), excludeVec_.end(), uPt ) == excludeVec_.end() ) {
-      if ( checkParametersDoubleGaussian( fitTrans, fitFuncID_ ) {
+      if ( checkParametersDoubleGaussian( fitTrans, fitFuncID_ ) ) {
         mixParametersDoubleGaussian( transfer, fitTrans );
         if ( verbose_ > 0 ) {
           std::cout << myName_ << " --> WARNING:" << std::endl

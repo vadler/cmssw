@@ -1,9 +1,9 @@
 #include "TopQuarkAnalysis/TopMassSemiLeptonic/interface/FitTopTransferFunctionsHistos.h"
 
 
-#include <string>
-
 #include "boost/lexical_cast.hpp"
+
+#include <TStyle.h>
 
 
 using namespace my;
@@ -14,6 +14,9 @@ my::HistosTransEta::HistosTransEta( const HistosTransEta& histosTransEta, const 
 {
   const std::string nameTrans( baseName + "_Trans" );
   histTrans = new TH1D( *( ( TH1D* )( histosTransEta.histTrans->Clone( nameTrans.c_str() ) ) ) );
+  legTrans  = new TLegend( gStyle->GetPadLeftMargin() + 0.025, 0.75, 0.4, 0.975 - gStyle->GetPadTopMargin() );
+  legTrans->SetFillColor( gStyle->GetPadColor() );
+  legTrans->SetHeader( histTrans->GetTitle() );
   const std::string nameTransMapPt( nameTrans + "_Map_Pt" );
   histTransMapPt = new TH2D( *( ( TH2D* )( histosTransEta.histTransMapPt->Clone( nameTransMapPt.c_str() ) ) ) );
 
@@ -22,6 +25,10 @@ my::HistosTransEta::HistosTransEta( const HistosTransEta& histosTransEta, const 
     const std::string namePtTrans( baseName + "_" + baseTitlePt + binPt + "_Trans" );
     TH1D* histPtTrans( new TH1D( *( ( TH1D* )( histosTransEta.histVecPtTrans.at( uPt)->Clone( namePtTrans.c_str() ) ) ) ) );
     histVecPtTrans.push_back( histPtTrans );
+    TLegend* legPtTrans( new TLegend( gStyle->GetPadLeftMargin() + 0.025, 0.75, 0.4, 0.975 - gStyle->GetPadTopMargin() ) );
+    legPtTrans->SetFillColor( gStyle->GetPadColor() );
+    legPtTrans->SetHeader( histPtTrans->GetTitle() );
+    legVecPtTrans.push_back( legPtTrans );
   }
 
   if ( scale ) this->scale();
@@ -33,6 +40,9 @@ my::HistosTransEta::HistosTransEta( const std::string& objCat, const std::string
   histTrans = new TH1D( nameTrans.c_str(), objCat.c_str(), nPtBinsHistos, -ptMaxHistos, ptMaxHistos );
   histTrans->SetXTitle( titleTrans.c_str() );
   histTrans->SetYTitle( "events" );
+  legTrans  = new TLegend( gStyle->GetPadLeftMargin() + 0.025, 0.75, 0.4, 0.975 - gStyle->GetPadTopMargin() );
+  legTrans->SetFillColor( gStyle->GetPadColor() );
+  legTrans->SetHeader( histTrans->GetTitle() );
   const std::string nameTransMapPt( nameTrans + "_Map_Pt" );
   histTransMapPt = new TH2D( nameTransMapPt.c_str(), objCat.c_str(), nPtBins, ptBins.data(), nPtBinsHistos, -ptMaxHistos, ptMaxHistos );
   histTransMapPt->SetXTitle( titlePt.c_str() );
@@ -47,6 +57,10 @@ my::HistosTransEta::HistosTransEta( const std::string& objCat, const std::string
     histPtTrans->SetXTitle( titleTrans.c_str() );
     histPtTrans->SetYTitle( "events" );
     histVecPtTrans.push_back( histPtTrans );
+    TLegend* legPtTrans( new TLegend( gStyle->GetPadLeftMargin() + 0.025, 0.75, 0.4, 0.975 - gStyle->GetPadTopMargin() ) );
+    legPtTrans->SetFillColor( gStyle->GetPadColor() );
+    legPtTrans->SetHeader( histPtTrans->GetTitle() );
+    legVecPtTrans.push_back( legPtTrans );
   }
 }
 
@@ -59,6 +73,9 @@ my::HistosTransEta::HistosTransEta( const std::string& objCat, const std::string
   histTrans = new TH1D( nameTrans.c_str(), objCat.c_str(), nPtBinsHistos, meanTrans - rangeTrans, meanTrans + rangeTrans );
   histTrans->SetXTitle( titleTrans.c_str() );
   histTrans->SetYTitle( "events" );
+  legTrans  = new TLegend( gStyle->GetPadLeftMargin() + 0.025, 0.75, 0.4, 0.975 - gStyle->GetPadTopMargin() );
+  legTrans->SetFillColor( gStyle->GetPadColor() );
+  legTrans->SetHeader( histTrans->GetTitle() );
   const std::string nameTransMapPt( nameTrans + "_Map_Pt" );
   histTransMapPt = new TH2D( nameTransMapPt.c_str(), objCat.c_str(), nPtBins, ptBins.data(), nPtBinsHistos, meanTrans - rangeTrans, meanTrans + rangeTrans );
   histTransMapPt->SetXTitle( titlePt.c_str() );
@@ -76,6 +93,10 @@ my::HistosTransEta::HistosTransEta( const std::string& objCat, const std::string
     histPtTrans->SetXTitle( titleTrans.c_str() );
     histPtTrans->SetYTitle( "events" );
     histVecPtTrans.push_back( histPtTrans );
+    TLegend* legPtTrans( new TLegend( gStyle->GetPadLeftMargin() + 0.025, 0.75, 0.4, 0.975 - gStyle->GetPadTopMargin() ) );
+    legPtTrans->SetFillColor( gStyle->GetPadColor() );
+    legPtTrans->SetHeader( histPtTrans->GetTitle() );
+    legVecPtTrans.push_back( legPtTrans );
   }
 }
 
@@ -174,6 +195,9 @@ my::HistosDependency::HistosDependency( const std::string& objCat, const std::st
   histPtProb = new TH1D( namePtFitMapProb.c_str(), titlePtFitMapProb.c_str(), nPtBins, ptBins.data() );
   histPtProb->SetXTitle( titlePt.c_str() );
   histPtProb->SetYTitle( "log_{10}(prob.)" );
+  legPtProb  = new TLegend( gStyle->GetPadLeftMargin() + 0.025, 0.75, 0.4, 0.975 - gStyle->GetPadTopMargin() );
+  legPtProb->SetFillColor( gStyle->GetPadColor() );
+  legPtProb->SetHeader( histPtProb->GetTitle() );
 
   for ( unsigned uPar = 0; uPar < nPar; ++uPar ) {
     const std::string parFit( boost::lexical_cast< std::string >( uPar ) );
@@ -182,5 +206,9 @@ my::HistosDependency::HistosDependency( const std::string& objCat, const std::st
     TH1D * histPtPar( new TH1D( namePtFitMap.c_str(), titlePtFitMap.c_str(), nPtBins, ptBins.data() ) );
     histPtPar->SetXTitle( titlePt.c_str() );
     histVecPtPar.push_back( histPtPar );
+    TLegend* legPtPar( new TLegend( gStyle->GetPadLeftMargin() + 0.025, 0.75, 0.4, 0.975 - gStyle->GetPadTopMargin() ) );
+    legPtPar->SetFillColor( gStyle->GetPadColor() );
+    legPtPar->SetHeader( histPtPar->GetTitle() );
+    legVecPtPar.push_back( legPtPar );
   }
 }

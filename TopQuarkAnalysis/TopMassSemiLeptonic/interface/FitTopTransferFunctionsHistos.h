@@ -8,6 +8,7 @@
 #include <TROOT.h>
 #include <TH1D.h>
 #include <TH2D.h>
+#include <TLegend.h>
 
 
 namespace my {
@@ -16,10 +17,12 @@ namespace my {
 
     std::string name;
 
-    TH1D* histTrans;
-    TH2D* histTransMapPt;
+    TH1D*    histTrans;
+    TLegend* legTrans;
+    TH2D*    histTransMapPt;
     // Per pt bin
-    std::vector< TH1D* > histVecPtTrans;
+    std::vector< TH1D* >    histVecPtTrans;
+    std::vector< TLegend* > legVecPtTrans;
 
     HistosTransEta() {};
     HistosTransEta( const HistosTransEta& histosTransEta, const std::string& baseName, const std::string& baseTitlePt, bool scale = false );
@@ -51,10 +54,11 @@ namespace my {
 
     std::string name;
 
-
-    TH1D* histPtProb;
+    TH1D*    histPtProb;
+    TLegend* legPtProb;
     // Per parameter
-    std::vector< TH1D* > histVecPtPar;
+    std::vector< TH1D* >    histVecPtPar;
+    std::vector< TLegend* > legVecPtPar;
 
     HistosDependency() {};
     explicit HistosDependency( const std::string& objCat, const std::string& baseName, const unsigned nPtBins, const std::vector< Double_t >& ptBins, const unsigned nPar, const std::string& baseTitlePt, const std::string& titlePt );

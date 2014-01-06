@@ -460,8 +460,10 @@ std::string TransferFunction::Print( bool only1D, bool useNan ) const
   print << std::endl;
   if ( FitFunction().empty() ) print << "FitFunction       : \t" << ( FitFunctionString().empty() ? "[undetermined]" : FitFunctionString() ) << "\t(constructed from C++ class)" << std::endl;
   else                         print << "FitFunction       : \t" << FitFunction() << std::endl;
-  if ( DependencyFunction().empty() ) print << "DependencyFunction: \t" << ( DependencyFunctionString().empty() ? "[undetermined]" : DependencyFunctionString() ) << "\t(constructed from C++ class) \ton " << Dependency() << std::endl;
-  else                                print << "DependencyFunction: \t" << DependencyFunction() << " \ton " << Dependency() << std::endl;
+  if ( ! only1D ) {
+    if ( DependencyFunction().empty() ) print << "DependencyFunction: \t" << ( DependencyFunctionString().empty() ? "[undetermined]" : DependencyFunctionString() ) << "\t(constructed from C++ class) \ton " << Dependency() << std::endl;
+    else                                print << "DependencyFunction: \t" << DependencyFunction() << " \ton " << Dependency() << std::endl;
+  }
   print << "Comment           : \t" << Comment() << std::endl << std::endl;
 
   print << "Parameters 1D:" << std::endl;

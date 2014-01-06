@@ -8,8 +8,8 @@ import FWCore.ParameterSet.Config as cms
 era    = 'Summer11-coarseEta'
 #era    = 'Summer11-coarsePt'
 # Input sample
-#sample = 'Summer12_MadGraph_L3_unambiguousOnly'
-sample = 'Summer12_MCatNLO_L3_unambiguousOnly'
+sample = 'Summer12_MadGraph_L3_unambiguousOnly'
+#sample = 'Summer12_MCatNLO_L3_unambiguousOnly'
 
 ### Contstants ###
 
@@ -42,15 +42,15 @@ fitTopTransferFunctions = cms.PSet(
 )
 
 fitTopTransferFunctions.io = cms.PSet(
-  fullStats    = cms.bool( True )
+  fullStats    = cms.bool( False )
 , sample       = cms.string( sample )
 , inputFile    = cms.string( '' ) # defined below
 , refSel       = cms.bool( True )
 , usePileUp    = cms.bool( False )
 , pileUp       = cms.string( 'PileUpWeightTrue' ) # 'PileUpWeightTrue' or 'PileUpWeightObserved'
 , outputFile   = cms.string( '' ) # defined below
-, writeFiles   = cms.bool( True )
-, writeFilesPt = cms.bool( True )
+, writeFiles   = cms.bool( False )
+, writeFilesPt = cms.bool( False )
 , pathOut      = cms.string( '' ) # defined below
 , plot         = cms.bool( True )
 , pathPlots    = cms.string( '' ) # defined below
@@ -67,7 +67,7 @@ fitTopTransferFunctions.objects = cms.PSet(
   , fitFunction        = cms.string( dGauss )
   , dependencyFunction = cms.string( squared )
   , resolutionFunction = cms.string( resolution )
-  , fitEtaBins         = cms.bool( True )
+  , fitEtaBins         = cms.bool( False )
   , fitMaxPt           = cms.double( 999999. )
   , fitRange           = cms.double( 5.0 ) # if not 'sGauss', should be widthFactor
   , fitOptions         = cms.string( fitOptions )
@@ -75,25 +75,25 @@ fitTopTransferFunctions.objects = cms.PSet(
   , exclude            = cms.vuint32(  ) # MadGraph
   #, exclude            = cms.vuint32(  ) # MC@NLO
   )
-, BJet = cms.PSet(
-  #BJet = cms.PSet(
-    deltaPtBins        = cms.uint32( 50 )
-  , deltaPtMax         = cms.double( 50. )
-  , widthFactor        = cms.double( 5.0 )
-  , minPt              = cms.double( 0.0 )
-  , maxEta             = cms.double( 999999. )
-  , maxDR              = cms.double( 0.1 )
-  , fitFunction        = cms.string( dGauss )
-  , dependencyFunction = cms.string( squared )
-  , resolutionFunction = cms.string( resolution )
-  , fitEtaBins         = cms.bool( True )
-  , fitMaxPt           = cms.double( 999999. )
-  , fitRange           = cms.double( 5.0 ) # if not 'sGauss', should be widthFactor
-  , fitOptions         = cms.string( fitOptions )
-  , minEntriesFactor   = cms.uint32( 5 )
-  , exclude            = cms.vuint32(  ) # MadGraph
-  #, exclude            = cms.vuint32(  ) # MC@NLO
-  )
+#, BJet = cms.PSet(
+  ##BJet = cms.PSet(
+    #deltaPtBins        = cms.uint32( 50 )
+  #, deltaPtMax         = cms.double( 50. )
+  #, widthFactor        = cms.double( 5.0 )
+  #, minPt              = cms.double( 0.0 )
+  #, maxEta             = cms.double( 999999. )
+  #, maxDR              = cms.double( 0.1 )
+  #, fitFunction        = cms.string( dGauss )
+  #, dependencyFunction = cms.string( squared )
+  #, resolutionFunction = cms.string( resolution )
+  #, fitEtaBins         = cms.bool( True )
+  #, fitMaxPt           = cms.double( 999999. )
+  #, fitRange           = cms.double( 5.0 ) # if not 'sGauss', should be widthFactor
+  #, fitOptions         = cms.string( fitOptions )
+  #, minEntriesFactor   = cms.uint32( 5 )
+  #, exclude            = cms.vuint32(  ) # MadGraph
+  ##, exclude            = cms.vuint32(  ) # MC@NLO
+  #)
 #, Mu = cms.PSet(
     #deltaPtBins        = cms.uint32( 50 )
   #, deltaPtMax         = cms.double( 50. )

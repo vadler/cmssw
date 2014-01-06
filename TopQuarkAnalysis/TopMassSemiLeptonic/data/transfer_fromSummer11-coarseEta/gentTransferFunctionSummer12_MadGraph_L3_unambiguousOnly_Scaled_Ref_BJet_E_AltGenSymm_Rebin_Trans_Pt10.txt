@@ -1,10 +1,8 @@
 for 200 GeV <= E < 300 GeV
 --------------------------------------------------------------------------------
 
-
 FitFunction       : 	[0]*(exp(-0.5*((x-[1])/[2])**2)+[3]*exp(-0.5*((x-[4])/[5])**2))/(([2]+[3]*[5])*sqrt(2*pi))	(constructed from C++ class)
-DependencyFunction: 	[0]+[1]*x+[2]*x**2	(constructed from C++ class) 	on E^{GEN} (GeV)_parton
-Comment           : 	E_parton <= 999999, E_parton >= 0, DeltaR(parton, reco) <= 0.1
+Comment           : 	E_parton <= 999999, E_parton >= 0, DeltaR(parton, reco) <= 0.1, minEntries / bins: 5
 
 Parameters 1D:
 [0]: 	1.00752+-0.00597705

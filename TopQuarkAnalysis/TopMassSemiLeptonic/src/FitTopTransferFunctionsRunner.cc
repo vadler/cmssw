@@ -216,7 +216,7 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
   if ( verbose_ > 1 ) {
     std::cout << std::endl
               << myName_ << " --> INFO:" << std::endl
-              << "    filling for object categorie " << objCat << std::endl;
+              << "    filling for object category " << objCat << std::endl;
   }
 
   // Get object configuration
@@ -422,7 +422,7 @@ bool FitTopTransferFunctionsRunner::fitPerCategory( unsigned uCat )
   if ( verbose_ > 1 ) {
     std::cout << std::endl
               << myName_ << " --> INFO:" << std::endl
-              << "    fitting for object categorie " << objCat << std::endl;
+              << "    fitting for object category " << objCat << std::endl;
   }
 
   // Get object configuration
@@ -714,11 +714,21 @@ void FitTopTransferFunctionsRunner::fitPerCategoryBin( const std::string& objCat
   HistosDependency histosDependency( objCat, histosTransEta.name, objectData_.back().nPtBins(), objectData_.back().ptBins(), transfer.NParFit(), baseTitlePt_, titlePt_ );
 
   // Fit
-  fitPerCategoryFit( transfer,  histosTransEta.histTrans, 0, -1, scale );
+  fitPerCategoryFit( transfer, histosTransEta.histTrans, 0, -1, scale );
   for ( unsigned uPt = 0; uPt < histosTransEta.histVecPtTrans.size(); ++uPt ) {
     fitPerCategoryFit( transferColl.at( uPt ), histosTransEta.histVecPtTrans.at( uPt ), &histosDependency, uPt, scale );
   }
   histosVecDependency.push_back( histosDependency );
+
+  // Plot
+  if ( plot_ ) {
+    TCanvas canvas;
+    histosDependency.histPtProb->Draw();
+    const std::string entryHisto( "from " + titlePtT_ + " bins" );
+    histosDependency.legPtProb->AddEntry( histosDependency.histPtProb, entryHisto.c_str(), "F" );
+    histosDependency.legPtProb->Draw();
+    canvas.Print( std::string( pathPlots_ + histosDependency.histPtProb->GetName() + ".png" ).c_str() );
+  }
 }
 
 
@@ -787,7 +797,7 @@ bool FitTopTransferFunctionsRunner::dependencyPerCategory( unsigned uCat )
   if ( verbose_ > 1 ) {
     std::cout << std::endl
               << myName_ << " --> INFO:" << std::endl
-              << "    Dependency fitting for object categorie " << objCat << std::endl;
+              << "    Dependency fitting for object category " << objCat << std::endl;
   }
 
   // Fitting unscaled distribution
@@ -869,6 +879,11 @@ void FitTopTransferFunctionsRunner::dependencyPerCategoryBin( const std::string&
     if ( plot_ ) {
       TCanvas canvas;
       histosDependency.histVecPtPar.at( uPar )->Draw();
+      const std::string entryHisto( "from " + titlePtT_ + " bins" );
+      histosDependency.legVecPtPar.at( uPar )->AddEntry( histosDependency.histVecPtPar.at( uPar ), entryHisto.c_str(), "LEP" );
+      const std::string entryFit( "fitted " + titlePtT_ + " dependency" );
+      histosDependency.legVecPtPar.at( uPar )->AddEntry( fitDep, entryFit.c_str(), "L" );
+      histosDependency.legVecPtPar.at( uPar )->Draw();
       canvas.Print( std::string( pathPlots_ + histosDependency.histVecPtPar.at( uPar )->GetName() + ".png" ).c_str() );
     }
   }
@@ -883,7 +898,7 @@ bool FitTopTransferFunctionsRunner::transferPerCategory( unsigned uCat )
   if ( verbose_ > 1 ) {
     std::cout << std::endl
               << myName_ << " --> INFO:" << std::endl
-              << "    Transfer function determination for object categorie " << objCat << std::endl;
+              << "    Transfer function determination for object category " << objCat << std::endl;
   }
 
   // Fitting unscaled distribution
@@ -964,8 +979,25 @@ void FitTopTransferFunctionsRunner::transferPerCategoryBin( const std::string& o
     TCanvas canvas;
     transferFunction->Draw( "Surf3Z" );
     canvas.Print( std::string( pathPlots_ + transferFunction->GetName() + ".png" ).c_str() );
+    histosTransEta.histTrans->Draw();
+    std::string header( histosTransEta.legTrans->GetHeader() );
+    header += ", scaled";
+    histosTransEta.legTrans->SetHeader( header.c_str() );
+    histosTransEta.legTrans->AddEntry( histosTransEta.histTrans, "MC", "LEP" );
+    histosTransEta.legTrans->AddEntry( histosTransEta.histTrans->GetListOfFunctions()->First(), "fitted 1-D transfer function", "L" );
+    histosTransEta.legTrans->Draw();
+    canvas.Print( std::string( pathPlots_ + histosTransEta.histTrans->GetName() + ".png" ).c_str() );
+
+    const std::string entryTransfer( "projected 2-D transfer function at " + titlePtT_ + " bin centre" );
     for ( unsigned uPt = 0; uPt < histosTransEta.histVecPtTrans.size(); ++uPt ) {
       histosTransEta.histVecPtTrans.at( uPt )->Draw();
+      std::string header( histosTransEta.legVecPtTrans.at( uPt )->GetHeader() );
+      header += ", scaled";
+      histosTransEta.legVecPtTrans.at( uPt )->SetHeader( header.c_str() );
+      histosTransEta.legVecPtTrans.at( uPt )->AddEntry( histosTransEta.histVecPtTrans.at( uPt ), "MC", "LEP" );
+      histosTransEta.legVecPtTrans.at( uPt )->AddEntry( histosTransEta.histVecPtTrans.at( uPt )->GetListOfFunctions()->First(), "fitted 1-D transfer function", "L" );
+      histosTransEta.legVecPtTrans.at( uPt )->AddEntry( histosTransEta.histVecPtTrans.at( uPt )->GetListOfFunctions()->Last(), entryTransfer.c_str(), "L" );
+      histosTransEta.legVecPtTrans.at( uPt )->Draw();
       canvas.Print( std::string( pathPlots_ + histosTransEta.histVecPtTrans.at( uPt )->GetName() + ".png" ).c_str() );
     }
   }
@@ -980,7 +1012,7 @@ bool FitTopTransferFunctionsRunner::compatibilityPerCategory( unsigned uCat )
   if ( verbose_ > 1 ) {
     std::cout << std::endl
               << myName_ << " --> INFO:" << std::endl
-              << "    Transfer function compatibility for object categorie " << objCat << std::endl;
+              << "    Transfer function compatibility for object category " << objCat << std::endl;
   }
 
   // Fitting unscaled distribution
@@ -1111,8 +1143,27 @@ void FitTopTransferFunctionsRunner::compatibilityPerCategoryBin( const std::stri
 
   if ( plot_ ) {
     TCanvas canvas;
+    histosTransEta.histTrans->Draw();
+    std::string header( histosTransEta.legTrans->GetHeader() );
+    header += ", unscaled";
+    histosTransEta.legTrans->SetHeader( header.c_str() );
+    histosTransEta.legTrans->AddEntry( histosTransEta.histTrans, "MC", "LEP" );
+    histosTransEta.legTrans->Draw();
+    canvas.Print( std::string( pathPlots_ + histosTransEta.histTrans->GetName() + ".png" ).c_str() );
+
+    const std::string entryTransfer( "projected 2-D transfer function at " + titlePtT_ + " bin centre" );
     for ( unsigned uPt = 0; uPt < histosTransEta.histVecPtTrans.size(); ++uPt ) {
       histosTransEta.histVecPtTrans.at( uPt )->Draw();
+      std::string header( histosTransEta.legVecPtTrans.at( uPt )->GetHeader() );
+      header += ", unscaled";
+      histosTransEta.legVecPtTrans.at( uPt )->SetHeader( header.c_str() );
+      histosTransEta.legVecPtTrans.at( uPt )->AddEntry( histosTransEta.histVecPtTrans.at( uPt ), "MC", "LEP" );
+      histosTransEta.legVecPtTrans.at( uPt )->AddEntry( histosTransEta.histVecPtTrans.at( uPt )->GetListOfFunctions()->Last(), entryTransfer.c_str(), "L" );
+      const std::string entryChi2( "#Chi^{2} prob.: " + boost::lexical_cast< std::string >( pChi2Vec.at( uPt ) ) );
+      histosTransEta.legVecPtTrans.at( uPt )->AddEntry( (TObject*)0, entryChi2.c_str(), "" );
+      const std::string entryKS( "KS prob.: " + boost::lexical_cast< std::string >( pKSVec.at( uPt ) ) );
+      histosTransEta.legVecPtTrans.at( uPt )->AddEntry( (TObject*)0, entryKS.c_str(), "" );
+      histosTransEta.legVecPtTrans.at( uPt )->Draw();
       canvas.Print( std::string( pathPlots_ + histosTransEta.histVecPtTrans.at( uPt )->GetName() + ".png" ).c_str() );
     }
   }
@@ -1136,7 +1187,7 @@ bool FitTopTransferFunctionsRunner::writeFilesPerCategory( unsigned uCat )
   if ( verbose_ > 1 ) {
     std::cout << std::endl
               << myName_ << " --> INFO:" << std::endl
-              << "    Writing files for object categorie " << objCat << std::endl
+              << "    Writing files for object category " << objCat << std::endl
               << "        to " << pathOut_ << std::endl;
   }
 

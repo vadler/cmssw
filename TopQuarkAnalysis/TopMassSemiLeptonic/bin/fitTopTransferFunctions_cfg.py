@@ -54,6 +54,13 @@ fitTopTransferFunctions.io = cms.PSet(
 , pathOut      = cms.string( '' ) # defined below
 , plot         = cms.bool( True )
 , pathPlots    = cms.string( '' ) # defined below
+, formatPlots  = cms.vstring( 'png'
+                            , 'pdf'
+                            #, 'ps'
+                            #, 'eps'
+                            #, 'jpg'
+                            #, 'gif'
+                            )
 )
 
 fitTopTransferFunctions.objects = cms.PSet(

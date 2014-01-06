@@ -66,6 +66,7 @@ FitTopTransferFunctionsRunner::FitTopTransferFunctionsRunner( const std::string&
   pathOut_      = configIO.getParameter< std::string >( "pathOut" );
   plot_         = configIO.getParameter< bool >( "plot" );
   pathPlots_    = configIO.getParameter< std::string >( "pathPlots" );
+  formatPlots_  = configIO.getParameter< std::vector< std::string > >( "formatPlots" );
 
   // Set up ROOT
   setPlotEnvironment( gStyle );
@@ -401,16 +402,16 @@ void FitTopTransferFunctionsRunner::fillPerCategoryBin( unsigned uEta, HistosTra
     } // loop: uEntry < objectData_.back().sizePt( uEta, uPt )
     if ( plot_ ) {
       histosTrans.histVecPtTransMapEta.at( uPt )->Draw();
-      canvas.Print( std::string( pathPlots_ + histosTrans.histVecPtTransMapEta.at( uPt )->GetName() + ".png" ).c_str() );
+      for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosTrans.histVecPtTransMapEta.at( uPt )->GetName() + "." + formatPlots_.at( uForm ) ).c_str() );
     }
   } // loop:uPt < nPtBins
   if ( plot_ ) {
     histosTransEta.histTransMapPt->Draw();
-    canvas.Print( std::string( pathPlots_ + histosTransEta.histTransMapPt->GetName() + ".png" ).c_str() );
+    for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosTransEta.histTransMapPt->GetName() + "." + formatPlots_.at( uForm )  ).c_str() );
     histosTrans.histTransMapPt->Draw();
-    canvas.Print( std::string( pathPlots_ + histosTrans.histTransMapPt->GetName() + ".png" ).c_str() );
+    for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosTrans.histTransMapPt->GetName() + "." + formatPlots_.at( uForm )  ).c_str() );
     histosTrans.histTransMapEta->Draw();
-    canvas.Print( std::string( pathPlots_ + histosTrans.histTransMapEta->GetName() + ".png" ).c_str() );
+    for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosTrans.histTransMapEta->GetName() + "." + formatPlots_.at( uForm )  ).c_str() );
   }
 }
 
@@ -727,7 +728,7 @@ void FitTopTransferFunctionsRunner::fitPerCategoryBin( const std::string& objCat
     const std::string entryHisto( "from " + titlePtT_ + " bins" );
     histosDependency.legPtProb->AddEntry( histosDependency.histPtProb, entryHisto.c_str(), "F" );
     histosDependency.legPtProb->Draw();
-    canvas.Print( std::string( pathPlots_ + histosDependency.histPtProb->GetName() + ".png" ).c_str() );
+    for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosDependency.histPtProb->GetName() + "." + formatPlots_.at( uForm ) ).c_str() );
   }
 }
 
@@ -785,7 +786,7 @@ void FitTopTransferFunctionsRunner::fitPerCategoryFit( TransferFunction& transfe
 //   if ( plot_ ) {
 //     TCanvas canvas;
 //     histoTrans->Draw();
-//     canvas.Print( std::string( pathPlots_ + histoTrans->GetName() + ".png" ).c_str() );
+//     for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histoTrans->GetName() + "." + formatPlots_.at( uForm ) ).c_str() );
 //   }
 }
 
@@ -884,7 +885,7 @@ void FitTopTransferFunctionsRunner::dependencyPerCategoryBin( const std::string&
       const std::string entryFit( "fitted " + titlePtT_ + " dependency" );
       histosDependency.legVecPtPar.at( uPar )->AddEntry( fitDep, entryFit.c_str(), "L" );
       histosDependency.legVecPtPar.at( uPar )->Draw();
-      canvas.Print( std::string( pathPlots_ + histosDependency.histVecPtPar.at( uPar )->GetName() + ".png" ).c_str() );
+      for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosDependency.histVecPtPar.at( uPar )->GetName() + "." + formatPlots_.at( uForm ) ).c_str() );
     }
   }
 
@@ -978,7 +979,7 @@ void FitTopTransferFunctionsRunner::transferPerCategoryBin( const std::string& o
   if ( plot_ ) {
     TCanvas canvas;
     transferFunction->Draw( "Surf3Z" );
-    canvas.Print( std::string( pathPlots_ + transferFunction->GetName() + ".png" ).c_str() );
+    for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + transferFunction->GetName() + "." + formatPlots_.at( uForm ) ).c_str() );
     histosTransEta.histTrans->Draw();
     std::string header( histosTransEta.legTrans->GetHeader() );
     header += ", scaled";
@@ -986,7 +987,7 @@ void FitTopTransferFunctionsRunner::transferPerCategoryBin( const std::string& o
     histosTransEta.legTrans->AddEntry( histosTransEta.histTrans, "MC", "LEP" );
     histosTransEta.legTrans->AddEntry( histosTransEta.histTrans->GetListOfFunctions()->First(), "fitted 1-D transfer function", "L" );
     histosTransEta.legTrans->Draw();
-    canvas.Print( std::string( pathPlots_ + histosTransEta.histTrans->GetName() + ".png" ).c_str() );
+    for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosTransEta.histTrans->GetName() + "." + formatPlots_.at( uForm ) ).c_str() );
 
     const std::string entryTransfer( "projected 2-D transfer function at " + titlePtT_ + " bin centre" );
     for ( unsigned uPt = 0; uPt < histosTransEta.histVecPtTrans.size(); ++uPt ) {
@@ -998,7 +999,7 @@ void FitTopTransferFunctionsRunner::transferPerCategoryBin( const std::string& o
       histosTransEta.legVecPtTrans.at( uPt )->AddEntry( histosTransEta.histVecPtTrans.at( uPt )->GetListOfFunctions()->First(), "fitted 1-D transfer function", "L" );
       histosTransEta.legVecPtTrans.at( uPt )->AddEntry( histosTransEta.histVecPtTrans.at( uPt )->GetListOfFunctions()->Last(), entryTransfer.c_str(), "L" );
       histosTransEta.legVecPtTrans.at( uPt )->Draw();
-      canvas.Print( std::string( pathPlots_ + histosTransEta.histVecPtTrans.at( uPt )->GetName() + ".png" ).c_str() );
+      for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosTransEta.histVecPtTrans.at( uPt )->GetName() + "." + formatPlots_.at( uForm ) ).c_str() );
     }
   }
 
@@ -1149,7 +1150,7 @@ void FitTopTransferFunctionsRunner::compatibilityPerCategoryBin( const std::stri
     histosTransEta.legTrans->SetHeader( header.c_str() );
     histosTransEta.legTrans->AddEntry( histosTransEta.histTrans, "MC", "LEP" );
     histosTransEta.legTrans->Draw();
-    canvas.Print( std::string( pathPlots_ + histosTransEta.histTrans->GetName() + ".png" ).c_str() );
+    for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosTransEta.histTrans->GetName() + "." + formatPlots_.at( uForm ) ).c_str() );
 
     const std::string entryTransfer( "projected 2-D transfer function at " + titlePtT_ + " bin centre" );
     for ( unsigned uPt = 0; uPt < histosTransEta.histVecPtTrans.size(); ++uPt ) {
@@ -1164,7 +1165,7 @@ void FitTopTransferFunctionsRunner::compatibilityPerCategoryBin( const std::stri
       const std::string entryKS( "KS prob.: " + boost::lexical_cast< std::string >( pKSVec.at( uPt ) ) );
       histosTransEta.legVecPtTrans.at( uPt )->AddEntry( (TObject*)0, entryKS.c_str(), "" );
       histosTransEta.legVecPtTrans.at( uPt )->Draw();
-      canvas.Print( std::string( pathPlots_ + histosTransEta.histVecPtTrans.at( uPt )->GetName() + ".png" ).c_str() );
+      for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosTransEta.histVecPtTrans.at( uPt )->GetName() + "." + formatPlots_.at( uForm ) ).c_str() );
     }
   }
 

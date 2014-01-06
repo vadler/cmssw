@@ -17,6 +17,7 @@ fitTopTransferFunctions = cms.PSet(
         usePileUp = cms.bool(False),
         sample = cms.string('Summer12_MadGraph_L3_unambiguousOnly'),
         pathPlots = cms.string('/afs/cern.ch/work/v/vadler/cms/Top/CMSSW_5_3_13/output/plots/fitTopTransferFunctions/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MadGraph_L3_unambiguousOnly_Ref_'),
+        formatPlots = cms.vstring('png', 'pdf'),
         pileUp = cms.string('PileUpWeightTrue'),
         writeFilesPt = cms.bool(True),
         fullStats = cms.bool(True),

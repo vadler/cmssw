@@ -40,6 +40,7 @@ namespace my {
       std::string                pathOut_;
       bool                       plot_;
       std::string                pathPlots_;
+      std::vector< std::string > formatPlots_;
       std::vector< std::string > objCats_;
       std::string                fitFuncID_;
       std::string                depFuncID_;

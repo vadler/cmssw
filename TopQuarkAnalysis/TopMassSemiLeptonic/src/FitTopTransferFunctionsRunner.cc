@@ -846,27 +846,36 @@ void FitTopTransferFunctionsRunner::dependencyPerCategoryLoop( const std::string
 void FitTopTransferFunctionsRunner::dependencyPerCategoryBin( const std::string& objCat, TDirectory* dirOut, TransferFunction& transfer, HistosDependency& histosDependency, bool scale )
 {
   const Int_t nParFit( fitFunction_->GetNpar() );
-  const Int_t nParDep( dependencyFunction_->GetNpar() );
   for ( Int_t uPar = 0; uPar < nParFit; ++uPar ) {
     const std::string parFit( boost::lexical_cast< std::string >( uPar ) );
     const std::string nameDep( histosDependency.histVecPtPar.at( uPar )->GetName() );
     const std::string nameDepFit( nameDep + "_fit" );
-    TF1* fitDep( new TF1( nameDepFit.c_str(), dependencyFunction_, objectData_.back().ptBins().front(), fitMaxPt_, nParDep ) );
-    initialiseDependencyParameters( fitDep, histosDependency.histVecPtPar.at( uPar ), depFuncID_ );
-    TFitResultPtr fitDepResultPtr( histosDependency.histVecPtPar.at( uPar )->Fit( fitDep, fitOptions_.c_str() ) );
-    if ( fitDepResultPtr >= 0 ) {
-      if ( fitDepResultPtr->Status() == 0 && fitDepResultPtr->Ndf() != 0. ) {
+    Int_t nParDep;
+    TF1* fitFunc;
+    if ( transfer.SigmaPars().find( uPar ) == transfer.SigmaPars().end() ) {
+      nParDep = dependencyFunction_->GetNpar();
+      fitFunc = new TF1( nameDepFit.c_str(), dependencyFunction_, objectData_.back().ptBins().front(), fitMaxPt_, nParDep );
+      initialiseDependencyParameters( fitFunc, histosDependency.histVecPtPar.at( uPar ), depFuncID_ );
+    }
+    else {
+      nParDep = resolutionFunction_->GetNpar();
+      fitFunc = new TF1( nameDepFit.c_str(), resolutionFunction_, objectData_.back().ptBins().front(), fitMaxPt_, nParDep );
+      initialiseDependencyParameters( fitFunc, histosDependency.histVecPtPar.at( uPar ), resFuncID_ );
+    }
+    TFitResultPtr fitResultPtr( histosDependency.histVecPtPar.at( uPar )->Fit( fitFunc, fitOptions_.c_str() ) );
+    if ( fitResultPtr >= 0 ) {
+      if ( fitResultPtr->Status() == 0 && fitResultPtr->Ndf() != 0. ) {
         for ( Int_t uDep = 0; uDep < nParDep; ++uDep ) {
-          transfer.SetParameter( uPar, uDep, fitDep->GetParameter( uDep ) );
-          transfer.SetError( uPar, uDep, fitDep->GetParError( uDep ) );
+          transfer.SetParameter( uPar, uDep, fitFunc->GetParameter( uDep ) );
+          transfer.SetError( uPar, uDep, fitFunc->GetParError( uDep ) );
         }
       }
       else {
         if ( verbose_ > 0 ) {
           std::cout << myName_ << " --> WARNING:" << std::endl
                     << "    failing fit in directory '"; dirOut->pwd();
-          if ( fitDepResultPtr->Status() != 0 ) std::cout << "    '" << nameDep << "' status " << fitDepResultPtr->Status() << std::endl;
-          if ( fitDepResultPtr->Ndf() == 0. )   std::cout << "    '" << nameDep << "' ndf    " << fitDepResultPtr->Ndf()    << std::endl;
+          if ( fitResultPtr->Status() != 0 ) std::cout << "    '" << nameDep << "' status " << fitResultPtr->Status() << std::endl;
+          if ( fitResultPtr->Ndf() == 0. )   std::cout << "    '" << nameDep << "' ndf    " << fitResultPtr->Ndf()    << std::endl;
         }
       }
     }
@@ -883,7 +892,7 @@ void FitTopTransferFunctionsRunner::dependencyPerCategoryBin( const std::string&
       const std::string entryHisto( "from " + titlePtT_ + " bins" );
       histosDependency.legVecPtPar.at( uPar )->AddEntry( histosDependency.histVecPtPar.at( uPar ), entryHisto.c_str(), "LEP" );
       const std::string entryFit( "fitted " + titlePtT_ + " dependency" );
-      histosDependency.legVecPtPar.at( uPar )->AddEntry( fitDep, entryFit.c_str(), "L" );
+      histosDependency.legVecPtPar.at( uPar )->AddEntry( fitFunc, entryFit.c_str(), "L" );
       histosDependency.legVecPtPar.at( uPar )->Draw();
       for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosDependency.histVecPtPar.at( uPar )->GetName() + "." + formatPlots_.at( uForm ) ).c_str() );
     }

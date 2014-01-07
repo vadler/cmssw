@@ -141,7 +141,7 @@ namespace my {
 
         // Transfer function
         const std::string part( refGen_ ? "_parton" : "_reco" );
-        TransferFunction transfer( fitFunction, FitFuncType::SigmaPars(), dependencyFunction, resolutionFunction, std::string( titlePt_ + part ) ); // FIXME: does not take separate resolution function yet
+        TransferFunction transfer( fitFunction, FitFuncType::SigmaPars(), dependencyFunction, resolutionFunction, std::string( titlePtT_ + part ) ); // FIXME: does not take separate resolution function yet
         transfer.SetFitFunctionString( FitFuncType::String() );
         transfer.SetDependencyFunctionString( DepFuncType::String() );
         transfer.SetResolutionFunctionString( ResFuncType::String() );

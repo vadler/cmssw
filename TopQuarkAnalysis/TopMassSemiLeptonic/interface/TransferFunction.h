@@ -245,7 +245,7 @@ namespace my {
       std::string FitFunctionString() const { return fitFunctionString_; };
 
       /// Get the number of parameters in the fit function.
-      unsigned NParFit() const { return fitFunction_.GetNpar(); }; // FIXME
+      unsigned NParFit() const { return fitFunction_.GetNpar(); };
 
       /// Get the dependency function.
       TF1 GetDependencyFunction() const { return dependencyFunction_; };
@@ -259,7 +259,7 @@ namespace my {
       std::string DependencyFunctionString() const { return dependencyFunctionString_; };
 
       /// Get the number of parameters in the dependency function.
-      unsigned NParDependency() const { return dependencyFunction_.GetNpar(); }; // FIXME
+      unsigned NParDependency() const { return dependencyFunction_.GetNpar(); };
 
       /// Get the resolution function.
       TF1 GetResolutionFunction() const { return resolutionFunction_; };
@@ -273,7 +273,7 @@ namespace my {
       std::string ResolutionFunctionString() const { return resolutionFunctionString_; };
 
       /// Get the number of parameters in the dependency function.
-      unsigned NParResolution() const { return resolutionFunction_.GetNpar(); }; // FIXME
+      unsigned NParResolution() const { return resolutionFunction_.GetNpar(); };
 
       /// Get the name of the dependency variable.
       std::string Dependency() const { return dependency_; };
@@ -334,13 +334,16 @@ namespace my {
       /// data members).
       std::string Formula( double dependencyValue, int norm = 0 ) const;
 
-      /// Get the  numerical value of the 1D fit function for given values of
+      /// Get the numerical value of the 1D fit function for given values of
       /// the fit variable.
       double Eval( double value, int norm = 0 ) const;
 
-      /// Get the  numerical value of the 2D fit function for given values of
+      /// Get the numerical value of the 2D fit function for given values of
       /// the fit and dependency variables.
       double Eval( double dependencyValue, double value, int norm = 0 ) const;
+
+      /// Get the 1D fit function for given values of the dependency variable.
+      TF1 GetFitFunction( double dependencyValue, int norm = 0 ) const;
 
       ///
 //       double Sigma() const { return Parameter( 2 ) + Parameter( 3 ) * Parameter( 5 ); };

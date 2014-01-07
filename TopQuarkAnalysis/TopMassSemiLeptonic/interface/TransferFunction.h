@@ -54,14 +54,24 @@ namespace my {
       std::string fitFunctionString_;
 
       /// Dependency function
-      /// Function to be fit distributions of fit parameters for the fit
-      /// function over a dependency variable.
+      /// Function to be fit to distributions of fit parameters from the fit
+      /// function over the dependency variable.
       TF1 dependencyFunction_;
 
       /// Dependency function string
       /// Holds string representing the dependency function if constructed from
       /// C++ class.
       std::string dependencyFunctionString_;
+
+      /// Resolution function
+      /// Function to be fit to distributions of resolution parameters from the fit
+      /// function over the dependency variable.
+      TF1 resolutionFunction_;
+
+      /// Resolution function string
+      /// Holds string representing the resolution function if constructed from
+      /// C++ class.
+      std::string resolutionFunctionString_;
 
       /// Name of the dependency variable (e.g. "E_parton", "eta").
       std::string dependency_;
@@ -70,6 +80,9 @@ namespace my {
       /// This string is added to the Print() output, describing e.g. applied
       /// cuts etc.
       std::string comment_;
+
+      /// List of resolution parameter indices
+      std::vector< int > sigmaPars_;
 
       /// Parameter vector for 1D
       /// It holds the results of the fit of the fit function, independently
@@ -90,19 +103,19 @@ namespace my {
       ///
 
       /// Default constructor
-      TransferFunction() { TransferFunction( "" ); };
+      TransferFunction() { TransferFunction( "", std::vector< int >() ); };
 
       /// Constructor from TransferFunction (copy c'tor)
-      TransferFunction( const TransferFunction & transfer );
+      TransferFunction( const TransferFunction& transfer );
 
       /// Constructor from strings
       /// Functions are entered in the format for filling a TFormula
-      TransferFunction( const std::string & fitFunction, const std::string & dependencyFunction = "0", const std::string & dependency = "x" );
+      TransferFunction( const std::string& fitFunction, const std::vector< int >& sigmaPars, const std::string& dependencyFunction = "0", const std::string& resolutionFunction = "0", const std::string& dependency = "x" );
 
       /// Constructor from TF1s
       /// TFormula members of the TF1s are possibly empty (e.g. TF1 from
       /// functor).
-      TransferFunction( TF1 * fitFunction, TF1 * dependencyFunction, const std::string & dependency = "x" );
+      TransferFunction( TF1* fitFunction, const std::vector< int >& sigmaPars, TF1* dependencyFunction, TF1* resolutionFunction, const std::string& dependency = "x" );
 
       /// Destructor
       virtual ~TransferFunction() {};
@@ -119,7 +132,7 @@ namespace my {
       /// The corresponding parameter vectors are resized according to the
       /// number of function parameters. If 'clear' is 'false', the existing
       /// values are not overwritten.
-      void SetFitFunction( const std::string & fitFunctionString, bool clear = true );
+      void SetFitFunction( const std::string& fitFunctionString, const std::vector< int >& sigmaPars, bool clear = true );
 
       /// Set the fit function.
       /// TFormula members of the TF1s are possibly empty (e.g. TF1 from
@@ -127,11 +140,11 @@ namespace my {
       /// The corresponding parameter vectors are resized according to the
       /// number of function parameters. If 'clear' is 'false', the existing
       /// values are not overwritten.
-      void SetFitFunction( TF1 * fitFunction, bool clear = true );
+      void SetFitFunction( TF1* fitFunction, const std::vector< int >& sigmaPars, bool clear = true );
 
       /// Set the fit function string.
       /// This has only effect, if the original function's title is empty.
-      void SetFitFunctionString( const std::string & fitFunctionString );
+      void SetFitFunctionString( const std::string& fitFunctionString );
 
       /// Set the dependency function.
       /// The function is entered in the format for filling a TFormula (s. data
@@ -139,7 +152,7 @@ namespace my {
       /// The corresponding vector of parameter vectors are resized according
       /// to the number of function parameters. If 'clear' is 'false', the
       /// existing values are not overwritten.
-      void SetDependencyFunction( const std::string & dependencyFunctionString, bool clear = true );
+      void SetDependencyFunction( const std::string& dependencyFunctionString, bool clear = true );
 
       /// Set the dependency function.
       /// TFormula members of the TF1s are possibly empty (e.g. TF1 from
@@ -147,17 +160,40 @@ namespace my {
       /// The corresponding vector of parameter vectors are resized according
       /// to the number of function parameters. If 'clear' is 'false', the
       /// existing values are not overwritten.
-      void SetDependencyFunction( TF1 * dependencyFunction, bool clear = true );
+      void SetDependencyFunction( TF1* dependencyFunction, bool clear = true );
 
       /// Set the dependency function string.
       /// This has only effect, if the original function's title is empty.
-      void SetDependencyFunctionString( const std::string & dependencyFunctionString );
+      void SetDependencyFunctionString( const std::string& dependencyFunctionString );
+
+      /// Set the resolution function.
+      /// The function is entered in the format for filling a TFormula (s. data
+      /// members).
+      /// The corresponding vector of parameter vectors are resized according
+      /// to the number of function parameters. If 'clear' is 'false', the
+      /// existing values are not overwritten.
+      void SetResolutionFunction( const std::string& resolutionFunctionString, bool clear = true );
+
+      /// Set the resolution function.
+      /// TFormula members of the TF1s are possibly empty (e.g. TF1 from
+      /// functor).
+      /// The corresponding vector of parameter vectors are resized according
+      /// to the number of function parameters. If 'clear' is 'false', the
+      /// existing values are not overwritten.
+      void SetResolutionFunction( TF1* resolutionFunction, bool clear = true );
+
+      /// Set the dependency function string.
+      /// This has only effect, if the original function's title is empty.
+      void SetResolutionFunctionString( const std::string& resolutionFunctionString );
 
       /// Set the name of the dependency variable (e.g. "E_parton", "eta").
-      void SetDependency( const std::string & dependency ) { dependency_ = dependency; };
+      void SetDependency( const std::string& dependency ) { dependency_ = dependency; };
 
       /// Set the comment string.
-      void SetComment( const std::string & comment ) { comment_ = comment; };
+      void SetComment( const std::string& comment ) { comment_ = comment; };
+
+      /// Set the list of resolution parameter indices.
+      void SetSigmaPars( const std::vector< int >& sigmaPars ) { sigmaPars_ = sigmaPars; };
 
       /// Set a fit parameter of the fit function, which is independent of the
       /// dependency variable.
@@ -221,7 +257,7 @@ namespace my {
       std::string FitFunctionString() const { return fitFunctionString_; };
 
       /// Get the number of parameters in the fit function.
-      unsigned NParFit() const { return pars1D_.size(); };
+      unsigned NParFit() const { return fitFunction_.GetNpar(); }; // FIXME
 
       /// Get the dependency function.
       TF1 GetDependencyFunction() const { return dependencyFunction_; };
@@ -235,13 +271,30 @@ namespace my {
       std::string DependencyFunctionString() const { return dependencyFunctionString_; };
 
       /// Get the number of parameters in the dependency function.
-      unsigned NParDependency() const { return pars2D_.size(); };
+      unsigned NParDependency() const { return dependencyFunction_.GetNpar(); }; // FIXME
+
+      /// Get the resolution function.
+      TF1 GetResolutionFunction() const { return resolutionFunction_; };
+
+      /// Get the resolution function.
+      /// The function is returned in the format for filling a TFormula (s.
+      /// data members).
+      std::string ResolutionFunction() const { return std::string( resolutionFunction_.GetTitle() ); };
+
+      /// Get the resolution function string.
+      std::string ResolutionFunctionString() const { return resolutionFunctionString_; };
+
+      /// Get the number of parameters in the dependency function.
+      unsigned NParResolution() const { return resolutionFunction_.GetNpar(); }; // FIXME
 
       /// Get the name of the dependency variable.
       std::string Dependency() const { return dependency_; };
 
       /// Get the comment string.
       std::string Comment() const { return comment_; };
+
+      /// Get the list of resolution parameter indices.
+      std::vector< int > SigmaPars() const { return sigmaPars_; };
 
       /// Get a fit parameter of the fit function, which is independent of the
       /// dependency variable.
@@ -273,7 +326,7 @@ namespace my {
       /// 'j' denotes the parameter number as defined in the dependency
       /// function string.
       /// The order of the vector elements corresponds to the parameter numbers
-      /// as defined in the fit function string. If'j' is beyond the
+      /// as defined in the fit function string. If 'j' is beyond the
       /// number of available parameters in the dependency function, an empty
       /// vector is returned.
       std::vector< double > Parameters( unsigned j ) const;
@@ -324,6 +377,10 @@ namespace my {
       /// parameters of the transfer function.
       std::string Print( bool only1D = false, bool useNan = true ) const;
 
+      /// Returns a formatted string for human readability of the dependency
+      /// or resolution function for the given parameter of the fit function.
+      std::string Print( unsigned i, bool useNan = true ) const;
+
       /// Returns a formatted string for human readability of the 1D fit
       /// function.
       std::string PrintFit1D( bool useNan = true ) const;
@@ -331,10 +388,6 @@ namespace my {
       /// Returns a formatted string for human readability of the 2D fit
       /// function.
       std::string PrintFit2D( bool useNan = true ) const;
-
-      /// Returns a formatted string for human readability of the dependency
-      /// function for the given parameter of the fit function.
-      std::string PrintDependency( unsigned i, bool useNan = true ) const;
 
       /// Creates a transfer function from a string as produced by Print().
       /// NOT IMPLEMENTED YET!

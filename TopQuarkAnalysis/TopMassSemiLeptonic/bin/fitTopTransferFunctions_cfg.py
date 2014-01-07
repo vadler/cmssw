@@ -31,14 +31,14 @@ fitOptions = 'IBRS+'
 ### Configuration ###
 
 fitTopTransferFunctions = cms.PSet(
-  verbose   = cms.uint32( 3 )
+  verbose   = cms.uint32( 10 )
 , maxEvents = cms.int32( -1 )
 , useSymm   = cms.bool( True )
 , useAlt    = cms.bool( True )
 , useNonT   = cms.bool( True )
 , refGen    = cms.bool( True )
 , scale     = cms.bool( True )
-, overwrite = cms.bool( True )
+, overwrite = cms.bool( False )
 )
 
 fitTopTransferFunctions.io = cms.PSet(
@@ -52,10 +52,10 @@ fitTopTransferFunctions.io = cms.PSet(
 , writeFiles   = cms.bool( False )
 , writeFilesPt = cms.bool( False )
 , pathOut      = cms.string( '' ) # defined below
-, plot         = cms.bool( True )
+, plot         = cms.bool( False )
 , pathPlots    = cms.string( '' ) # defined below
 , formatPlots  = cms.vstring( 'png'
-                            , 'pdf'
+                            #, 'pdf'
                             #, 'ps'
                             #, 'eps'
                             #, 'jpg'

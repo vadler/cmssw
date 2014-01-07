@@ -15,48 +15,55 @@ using namespace my;
 // Constructors and Destructor
 
 // Constructor from TransferFunction (copy c'tor)
-TransferFunction::TransferFunction( const TransferFunction & transfer )
+TransferFunction::TransferFunction( const TransferFunction& transfer )
 : fitFunction_( transfer.GetFitFunction() )
 , fitFunctionString_( transfer.FitFunctionString() )
 , dependencyFunction_( transfer.GetDependencyFunction() )
 , dependencyFunctionString_( transfer.DependencyFunctionString() )
+, resolutionFunction_( transfer.GetResolutionFunction() )
+, resolutionFunctionString_( transfer.ResolutionFunctionString() )
 , dependency_( transfer.Dependency() )
 , comment_( transfer.Comment() )
 {
+  sigmaPars_ = transfer.SigmaPars();
   ClearParameters();
-  ClearErrors();
-  pars1D_ = transfer.Parameters1D();
-  errs1D_ = transfer.Errors1D();
-  pars2D_ = transfer.Parameters2D();
-  errs2D_ = transfer.Errors2D();
+  pars1D_    = transfer.Parameters1D();
+  errs1D_    = transfer.Errors1D();
+  pars2D_    = transfer.Parameters2D();
+  errs2D_    = transfer.Errors2D();
 }
 
 // Constructor from strings
-TransferFunction::TransferFunction( const std::string & fitFunction, const std::string & dependencyFunction, const std::string & dependency )
+TransferFunction::TransferFunction( const std::string& fitFunction, const std::vector< int >& sigmaPars, const std::string& dependencyFunction, const std::string& resolutionFunction, const std::string& dependency )
 : fitFunction_( "fitFunction", fitFunction.c_str() )
 , fitFunctionString_( fitFunction )
 , dependencyFunction_( "dependencyFunction", dependencyFunction.c_str() )
 , dependencyFunctionString_( dependencyFunction )
+, resolutionFunction_( "resolutionFunction", resolutionFunction.c_str() )
+, resolutionFunctionString_( resolutionFunction )
 , dependency_( dependency )
 , comment_()
 {
+  sigmaPars_ = sigmaPars;
   ClearParameters();
-  ClearErrors();
 }
 
 // Constructor from TF1s
-TransferFunction::TransferFunction( TF1 * fitFunction, TF1 * dependencyFunction, const std::string & dependency )
+TransferFunction::TransferFunction( TF1* fitFunction, const std::vector< int >& sigmaPars, TF1* dependencyFunction, TF1* resolutionFunction, const std::string& dependency )
 : fitFunction_( *fitFunction )
 , fitFunctionString_( "" )
 , dependencyFunction_( *dependencyFunction )
 , dependencyFunctionString_( "" )
+, resolutionFunction_( *resolutionFunction )
+, resolutionFunctionString_( "" )
 , dependency_( dependency )
 , comment_()
 {
+  sigmaPars_ = sigmaPars;
   ClearParameters();
-  ClearErrors();
   fitFunction_.SetName( "fitFunction" );
   dependencyFunction_.SetName( "dependencyFunction" );
+  resolutionFunction_.SetName( "resolutionFunction" );
 }
 
 
@@ -64,34 +71,36 @@ TransferFunction::TransferFunction( TF1 * fitFunction, TF1 * dependencyFunction,
 
 // Setters
 
-void TransferFunction::SetFitFunction( const std::string & fitFunctionString, bool clear )
+void TransferFunction::SetFitFunction( const std::string& fitFunctionString, const std::vector< int >& sigmaPars, bool clear )
 {
   fitFunction_       = TF1( "fitFunction", fitFunctionString.c_str() );
   fitFunctionString_ = fitFunctionString;
+  sigmaPars_         = sigmaPars;
   clear ? ClearParameters() : ResizeParameters();
 }
 
-void TransferFunction::SetFitFunction( TF1 * fitFunction, bool clear )
+void TransferFunction::SetFitFunction( TF1* fitFunction, const std::vector< int >& sigmaPars, bool clear )
 {
   fitFunction_ = TF1( *fitFunction );
   fitFunction_.SetName( "fitFunction" );
   fitFunctionString_ = fitFunction->GetTitle();
+  sigmaPars_         = sigmaPars;
   clear ? ClearParameters() : ResizeParameters();
 }
 
-void TransferFunction::SetFitFunctionString( const std::string & fitFunctionString )
+void TransferFunction::SetFitFunctionString( const std::string& fitFunctionString )
 {
   if ( FitFunction().empty() ) fitFunctionString_ = fitFunctionString;
 }
 
-void TransferFunction::SetDependencyFunction( const std::string & dependencyFunctionString, bool clear )
+void TransferFunction::SetDependencyFunction( const std::string& dependencyFunctionString, bool clear )
 {
   dependencyFunction_       = TF1( "dependencyFunction", dependencyFunctionString.c_str() );
   dependencyFunctionString_ = dependencyFunctionString;
   clear ? ClearParameters() : ResizeParameters();
 }
 
-void TransferFunction::SetDependencyFunction( TF1 * dependencyFunction, bool clear )
+void TransferFunction::SetDependencyFunction( TF1* dependencyFunction, bool clear )
 {
   dependencyFunction_ = TF1( *dependencyFunction );
   dependencyFunction_.SetName( "dependencyFunction" );
@@ -99,9 +108,29 @@ void TransferFunction::SetDependencyFunction( TF1 * dependencyFunction, bool cle
   clear ? ClearParameters() : ResizeParameters();
 }
 
-void TransferFunction::SetDependencyFunctionString( const std::string & dependencyFunctionString )
+void TransferFunction::SetDependencyFunctionString( const std::string& dependencyFunctionString )
 {
   if ( DependencyFunction().empty() ) dependencyFunctionString_ = dependencyFunctionString;
+}
+
+void TransferFunction::SetResolutionFunction( const std::string& resolutionFunctionString, bool clear )
+{
+  resolutionFunction_       = TF1( "resolutionFunction", resolutionFunctionString.c_str() );
+  resolutionFunctionString_ = resolutionFunctionString;
+  clear ? ClearParameters() : ResizeParameters();
+}
+
+void TransferFunction::SetResolutionFunction( TF1* resolutionFunction, bool clear )
+{
+  resolutionFunction_ = TF1( *resolutionFunction );
+  resolutionFunction_.SetName( "resolutionFunction" );
+  resolutionFunctionString_ = resolutionFunction->GetTitle();
+  clear ? ClearParameters() : ResizeParameters();
+}
+
+void TransferFunction::SetResolutionFunctionString( const std::string& resolutionFunctionString )
+{
+  if ( ResolutionFunction().empty() ) resolutionFunctionString_ = resolutionFunctionString;
 }
 
 bool TransferFunction::SetParameter( unsigned i, double par )
@@ -125,7 +154,7 @@ bool TransferFunction::SetError( unsigned i, double err )
 bool TransferFunction::SetParameter( unsigned i, unsigned j, double par )
 {
   if ( i < NParFit() && j < NParDependency() ) {
-    pars2D_.at( j ).at( i ) = par;
+    pars2D_.at( i ).at( j ) = par;
     return true;
   }
   return false;
@@ -134,7 +163,7 @@ bool TransferFunction::SetParameter( unsigned i, unsigned j, double par )
 bool TransferFunction::SetError( unsigned i, unsigned j, double err )
 {
   if ( i < NParFit() && j < NParDependency() ) {
-    errs2D_.at( j ).at( i ) = err;
+    errs2D_.at( i ).at( j ) = err;
     return true;
   }
   return false;
@@ -161,7 +190,9 @@ bool TransferFunction::SetErrors( std::vector< double > errs )
 bool TransferFunction::SetParameters( unsigned j, std::vector< double > pars )
 {
   if ( j < NParDependency() && pars.size() == NParFit() ) {
-    pars2D_.at( j ) = pars;
+    for ( unsigned i = 0; i < pars.size(); ++i ) {
+      pars2D_.at( i ).at( j ) = pars.at( i );
+    }
     return true;
   }
   return false;
@@ -170,12 +201,15 @@ bool TransferFunction::SetParameters( unsigned j, std::vector< double > pars )
 bool TransferFunction::SetErrors( unsigned j, std::vector< double > errs )
 {
   if ( j < NParDependency() && errs.size() == NParFit() ) {
-    errs2D_.at( j ) = errs;
+    for ( unsigned i = 0; i < errs.size(); ++i ) {
+      errs2D_.at( i ).at( j ) = errs.at( i );
+    }
     return true;
   }
   return false;
 }
 
+// FIXME: Adapt to resolution function
 void TransferFunction::ClearParameters()
 {
   pars1D_.clear();
@@ -184,59 +218,86 @@ void TransferFunction::ClearParameters()
   for ( unsigned i = 0; i < NParFit(); ++i ) {
     pars1D_.at( i ) = transferFunctionInitConst;
     for ( unsigned j = 0; j < NParDependency(); ++j ) {
-      pars2D_.at( j ).at( i ) = transferFunctionInitConst;
+      pars2D_.at( i ).at( j ) = transferFunctionInitConst;
     }
   }
+  ClearErrors();
 }
 
+// FIXME: Adapt to resolution function
 void TransferFunction::ClearErrors()
 {
   errs1D_.clear();
   errs2D_.clear();
-  ResizeParameters();
   ResizeErrors();
   for ( unsigned i = 0; i < NParFit(); ++i ) {
     errs1D_.at( i ) = transferFunctionInitConst;
     for ( unsigned j = 0; j < NParDependency(); ++j ) {
-      errs2D_.at( j ).at( i ) = transferFunctionInitConst;
+      errs2D_.at( i ).at( j ) = transferFunctionInitConst;
     }
   }
 }
 
+// FIXME: Adapt to resolution function
 void TransferFunction::ResizeParameters()
 {
   pars1D_.resize( GetFitFunction().GetNpar() );
-  pars2D_.resize( GetDependencyFunction().GetNpar(), std::vector< double >( GetFitFunction().GetNpar() ) );
+  pars2D_.resize( GetFitFunction().GetNpar(), std::vector< double >( GetDependencyFunction().GetNpar() ) );
+  ResizeErrors();
 }
 
+// FIXME: Adapt to resolution function
 void TransferFunction::ResizeErrors()
 {
   errs1D_.resize( GetFitFunction().GetNpar() );
-  errs2D_.resize( GetDependencyFunction().GetNpar(), std::vector< double >( GetFitFunction().GetNpar() ) );
+  errs2D_.resize( GetFitFunction().GetNpar(), std::vector< double >( GetDependencyFunction().GetNpar() ) );
 }
 
 // Getters
 
+// FIXME: Adapt to resolution function
 double TransferFunction::Parameter( unsigned i, unsigned j ) const
 {
-  if ( i < NParFit() && j < NParDependency() ) return Parameters2D().at( j ).at( i );
+  if ( i < NParFit() && j < NParDependency() ) return pars2D_.at( i ).at( j );
   return transferFunctionInitConst;
 }
 
+// FIXME: Adapt to resolution function
 double TransferFunction::Error( unsigned i, unsigned j ) const
 {
-  if ( i < NParFit() && j < NParDependency() ) return Errors2D().at( j ).at( i );
+  if ( i < NParFit() && j < NParDependency() ) return errs2D_.at( i ).at( j );
   return transferFunctionInitConst;
 }
 
+// FIXME: Adapt to resolution function
+std::vector< double > TransferFunction::Parameters( unsigned j ) const
+{
+  if ( j < NParDependency() ) {
+    std::vector< double > pars;
+    for ( unsigned i = 0; i < NParFit(); ++i ) {
+      pars.push_back( pars2D_.at( i ).at( j ) );
+    }
+    return pars;
+  }
+  return std::vector< double >();
+}
+
+// FIXME: Adapt to resolution function
 std::vector< double > TransferFunction::Errors( unsigned j ) const
 {
-  if ( j < NParDependency() ) return Errors2D().at( j );
+  if ( j < NParDependency() ) {
+    std::vector< double > errs;
+    for ( unsigned i = 0; i < NParFit(); ++i ) {
+      errs.push_back( errs2D_.at( i ).at( j ) );
+    }
+    return errs;
+  }
   return std::vector< double >();
 }
 
 // Evaluate
 
+// FIXME: Adapt to resolution function
 TransferFunction TransferFunction::FunctionErrorsUp() const
 {
   TransferFunction transferFunction( *this );
@@ -250,6 +311,7 @@ TransferFunction TransferFunction::FunctionErrorsUp() const
   return transferFunction;
 }
 
+// FIXME: Adapt to resolution function
 TransferFunction TransferFunction::FunctionErrorsDown() const
 {
   TransferFunction transferFunction( *this );
@@ -263,6 +325,7 @@ TransferFunction TransferFunction::FunctionErrorsDown() const
   return transferFunction;
 }
 
+// FIXME: Adapt to resolution function
 TF2 TransferFunction::Function( int norm ) const
 {
   TString fitStr;
@@ -290,7 +353,7 @@ TF2 TransferFunction::Function( int norm ) const
       depStr.ReplaceAll( parStr, parStrNew );
       depStr.ReplaceAll( "x", "y" );
       depStr.ReplaceAll( "eyp", "exp" ); // Fixing unwanted replacements
-      pars.push_back( Parameters2D().at( j ).at( i ) );
+      pars.push_back( pars2D_.at( i ).at( j ) );
     }
     depStr.Prepend( "(" );
     depStr.Append( ")" );
@@ -310,6 +373,7 @@ TF2 TransferFunction::Function( int norm ) const
   return function;
 }
 
+// FIXME: Adapt to resolution function
 TF1 TransferFunction::Function( double dependencyValue, int norm ) const
 {
   TString fitStr;
@@ -344,6 +408,7 @@ TF1 TransferFunction::Function( double dependencyValue, int norm ) const
   return function;
 }
 
+// FIXME: Adapt to resolution function
 std::string TransferFunction::Formula( int norm ) const
 {
   TString fitStr;
@@ -359,7 +424,7 @@ std::string TransferFunction::Formula( int norm ) const
       fitStr.ReplaceAll( parStr, "1." );
       continue;
     }
-    TString depParStr( PrintDependency( i, false ) );
+    TString depParStr( Print( i, false ) );
     depParStr.ReplaceAll( Dependency(), "y" );
     depParStr.Prepend( "(" );
     depParStr.Append( ")" );
@@ -368,6 +433,7 @@ std::string TransferFunction::Formula( int norm ) const
   return std::string( fitStr.Data() );
 }
 
+// FIXME: Adapt to resolution function
 std::string TransferFunction::Formula( double dependencyValue, int norm ) const
 {
   TF1 fitFunc;
@@ -391,6 +457,7 @@ std::string TransferFunction::Formula( double dependencyValue, int norm ) const
   return std::string( fitFunc.GetExpFormula( "p" ).Data() );
 }
 
+// FIXME: Adapt to resolution function
 double TransferFunction::Eval( double value, int norm ) const
 {
   TF1 fitFunc;
@@ -410,6 +477,7 @@ double TransferFunction::Eval( double value, int norm ) const
   return fitFunc.Eval( value );
 }
 
+// FIXME: Adapt to resolution function
 double TransferFunction::Eval( double dependencyValue, double value, int norm ) const
 {
   TF1 fitFunc;
@@ -433,6 +501,7 @@ double TransferFunction::Eval( double dependencyValue, double value, int norm ) 
   return fitFunc.Eval( value );
 }
 
+// // FIXME: Adapt to resolution function
 // double TransferFunction::Sigma( double dependencyValue ) const
 // {
 //   // FIXME: This is too simple. Add checks!
@@ -454,6 +523,7 @@ double TransferFunction::Eval( double dependencyValue, double value, int norm ) 
 
 // Communication
 
+// FIXME: Adapt to resolution function
 std::string TransferFunction::Print( bool only1D, bool useNan ) const
 {
   std::stringstream print( std::ios_base::out );
@@ -477,9 +547,9 @@ std::string TransferFunction::Print( bool only1D, bool useNan ) const
   print << std::endl;
 
   if ( ! only1D ) {
-    print << "Parameters 2D (DependencyFunction):" << std::endl;
+    print << "Parameters 2D:" << std::endl;
     for ( unsigned i = 0; i < NParFit(); ++i ) {
-      print << "[" << i << "]: \t"  << PrintDependency( i, useNan ) << std::endl;
+      print << "[" << i << "]: \t"  << Print( i, useNan ) << std::endl;
     }
     print << "[all]: \t" << PrintFit2D( useNan ) << std::endl;
   }
@@ -487,50 +557,8 @@ std::string TransferFunction::Print( bool only1D, bool useNan ) const
   return print.str();
 }
 
-std::string TransferFunction::PrintFit1D( bool useNan ) const
-{
-  TString fitStr;
-  if ( FitFunction().empty() && ! FitFunctionString().empty() ) {
-    fitStr = TString( FitFunctionString() );
-  }
-  else {
-    fitStr = TString( FitFunction() );
-  }
-  if ( fitStr.Length() > 0 ) {
-    for ( unsigned i = 0; i < NParFit(); ++i ) {
-      TString valStr( boost::lexical_cast< std::string >( Parameter( i ) ) );
-      if ( useNan ) valStr.ReplaceAll( boost::lexical_cast< std::string >( transferFunctionInitConst ).c_str(), "NAN" );
-      valStr.Prepend( "(" );
-      valStr.Append( ")" );
-      TString parStr( "[" + boost::lexical_cast< std::string >( i ) + "]" );
-      fitStr.ReplaceAll( parStr, valStr );
-    }
-  }
-  return std::string( fitStr.Data() );
-}
-
-std::string TransferFunction::PrintFit2D( bool useNan ) const
-{
-  TString fitStr;
-  if ( FitFunction().empty() && ! FitFunctionString().empty() ) {
-    fitStr = TString( FitFunctionString() );
-  }
-  else {
-    fitStr = TString( FitFunction() );
-  }
-  if ( fitStr.Length() > 0 ) {
-    for ( unsigned i = 0; i < NParFit(); ++i ) {
-      TString depParStr( PrintDependency( i, useNan ) );
-      depParStr.Prepend( "(" );
-      depParStr.Append( ")" );
-      TString parStr( "[" + boost::lexical_cast< std::string >( i ) + "]" );
-      fitStr.ReplaceAll( parStr, depParStr );
-    }
-  }
-  return std::string( fitStr.Data() );
-}
-
-std::string TransferFunction::PrintDependency( unsigned i, bool useNan ) const
+// FIXME: Adapt to resolution function
+std::string TransferFunction::Print( unsigned i, bool useNan ) const
 {
   TF1 depFunc;
   if ( DependencyFunction().empty() && ! DependencyFunctionString().empty() ) {
@@ -562,6 +590,50 @@ std::string TransferFunction::PrintDependency( unsigned i, bool useNan ) const
     }
     return print.str();
   }
+}
+
+std::string TransferFunction::PrintFit1D( bool useNan ) const
+{
+  TString fitStr;
+  if ( FitFunction().empty() && ! FitFunctionString().empty() ) {
+    fitStr = TString( FitFunctionString() );
+  }
+  else {
+    fitStr = TString( FitFunction() );
+  }
+  if ( fitStr.Length() > 0 ) {
+    for ( unsigned i = 0; i < NParFit(); ++i ) {
+      TString valStr( boost::lexical_cast< std::string >( Parameter( i ) ) );
+      if ( useNan ) valStr.ReplaceAll( boost::lexical_cast< std::string >( transferFunctionInitConst ).c_str(), "NAN" );
+      valStr.Prepend( "(" );
+      valStr.Append( ")" );
+      TString parStr( "[" + boost::lexical_cast< std::string >( i ) + "]" );
+      fitStr.ReplaceAll( parStr, valStr );
+    }
+  }
+  return std::string( fitStr.Data() );
+}
+
+// FIXME: Adapt to resolution function
+std::string TransferFunction::PrintFit2D( bool useNan ) const
+{
+  TString fitStr;
+  if ( FitFunction().empty() && ! FitFunctionString().empty() ) {
+    fitStr = TString( FitFunctionString() );
+  }
+  else {
+    fitStr = TString( FitFunction() );
+  }
+  if ( fitStr.Length() > 0 ) {
+    for ( unsigned i = 0; i < NParFit(); ++i ) {
+      TString depParStr( Print( i, useNan ) );
+      depParStr.Prepend( "(" );
+      depParStr.Append( ")" );
+      TString parStr( "[" + boost::lexical_cast< std::string >( i ) + "]" );
+      fitStr.ReplaceAll( parStr, depParStr );
+    }
+  }
+  return std::string( fitStr.Data() );
 }
 
 TransferFunction TransferFunction::Read( const std::string & stream )

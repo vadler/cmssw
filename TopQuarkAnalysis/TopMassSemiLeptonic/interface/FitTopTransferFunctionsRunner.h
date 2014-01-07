@@ -25,7 +25,7 @@ namespace my {
       // Config
       edm::ParameterSet          config_;
       unsigned                   verbose_;
-      int                        maxEvents_; // FIXME: still nedds to be propageted
+      int                        maxEvents_; // FIXME: still needs to be propageted
       bool                       useSymm_;
       bool                       useAlt_;
       bool                       useNonT_;
@@ -141,9 +141,10 @@ namespace my {
 
         // Transfer function
         const std::string part( refGen_ ? "_parton" : "_reco" );
-        TransferFunction transfer( fitFunction, dependencyFunction, std::string( titlePt_ + part ) ); // FIXME: does not take separate resolution function yet
+        TransferFunction transfer( fitFunction, FitFuncType::SigmaPars(), dependencyFunction, resolutionFunction, std::string( titlePt_ + part ) ); // FIXME: does not take separate resolution function yet
         transfer.SetFitFunctionString( FitFuncType::String() );
         transfer.SetDependencyFunctionString( DepFuncType::String() );
+        transfer.SetResolutionFunctionString( ResFuncType::String() );
 
         return transfer;
       }

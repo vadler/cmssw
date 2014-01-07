@@ -448,7 +448,7 @@ bool FitTopTransferFunctionsRunner::fitPerCategory( unsigned uCat )
 
   // Initialise Functions // FIXME: optimise!
   // Dummies
-  fitFunction_ = new TF1( "fitFunction", "1" );
+  fitFunction_        = new TF1( "fitFunction", "1" );
   dependencyFunction_ = new TF1( "dependencyFunction", "1" );
   resolutionFunction_ = new TF1( "resolutionFunction", "1" );
   TransferFunction transferPt;

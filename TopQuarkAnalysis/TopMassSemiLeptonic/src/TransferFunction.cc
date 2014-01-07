@@ -27,14 +27,14 @@ TransferFunction::TransferFunction( const TransferFunction& transfer )
 {
   sigmaPars_ = transfer.SigmaPars();
   ClearParameters();
-  pars1D_    = transfer.Parameters1D();
-  errs1D_    = transfer.Errors1D();
-  pars2D_    = transfer.Parameters2D();
-  errs2D_    = transfer.Errors2D();
+  pars1D_    = transfer.pars1D_;
+  errs1D_    = transfer.errs1D_;
+  pars2D_    = transfer.pars2D_;
+  errs2D_    = transfer.errs2D_;
 }
 
 // Constructor from strings
-TransferFunction::TransferFunction( const std::string& fitFunction, const std::vector< int >& sigmaPars, const std::string& dependencyFunction, const std::string& resolutionFunction, const std::string& dependency )
+TransferFunction::TransferFunction( const std::string& fitFunction, const std::set< int >& sigmaPars, const std::string& dependencyFunction, const std::string& resolutionFunction, const std::string& dependency )
 : fitFunction_( "fitFunction", fitFunction.c_str() )
 , fitFunctionString_( fitFunction )
 , dependencyFunction_( "dependencyFunction", dependencyFunction.c_str() )
@@ -49,7 +49,7 @@ TransferFunction::TransferFunction( const std::string& fitFunction, const std::v
 }
 
 // Constructor from TF1s
-TransferFunction::TransferFunction( TF1* fitFunction, const std::vector< int >& sigmaPars, TF1* dependencyFunction, TF1* resolutionFunction, const std::string& dependency )
+TransferFunction::TransferFunction( TF1* fitFunction, const std::set< int >& sigmaPars, TF1* dependencyFunction, TF1* resolutionFunction, const std::string& dependency )
 : fitFunction_( *fitFunction )
 , fitFunctionString_( "" )
 , dependencyFunction_( *dependencyFunction )
@@ -71,21 +71,21 @@ TransferFunction::TransferFunction( TF1* fitFunction, const std::vector< int >& 
 
 // Setters
 
-void TransferFunction::SetFitFunction( const std::string& fitFunctionString, const std::vector< int >& sigmaPars, bool clear )
+void TransferFunction::SetFitFunction( const std::string& fitFunctionString, const std::set< int >& sigmaPars )
 {
   fitFunction_       = TF1( "fitFunction", fitFunctionString.c_str() );
   fitFunctionString_ = fitFunctionString;
   sigmaPars_         = sigmaPars;
-  clear ? ClearParameters() : ResizeParameters();
+  ClearParameters();
 }
 
-void TransferFunction::SetFitFunction( TF1* fitFunction, const std::vector< int >& sigmaPars, bool clear )
+void TransferFunction::SetFitFunction( TF1* fitFunction, const std::set< int >& sigmaPars )
 {
   fitFunction_ = TF1( *fitFunction );
   fitFunction_.SetName( "fitFunction" );
   fitFunctionString_ = fitFunction->GetTitle();
   sigmaPars_         = sigmaPars;
-  clear ? ClearParameters() : ResizeParameters();
+  ClearParameters();
 }
 
 void TransferFunction::SetFitFunctionString( const std::string& fitFunctionString )
@@ -93,19 +93,19 @@ void TransferFunction::SetFitFunctionString( const std::string& fitFunctionStrin
   if ( FitFunction().empty() ) fitFunctionString_ = fitFunctionString;
 }
 
-void TransferFunction::SetDependencyFunction( const std::string& dependencyFunctionString, bool clear )
+void TransferFunction::SetDependencyFunction( const std::string& dependencyFunctionString )
 {
   dependencyFunction_       = TF1( "dependencyFunction", dependencyFunctionString.c_str() );
   dependencyFunctionString_ = dependencyFunctionString;
-  clear ? ClearParameters() : ResizeParameters();
+  ClearParameters();
 }
 
-void TransferFunction::SetDependencyFunction( TF1* dependencyFunction, bool clear )
+void TransferFunction::SetDependencyFunction( TF1* dependencyFunction )
 {
   dependencyFunction_ = TF1( *dependencyFunction );
   dependencyFunction_.SetName( "dependencyFunction" );
   dependencyFunctionString_ = dependencyFunction->GetTitle();
-  clear ? ClearParameters() : ResizeParameters();
+  ClearParameters();
 }
 
 void TransferFunction::SetDependencyFunctionString( const std::string& dependencyFunctionString )
@@ -113,19 +113,19 @@ void TransferFunction::SetDependencyFunctionString( const std::string& dependenc
   if ( DependencyFunction().empty() ) dependencyFunctionString_ = dependencyFunctionString;
 }
 
-void TransferFunction::SetResolutionFunction( const std::string& resolutionFunctionString, bool clear )
+void TransferFunction::SetResolutionFunction( const std::string& resolutionFunctionString )
 {
   resolutionFunction_       = TF1( "resolutionFunction", resolutionFunctionString.c_str() );
   resolutionFunctionString_ = resolutionFunctionString;
-  clear ? ClearParameters() : ResizeParameters();
+  ClearParameters();
 }
 
-void TransferFunction::SetResolutionFunction( TF1* resolutionFunction, bool clear )
+void TransferFunction::SetResolutionFunction( TF1* resolutionFunction )
 {
   resolutionFunction_ = TF1( *resolutionFunction );
   resolutionFunction_.SetName( "resolutionFunction" );
   resolutionFunctionString_ = resolutionFunction->GetTitle();
-  clear ? ClearParameters() : ResizeParameters();
+  ClearParameters();
 }
 
 void TransferFunction::SetResolutionFunctionString( const std::string& resolutionFunctionString )
@@ -209,48 +209,39 @@ bool TransferFunction::SetErrors( unsigned j, std::vector< double > errs )
   return false;
 }
 
-// FIXME: Adapt to resolution function
 void TransferFunction::ClearParameters()
 {
   pars1D_.clear();
   pars2D_.clear();
-  ResizeParameters();
+  pars1D_.resize( NParFit() );
+  pars2D_.resize( NParFit(), std::vector< double >( NParDependency() ) );
+  for ( std::set< int >::const_iterator k = sigmaPars_.begin(); k != sigmaPars_.end(); ++k ) {
+    pars2D_.at( *k ).resize( NParResolution() );
+  }
   for ( unsigned i = 0; i < NParFit(); ++i ) {
     pars1D_.at( i ) = transferFunctionInitConst;
-    for ( unsigned j = 0; j < NParDependency(); ++j ) {
+    for ( unsigned j = 0; j < pars2D_.at( i ).size(); ++j ) {
       pars2D_.at( i ).at( j ) = transferFunctionInitConst;
     }
   }
   ClearErrors();
 }
 
-// FIXME: Adapt to resolution function
 void TransferFunction::ClearErrors()
 {
   errs1D_.clear();
   errs2D_.clear();
-  ResizeErrors();
+  errs1D_.resize( NParFit() );
+  errs2D_.resize( NParFit(), std::vector< double >( NParDependency() ) );
+  for ( std::set< int >::const_iterator k = sigmaPars_.begin(); k != sigmaPars_.end(); ++k ) {
+    errs2D_.at( *k ).resize( NParResolution() );
+  }
   for ( unsigned i = 0; i < NParFit(); ++i ) {
     errs1D_.at( i ) = transferFunctionInitConst;
-    for ( unsigned j = 0; j < NParDependency(); ++j ) {
+    for ( unsigned j = 0; j < errs2D_.at( i ).size(); ++j ) {
       errs2D_.at( i ).at( j ) = transferFunctionInitConst;
     }
   }
-}
-
-// FIXME: Adapt to resolution function
-void TransferFunction::ResizeParameters()
-{
-  pars1D_.resize( GetFitFunction().GetNpar() );
-  pars2D_.resize( GetFitFunction().GetNpar(), std::vector< double >( GetDependencyFunction().GetNpar() ) );
-  ResizeErrors();
-}
-
-// FIXME: Adapt to resolution function
-void TransferFunction::ResizeErrors()
-{
-  errs1D_.resize( GetFitFunction().GetNpar() );
-  errs2D_.resize( GetFitFunction().GetNpar(), std::vector< double >( GetDependencyFunction().GetNpar() ) );
 }
 
 // Getters

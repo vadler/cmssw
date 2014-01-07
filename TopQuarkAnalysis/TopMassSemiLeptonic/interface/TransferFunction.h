@@ -23,6 +23,7 @@
 
 
 #include <vector>
+#include <set>
 #include <string>
 
 #include <TF2.h>
@@ -82,7 +83,7 @@ namespace my {
       std::string comment_;
 
       /// List of resolution parameter indices
-      std::vector< int > sigmaPars_;
+      std::set< int > sigmaPars_;
 
       /// Parameter vector for 1D
       /// It holds the results of the fit of the fit function, independently
@@ -103,19 +104,19 @@ namespace my {
       ///
 
       /// Default constructor
-      TransferFunction() { TransferFunction( "", std::vector< int >() ); };
+      TransferFunction() { TransferFunction( "", std::set< int >() ); };
 
       /// Constructor from TransferFunction (copy c'tor)
       TransferFunction( const TransferFunction& transfer );
 
       /// Constructor from strings
       /// Functions are entered in the format for filling a TFormula
-      TransferFunction( const std::string& fitFunction, const std::vector< int >& sigmaPars, const std::string& dependencyFunction = "0", const std::string& resolutionFunction = "0", const std::string& dependency = "x" );
+      TransferFunction( const std::string& fitFunction, const std::set< int >& sigmaPars, const std::string& dependencyFunction = "0", const std::string& resolutionFunction = "0", const std::string& dependency = "x" );
 
       /// Constructor from TF1s
       /// TFormula members of the TF1s are possibly empty (e.g. TF1 from
       /// functor).
-      TransferFunction( TF1* fitFunction, const std::vector< int >& sigmaPars, TF1* dependencyFunction, TF1* resolutionFunction, const std::string& dependency = "x" );
+      TransferFunction( TF1* fitFunction, const std::set< int >& sigmaPars, TF1* dependencyFunction, TF1* resolutionFunction, const std::string& dependency = "x" );
 
       /// Destructor
       virtual ~TransferFunction() {};
@@ -132,7 +133,7 @@ namespace my {
       /// The corresponding parameter vectors are resized according to the
       /// number of function parameters. If 'clear' is 'false', the existing
       /// values are not overwritten.
-      void SetFitFunction( const std::string& fitFunctionString, const std::vector< int >& sigmaPars, bool clear = true );
+      void SetFitFunction( const std::string& fitFunctionString, const std::set< int >& sigmaPars );
 
       /// Set the fit function.
       /// TFormula members of the TF1s are possibly empty (e.g. TF1 from
@@ -140,7 +141,7 @@ namespace my {
       /// The corresponding parameter vectors are resized according to the
       /// number of function parameters. If 'clear' is 'false', the existing
       /// values are not overwritten.
-      void SetFitFunction( TF1* fitFunction, const std::vector< int >& sigmaPars, bool clear = true );
+      void SetFitFunction( TF1* fitFunction, const std::set< int >& sigmaPars );
 
       /// Set the fit function string.
       /// This has only effect, if the original function's title is empty.
@@ -152,7 +153,7 @@ namespace my {
       /// The corresponding vector of parameter vectors are resized according
       /// to the number of function parameters. If 'clear' is 'false', the
       /// existing values are not overwritten.
-      void SetDependencyFunction( const std::string& dependencyFunctionString, bool clear = true );
+      void SetDependencyFunction( const std::string& dependencyFunctionString );
 
       /// Set the dependency function.
       /// TFormula members of the TF1s are possibly empty (e.g. TF1 from
@@ -160,7 +161,7 @@ namespace my {
       /// The corresponding vector of parameter vectors are resized according
       /// to the number of function parameters. If 'clear' is 'false', the
       /// existing values are not overwritten.
-      void SetDependencyFunction( TF1* dependencyFunction, bool clear = true );
+      void SetDependencyFunction( TF1* dependencyFunction );
 
       /// Set the dependency function string.
       /// This has only effect, if the original function's title is empty.
@@ -172,7 +173,7 @@ namespace my {
       /// The corresponding vector of parameter vectors are resized according
       /// to the number of function parameters. If 'clear' is 'false', the
       /// existing values are not overwritten.
-      void SetResolutionFunction( const std::string& resolutionFunctionString, bool clear = true );
+      void SetResolutionFunction( const std::string& resolutionFunctionString );
 
       /// Set the resolution function.
       /// TFormula members of the TF1s are possibly empty (e.g. TF1 from
@@ -180,7 +181,7 @@ namespace my {
       /// The corresponding vector of parameter vectors are resized according
       /// to the number of function parameters. If 'clear' is 'false', the
       /// existing values are not overwritten.
-      void SetResolutionFunction( TF1* resolutionFunction, bool clear = true );
+      void SetResolutionFunction( TF1* resolutionFunction );
 
       /// Set the dependency function string.
       /// This has only effect, if the original function's title is empty.
@@ -193,7 +194,7 @@ namespace my {
       void SetComment( const std::string& comment ) { comment_ = comment; };
 
       /// Set the list of resolution parameter indices.
-      void SetSigmaPars( const std::vector< int >& sigmaPars ) { sigmaPars_ = sigmaPars; };
+      void SetSigmaPars( const std::set< int >& sigmaPars ) { sigmaPars_ = sigmaPars; };
 
       /// Set a fit parameter of the fit function, which is independent of the
       /// dependency variable.
@@ -233,15 +234,14 @@ namespace my {
       bool SetParameters( unsigned j, std::vector< double > pars );
       bool SetErrors( unsigned j, std::vector< double > errs );
 
+    private:
+
       /// Resize all vectors according to the number of parameters in the
       /// functions and set them to the initialisation constant.
       void ClearParameters();
       void ClearErrors();
 
-      /// Resize all vectors according to the number of parameters in the
-      /// functions.
-      void ResizeParameters();
-      void ResizeErrors();
+    public:
 
       /// Getters
 
@@ -294,7 +294,7 @@ namespace my {
       std::string Comment() const { return comment_; };
 
       /// Get the list of resolution parameter indices.
-      std::vector< int > SigmaPars() const { return sigmaPars_; };
+      std::set< int > SigmaPars() const { return sigmaPars_; };
 
       /// Get a fit parameter of the fit function, which is independent of the
       /// dependency variable.
@@ -318,8 +318,8 @@ namespace my {
       /// the dependency variable.
       /// The order of the vector elements corresponds to the parameter numbers
       /// as defined in the fit function string.
-      std::vector< double > Parameters() const { return Parameters1D(); };
-      std::vector< double > Errors() const { return Errors1D(); };
+      std::vector< double > Parameters() const { return pars1D_; };
+      std::vector< double > Errors() const { return errs1D_; };
 
       /// Get all fit parameter of the dependency function for a given
       /// parameter.
@@ -392,13 +392,6 @@ namespace my {
       /// Creates a transfer function from a string as produced by Print().
       /// NOT IMPLEMENTED YET!
       static TransferFunction Read( const std::string & stream );
-
-    private:
-
-      std::vector< double > Parameters1D() const { return pars1D_;};
-      std::vector< double > Errors1D() const { return errs1D_;};
-      std::vector< std::vector< double > > Parameters2D() const { return pars2D_ ;};
-      std::vector< std::vector< double > > Errors2D() const { return errs2D_ ;};
 
   };
 

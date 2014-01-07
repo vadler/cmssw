@@ -153,7 +153,7 @@ bool TransferFunction::SetError( unsigned i, double err )
 
 bool TransferFunction::SetParameter( unsigned i, unsigned j, double par )
 {
-  if ( i < NParFit() && j < NParDependency() ) {
+  if ( i < NParFit() && j < pars2D_.at( i ).size() ) {
     pars2D_.at( i ).at( j ) = par;
     return true;
   }
@@ -162,7 +162,7 @@ bool TransferFunction::SetParameter( unsigned i, unsigned j, double par )
 
 bool TransferFunction::SetError( unsigned i, unsigned j, double err )
 {
-  if ( i < NParFit() && j < NParDependency() ) {
+  if ( i < NParFit() && j < errs2D_.at( i ).size() ) {
     errs2D_.at( i ).at( j ) = err;
     return true;
   }
@@ -182,28 +182,6 @@ bool TransferFunction::SetErrors( std::vector< double > errs )
 {
   if ( errs.size() == NParFit() ) {
     errs1D_ = errs;
-    return true;
-  }
-  return false;
-}
-
-bool TransferFunction::SetParameters( unsigned j, std::vector< double > pars )
-{
-  if ( j < NParDependency() && pars.size() == NParFit() ) {
-    for ( unsigned i = 0; i < pars.size(); ++i ) {
-      pars2D_.at( i ).at( j ) = pars.at( i );
-    }
-    return true;
-  }
-  return false;
-}
-
-bool TransferFunction::SetErrors( unsigned j, std::vector< double > errs )
-{
-  if ( j < NParDependency() && errs.size() == NParFit() ) {
-    for ( unsigned i = 0; i < errs.size(); ++i ) {
-      errs2D_.at( i ).at( j ) = errs.at( i );
-    }
     return true;
   }
   return false;
@@ -246,44 +224,16 @@ void TransferFunction::ClearErrors()
 
 // Getters
 
-// FIXME: Adapt to resolution function
 double TransferFunction::Parameter( unsigned i, unsigned j ) const
 {
-  if ( i < NParFit() && j < NParDependency() ) return pars2D_.at( i ).at( j );
+  if ( i < NParFit() && j < pars2D_.at( i ).size() ) return pars2D_.at( i ).at( j );
   return transferFunctionInitConst;
 }
 
-// FIXME: Adapt to resolution function
 double TransferFunction::Error( unsigned i, unsigned j ) const
 {
-  if ( i < NParFit() && j < NParDependency() ) return errs2D_.at( i ).at( j );
+  if ( i < NParFit() && j < errs2D_.at( i ).size() ) return errs2D_.at( i ).at( j );
   return transferFunctionInitConst;
-}
-
-// FIXME: Adapt to resolution function
-std::vector< double > TransferFunction::Parameters( unsigned j ) const
-{
-  if ( j < NParDependency() ) {
-    std::vector< double > pars;
-    for ( unsigned i = 0; i < NParFit(); ++i ) {
-      pars.push_back( pars2D_.at( i ).at( j ) );
-    }
-    return pars;
-  }
-  return std::vector< double >();
-}
-
-// FIXME: Adapt to resolution function
-std::vector< double > TransferFunction::Errors( unsigned j ) const
-{
-  if ( j < NParDependency() ) {
-    std::vector< double > errs;
-    for ( unsigned i = 0; i < NParFit(); ++i ) {
-      errs.push_back( errs2D_.at( i ).at( j ) );
-    }
-    return errs;
-  }
-  return std::vector< double >();
 }
 
 // Evaluate

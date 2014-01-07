@@ -222,18 +222,6 @@ namespace my {
       bool SetParameters( std::vector< double > pars );
       bool SetErrors( std::vector< double > errs );
 
-      /// Set all fit parameter of the dependency function for a given
-      /// parameter.
-      /// 'j' denotes the parameter number as defined in the dependency
-      /// function string.
-      /// The order of the vector elements has to correspond to the parameter
-      /// numbers as defined in the fit function string. If'j' is beyond the
-      /// number of available parameters in the dependency function or the
-      /// length of the vector does not agree with the number of available
-      /// parameters in the fit function, 'false' is returned.
-      bool SetParameters( unsigned j, std::vector< double > pars );
-      bool SetErrors( unsigned j, std::vector< double > errs );
-
     private:
 
       /// Resize all vectors according to the number of parameters in the
@@ -320,17 +308,6 @@ namespace my {
       /// as defined in the fit function string.
       std::vector< double > Parameters() const { return pars1D_; };
       std::vector< double > Errors() const { return errs1D_; };
-
-      /// Get all fit parameter of the dependency function for a given
-      /// parameter.
-      /// 'j' denotes the parameter number as defined in the dependency
-      /// function string.
-      /// The order of the vector elements corresponds to the parameter numbers
-      /// as defined in the fit function string. If 'j' is beyond the
-      /// number of available parameters in the dependency function, an empty
-      /// vector is returned.
-      std::vector< double > Parameters( unsigned j ) const;
-      std::vector< double > Errors( unsigned j ) const;
 
       /// Evaluate
 

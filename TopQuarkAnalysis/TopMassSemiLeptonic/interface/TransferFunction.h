@@ -299,8 +299,8 @@ namespace my {
       /// in the fit function or 'j' is beyond the number of available
       /// parameters in the dependency function, the initialisation constant is
       /// returned.
-      double Parameter( unsigned i, unsigned j ) const;
-      double Error( unsigned i, unsigned j ) const;
+      double Parameter( unsigned i, unsigned j ) const { return i < NParFit() && j < pars2D_.at( i ).size() ? pars2D_.at( i ).at( j ) : transferFunctionInitConst; };
+      double Error( unsigned i, unsigned j ) const { return i < NParFit() && j < errs2D_.at( i ).size() ? errs2D_.at( i ).at( j ) : transferFunctionInitConst; };
 
       /// Get all fit parameter of the fit function, which is independent of
       /// the dependency variable.

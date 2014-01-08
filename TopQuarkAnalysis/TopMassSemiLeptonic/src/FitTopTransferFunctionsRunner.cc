@@ -841,31 +841,38 @@ void FitTopTransferFunctionsRunner::dependencyPerCategoryLoop( const std::string
 
 void FitTopTransferFunctionsRunner::dependencyPerCategoryBin( const std::string& objCat, TDirectory* dirOut, TransferFunction& transfer, HistosDependency& histosDependency, bool scale )
 {
+
   const Int_t nParFit( fitFunction_->GetNpar() );
   for ( Int_t uPar = 0; uPar < nParFit; ++uPar ) {
     const std::string parFit( boost::lexical_cast< std::string >( uPar ) );
     const std::string nameDep( histosDependency.histVecPtPar.at( uPar )->GetName() );
     const std::string nameDepFit( nameDep + "_fit" );
-    TF1*        fitFunc;
-    std::string fitFuncID;
+    TF1*        func;
+    std::string funcID;
     const std::set< int > sigmaPars( transfer.SigmaPars() );
     if ( sigmaPars.find( uPar ) == sigmaPars.end() ) {
-      fitFunc   = dependencyFunction_;
-      fitFuncID = depFuncID_;
+      func   = dependencyFunction_;
+      funcID = depFuncID_;
     }
     else {
-      fitFunc   = resolutionFunction_;
-      fitFuncID = resFuncID_;
+      func   = resolutionFunction_;
+      funcID = resFuncID_;
     }
-    const Int_t nParDep( fitFunc->GetNpar() );
-    TF1* fitFuncDep( new TF1( nameDepFit.c_str(), fitFunc, objectData_.back().ptBins().front(), fitMaxPt_, nParDep ) );
-    initialiseDependencyParameters( fitFuncDep, histosDependency.histVecPtPar.at( uPar ), fitFuncID );
-    TFitResultPtr fitResultPtr( histosDependency.histVecPtPar.at( uPar )->Fit( fitFuncDep, fitOptions_.c_str() ) );
+    const Int_t nPar( func->GetNpar() );
+    TF1* fitFunc( new TF1( nameDepFit.c_str(), func, objectData_.back().ptBins().front(), fitMaxPt_, nPar ) );
+    initialiseDependencyParameters( fitFunc, histosDependency.histVecPtPar.at( uPar ), funcID );
+    TFitResultPtr fitResultPtr( histosDependency.histVecPtPar.at( uPar )->Fit( fitFunc, fitOptions_.c_str() ) );
     if ( fitResultPtr >= 0 ) {
       if ( fitResultPtr->Status() == 0 && fitResultPtr->Ndf() != 0. ) {
-        for ( Int_t uDep = 0; uDep < nParDep; ++uDep ) {
-          transfer.SetParameter( uPar, uDep, fitFunc->GetParameter( uDep ) );
-          transfer.SetError( uPar, uDep, fitFunc->GetParError( uDep ) );
+        for ( Int_t uDep = 0; uDep < nPar; ++uDep ) {
+          if ( ! transfer.SetParameter( uPar, uDep, fitFunc->GetParameter( uDep ) ) ) {
+            std::cout << myName_ << " --> ERROR:" << std::endl
+                      << "    parameter index pair (" << uPar << "," << uDep << ") not available in transfer function"; dirOut->pwd();
+          }
+          if ( ! transfer.SetError( uPar, uDep, fitFunc->GetParError( uDep ) ) ) {
+            std::cout << myName_ << " --> ERROR:" << std::endl
+                      << "    error index pair (" << uPar << "," << uDep << ") not available in transfer function"; dirOut->pwd();
+          }
         }
       }
       else {
@@ -890,10 +897,19 @@ void FitTopTransferFunctionsRunner::dependencyPerCategoryBin( const std::string&
       const std::string entryHisto( "from " + titlePtT_ + " bins" );
       histosDependency.legVecPtPar.at( uPar )->AddEntry( histosDependency.histVecPtPar.at( uPar ), entryHisto.c_str(), "LEP" );
       const std::string entryFit( "fitted " + titlePtT_ + " dependency" );
-      histosDependency.legVecPtPar.at( uPar )->AddEntry( fitFuncDep, entryFit.c_str(), "L" );
+      histosDependency.legVecPtPar.at( uPar )->AddEntry( fitFunc, entryFit.c_str(), "L" );
       histosDependency.legVecPtPar.at( uPar )->Draw();
       for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosDependency.histVecPtPar.at( uPar )->GetName() + "." + formatPlots_.at( uForm ) ).c_str() );
     }
+  }
+
+  if ( verbose_ > 2 ) {
+    std::cout << myName_ << " --> DEBUG:" << std::endl
+                  << "    transfer function parameters in directory "; dirOut->pwd();
+    for ( unsigned i = 0; i < transfer.NParFit(); ++i ) {
+      std::cout << "[" << i << "]: \t"  << transfer.Print( i ) << std::endl;
+    }
+    std::cout << "[all]: \t" << transfer.PrintFit2D() << std::endl;
   }
 
 }

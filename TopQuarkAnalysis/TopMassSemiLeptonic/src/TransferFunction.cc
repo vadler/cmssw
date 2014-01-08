@@ -25,7 +25,7 @@ TransferFunction::TransferFunction( const TransferFunction& transfer )
 , dependency_( transfer.Dependency() )
 , comment_( transfer.Comment() )
 {
-  sigmaPars_ = transfer.SigmaPars();
+  sigmaPars_ = transfer.sigmaPars_;
   ClearParameters();
   pars1D_    = transfer.pars1D_;
   errs1D_    = transfer.errs1D_;
@@ -224,18 +224,6 @@ void TransferFunction::ClearErrors()
 
 // Getters
 
-double TransferFunction::Parameter( unsigned i, unsigned j ) const
-{
-  if ( i < NParFit() && j < pars2D_.at( i ).size() ) return pars2D_.at( i ).at( j );
-  return transferFunctionInitConst;
-}
-
-double TransferFunction::Error( unsigned i, unsigned j ) const
-{
-  if ( i < NParFit() && j < errs2D_.at( i ).size() ) return errs2D_.at( i ).at( j );
-  return transferFunctionInitConst;
-}
-
 // Evaluate
 
 TransferFunction TransferFunction::FunctionErrorsUp() const
@@ -243,7 +231,7 @@ TransferFunction TransferFunction::FunctionErrorsUp() const
   TransferFunction transferFunction( *this );
   for ( unsigned i = 0; i < transferFunction.NParFit(); ++i ) {
     transferFunction.SetParameter( i, transferFunction.Parameter( i ) + transferFunction.Error( i ) );
-    unsigned nPar( transferFunction.SigmaPars().find( i ) == transferFunction.SigmaPars().end() ? transferFunction.NParDependency() : transferFunction.NParResolution() );
+    unsigned nPar( transferFunction.sigmaPars_.find( i ) == transferFunction.sigmaPars_.end() ? transferFunction.NParDependency() : transferFunction.NParResolution() );
     for ( unsigned j = 0; j < nPar; ++j ) {
       transferFunction.SetParameter( i, j, transferFunction.Parameter( i, j ) + transferFunction.Error( i, j ) );
     }
@@ -257,7 +245,7 @@ TransferFunction TransferFunction::FunctionErrorsDown() const
   TransferFunction transferFunction( *this );
   for ( unsigned i = 0; i < transferFunction.NParFit(); ++i ) {
     transferFunction.SetParameter( i, transferFunction.Parameter( i ) - transferFunction.Error( i ) );
-    unsigned nPar( transferFunction.SigmaPars().find( i ) == transferFunction.SigmaPars().end() ? transferFunction.NParDependency() : transferFunction.NParResolution() );
+    unsigned nPar( transferFunction.sigmaPars_.find( i ) == transferFunction.sigmaPars_.end() ? transferFunction.NParDependency() : transferFunction.NParResolution() );
     for ( unsigned j = 0; j < nPar; ++j ) {
       transferFunction.SetParameter( i, j, transferFunction.Parameter( i, j ) - transferFunction.Error( i, j ) );
     }
@@ -281,7 +269,7 @@ TF2 TransferFunction::Function( int norm ) const
   for ( unsigned i = 0; i < NParFit(); ++i ) {
     if ( ( int )i == norm ) continue;
     TString funcStr;
-    if ( SigmaPars().find( i ) == SigmaPars().end() ) {
+    if ( sigmaPars_.find( i ) == sigmaPars_.end() ) {
       if ( DependencyFunction().empty() && ! DependencyFunctionString().empty() ) {
         funcStr = TString( DependencyFunctionString() );
       }
@@ -336,7 +324,7 @@ TF1 TransferFunction::Function( double dependencyValue, int norm ) const
   std::vector< double > pars;
   for ( unsigned i = 0; i < NParFit(); ++i ) {
     if ( ( int )i == norm ) continue;
-    if ( SigmaPars().find( i ) == SigmaPars().end() ) {
+    if ( sigmaPars_.find( i ) == sigmaPars_.end() ) {
       TF1 depFunc( GetDependencyFunction() );
       for ( unsigned j = 0; j < NParDependency(); ++j ) {
         depFunc.SetParameter( ( Int_t )j, ( Double_t )( Parameter( i, j ) ) );
@@ -439,7 +427,7 @@ TF1 TransferFunction::GetFitFunction( double dependencyValue, int norm ) const
       fitFunc.SetParameter( ( Int_t )i, 1. );
       continue;
     }
-    if ( SigmaPars().find( i ) == SigmaPars().end() ) {
+    if ( sigmaPars_.find( i ) == sigmaPars_.end() ) {
       TF1 depFunc( GetDependencyFunction() );
       for ( unsigned j = 0; j < NParDependency(); ++j ) {
         depFunc.SetParameter( ( Int_t )j, ( Double_t )( Parameter( i, j ) ) );
@@ -517,7 +505,7 @@ std::string TransferFunction::Print( bool only1D, bool useNan ) const
 std::string TransferFunction::Print( unsigned i, bool useNan ) const
 {
   TF1 func;
-  if ( SigmaPars().find( i ) == SigmaPars().end() ) {
+  if ( sigmaPars_.find( i ) == sigmaPars_.end() ) {
     if ( DependencyFunction().empty() && ! DependencyFunctionString().empty() ) {
       func = TF1( "func", DependencyFunctionString().c_str() );
     }
@@ -540,7 +528,7 @@ std::string TransferFunction::Print( unsigned i, bool useNan ) const
     }
   }
 
-  if ( ( SigmaPars().find( i ) == SigmaPars().end() && ( ! DependencyFunction().empty() || ! DependencyFunctionString().empty() ) ) || ( SigmaPars().find( i ) != SigmaPars().end() && ( ! ResolutionFunction().empty() || ! ResolutionFunctionString().empty() ) ) ) {
+  if ( ( sigmaPars_.find( i ) == sigmaPars_.end() && ( ! DependencyFunction().empty() || ! DependencyFunctionString().empty() ) ) || ( sigmaPars_.find( i ) != sigmaPars_.end() && ( ! ResolutionFunction().empty() || ! ResolutionFunctionString().empty() ) ) ) {
     TString depStr( func.GetExpFormula( "p" ) );
     depStr.ReplaceAll( "x", Dependency() );
     TString failStr( "e" + Dependency() + "p" );
@@ -550,7 +538,7 @@ std::string TransferFunction::Print( unsigned i, bool useNan ) const
   }
   else {
     std::stringstream print( std::ios_base::out );
-    unsigned nPar( SigmaPars().find( i ) == SigmaPars().end() ? NParDependency() : NParResolution() );
+    unsigned nPar( sigmaPars_.find( i ) == sigmaPars_.end() ? NParDependency() : NParResolution() );
     for ( unsigned j = 0; j < nPar; ++j ) {
       if ( j > 0 ) print << " \t";
       if ( useNan && Parameter( i, j ) == transferFunctionInitConst )

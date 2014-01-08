@@ -31,7 +31,7 @@ fitOptions = 'IBRS+'
 ### Configuration ###
 
 fitTopTransferFunctions = cms.PSet(
-  verbose   = cms.uint32( 10 )
+  verbose   = cms.uint32( 3 )
 , maxEvents = cms.int32( -1 )
 , useSymm   = cms.bool( True )
 , useAlt    = cms.bool( True )
@@ -42,7 +42,7 @@ fitTopTransferFunctions = cms.PSet(
 )
 
 fitTopTransferFunctions.io = cms.PSet(
-  fullStats    = cms.bool( False )
+  fullStats    = cms.bool( True )
 , sample       = cms.string( sample )
 , inputFile    = cms.string( '' ) # defined below
 , refSel       = cms.bool( True )
@@ -52,7 +52,7 @@ fitTopTransferFunctions.io = cms.PSet(
 , writeFiles   = cms.bool( True )
 , writeFilesPt = cms.bool( True )
 , pathOut      = cms.string( '' ) # defined below
-, plot         = cms.bool( False )
+, plot         = cms.bool( True )
 , pathPlots    = cms.string( '' ) # defined below
 , formatPlots  = cms.vstring( 'png'
                             #, 'pdf'
@@ -73,7 +73,7 @@ fitTopTransferFunctions.objects = cms.PSet(
   , maxDR              = cms.double( 0.1 )
   , fitFunction        = cms.string( dGauss )
   , dependencyFunction = cms.string( squared )
-  , resolutionFunction = cms.string( squared )
+  , resolutionFunction = cms.string( resolution )
   , fitEtaBins         = cms.bool( False )
   , fitMaxPt           = cms.double( 999999. )
   , fitRange           = cms.double( 5.0 ) # if not 'sGauss', should be widthFactor

@@ -3,6 +3,8 @@ import FWCore.ParameterSet.Config as cms
 
 ### Switches ###
 
+test = True
+
 # Origin of existing resolution functions
 #era    = 'Summer11'
 era    = 'Summer11-coarseEta'
@@ -74,7 +76,7 @@ fitTopTransferFunctions.objects = cms.PSet(
   , fitFunction        = cms.string( dGauss )
   , dependencyFunction = cms.string( squared )
   , resolutionFunction = cms.string( squared )
-  , fitEtaBins         = cms.bool( False )
+  , fitEtaBins         = cms.bool( True )
   , fitMaxPt           = cms.double( 999999. )
   , fitRange           = cms.double( 5.0 ) # if not 'sGauss', should be widthFactor
   , fitOptions         = cms.string( fitOptions )
@@ -149,9 +151,8 @@ if fitTopTransferFunctions.refGen.value() is True:
 if fitTopTransferFunctions.useSymm.value() is True:
   name += 'Symm'
 inputFile = 'analyzeHitFit_from%s_%s.root'%( era, sample )
-logFile    = inputFile.replace( 'analyzeHitFit', 'fitTopTransferFunctions' )
-outputFile = logFile
-logFile    = logFile.replace( 'root', 'log' )
+outputFile = inputFile.replace( 'analyzeHitFit', 'fitTopTransferFunctions' )
+logFile = outputFile.replace( 'root', 'log' )
 if fitTopTransferFunctions.io.usePileUp.value() is True:
   outputFile = outputFile.replace( '.root', '_PileUp.root' )
   logFile    = logFile.replace( '.log', '_PileUp.log' )
@@ -170,6 +171,10 @@ else:
 logFile = logFile.replace( '_.', '_' + name + '.', 1 )
 logFile = logFile.replace( '_.', '.', 1 )
 cfgFile    = logFile.replace( '.log', '_cfg.py' )
+if test:
+  outputFile = outputFile.replace( 'root', 'test.root' )
+  logFile = logFile.replace( 'log', 'test.log' )
+  cfgFile = cfgFile.replace( 'py', 'test.py' )
 inputFile  = 'file:%s/output/%s'%( os.getenv( "CMSSW_BASE" ), inputFile )
 outputFile = 'file:%s/output/%s'%( os.getenv( "CMSSW_BASE" ), outputFile )
 logFile    = '%s/output/%s'%( os.getenv( "CMSSW_BASE" ), logFile )

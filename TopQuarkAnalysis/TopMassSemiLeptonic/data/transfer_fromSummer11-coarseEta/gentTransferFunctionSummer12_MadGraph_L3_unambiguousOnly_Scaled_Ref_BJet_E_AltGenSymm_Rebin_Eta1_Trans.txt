@@ -2,7 +2,8 @@ for 0.87 <= |#eta| < 1.479
 --------------------------------------------------------------------------------
 
 FitFunction       : 	[0]*(exp(-0.5*((x-[1])/[2])**2)+[3]*exp(-0.5*((x-[4])/[5])**2))/(([2]+[3]*[5])*sqrt(2*pi))	(constructed from C++ class)
-DependencyFunction: 	[0]+[1]*x+[2]*x**2	(constructed from C++ class) 	on E^{GEN} (GeV)_parton
+DependencyFunction: 	[0]+[1]*x+[2]*x**2	(constructed from C++ class) 	on E_parton
+ResolutionFunction: 	[0]+[1]*x+[2]*x**2	(constructed from C++ class) 	on E_parton
 Comment           : 	E_parton <= 999999, E_parton >= 0, DeltaR(parton, reco) <= 0.1, minEntries / bins: 5
 
 Parameters 1D:
@@ -14,12 +15,12 @@ Parameters 1D:
 [5]: 	33.929+-0.427488
 [all]: 	(1.0003879926037826)*(exp(-0.5*((x-(0.078490157603980037))/(14.360059329907051))**2)+(0.22301703411647389)*exp(-0.5*((x-(10.79922563783164))/(33.928985412754955))**2))/(((14.360059329907051)+(0.22301703411647389)*(33.928985412754955))*sqrt(2*pi))
 
-Parameters 2D (DependencyFunction):
-[0]: 	(0.976633+(0.000160412*E^{GEN} (GeV)_parton))+(-1.62468e-07*sq(E^{GEN} (GeV)_parton))
-[1]: 	(-0.907334+(0.0346083*E^{GEN} (GeV)_parton))+(-0.000126721*sq(E^{GEN} (GeV)_parton))
-[2]: 	(-1.76281+(0.189914*E^{GEN} (GeV)_parton))+(-0.000349221*sq(E^{GEN} (GeV)_parton))
-[3]: 	(-0.250804+(0.00304783*E^{GEN} (GeV)_parton))+(-3.12743e-06*sq(E^{GEN} (GeV)_parton))
-[4]: 	(-29.6523+(0.379215*E^{GEN} (GeV)_parton))+(-0.000592439*sq(E^{GEN} (GeV)_parton))
-[5]: 	(-3.73433+(0.250876*E^{GEN} (GeV)_parton))+(-0.00020684*sq(E^{GEN} (GeV)_parton))
-[all]: 	((0.976633+(0.000160412*E^{GEN} (GeV)_parton))+(-1.62468e-07*sq(E^{GEN} (GeV)_parton)))*(exp(-0.5*((x-((-0.907334+(0.0346083*E^{GEN} (GeV)_parton))+(-0.000126721*sq(E^{GEN} (GeV)_parton))))/((-1.76281+(0.189914*E^{GEN} (GeV)_parton))+(-0.000349221*sq(E^{GEN} (GeV)_parton))))**2)+((-0.250804+(0.00304783*E^{GEN} (GeV)_parton))+(-3.12743e-06*sq(E^{GEN} (GeV)_parton)))*exp(-0.5*((x-((-29.6523+(0.379215*E^{GEN} (GeV)_parton))+(-0.000592439*sq(E^{GEN} (GeV)_parton))))/((-3.73433+(0.250876*E^{GEN} (GeV)_parton))+(-0.00020684*sq(E^{GEN} (GeV)_parton))))**2))/((((-1.76281+(0.189914*E^{GEN} (GeV)_parton))+(-0.000349221*sq(E^{GEN} (GeV)_parton)))+((-0.250804+(0.00304783*E^{GEN} (GeV)_parton))+(-3.12743e-06*sq(E^{GEN} (GeV)_parton)))*((-3.73433+(0.250876*E^{GEN} (GeV)_parton))+(-0.00020684*sq(E^{GEN} (GeV)_parton))))*sqrt(2*pi))
+Parameters 2D:
+[0]: 	(0.976633+(0.000160412*E_parton))+(-1.62468e-07*sq(E_parton))
+[1]: 	(-0.907334+(0.0346083*E_parton))+(-0.000126721*sq(E_parton))
+[2]: 	(-1.76281+(0.189914*E_parton))+(-0.000349221*sq(E_parton))
+[3]: 	(-0.250804+(0.00304783*E_parton))+(-3.12743e-06*sq(E_parton))
+[4]: 	(-29.6523+(0.379215*E_parton))+(-0.000592439*sq(E_parton))
+[5]: 	(-3.73433+(0.250876*E_parton))+(-0.00020684*sq(E_parton))
+[all]: 	((0.976633+(0.000160412*E_parton))+(-1.62468e-07*sq(E_parton)))*(exp(-0.5*((x-((-0.907334+(0.0346083*E_parton))+(-0.000126721*sq(E_parton))))/((-1.76281+(0.189914*E_parton))+(-0.000349221*sq(E_parton))))**2)+((-0.250804+(0.00304783*E_parton))+(-3.12743e-06*sq(E_parton)))*exp(-0.5*((x-((-29.6523+(0.379215*E_parton))+(-0.000592439*sq(E_parton))))/((-3.73433+(0.250876*E_parton))+(-0.00020684*sq(E_parton))))**2))/((((-1.76281+(0.189914*E_parton))+(-0.000349221*sq(E_parton)))+((-0.250804+(0.00304783*E_parton))+(-3.12743e-06*sq(E_parton)))*((-3.73433+(0.250876*E_parton))+(-0.00020684*sq(E_parton))))*sqrt(2*pi))
 

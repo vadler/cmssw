@@ -155,6 +155,7 @@ namespace my {
       /// - run only once;
       /// - run only during first loop over categories due to the usage of std::vector::back().
       void fillPerCategoryBin( unsigned uEta, HistosTrans& histosTrans, HistosTransEta& histosTransEta, double minPt, double maxEta, double maxDR );
+      void plotFillPerCategoryBin( HistosTrans& histosTrans );
       void fitPerCategoryLoop( const std::string& objCat, bool scale = false );
       void fitPerCategoryBin( const std::string& objCat, TDirectory* dirOut, TransferFunction& transfer, TransferFunctionCollection& transferColl, HistosTransEta& histosTransEta, std::vector< HistosDependency >& histosVecDependency, bool scale = false );
       void fitPerCategoryFit( TransferFunction& transfer, TH1D* histoTrans, HistosDependency* histosDependency, int uPt, bool scale = false );

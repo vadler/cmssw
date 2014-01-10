@@ -39,7 +39,6 @@ FitTopTransferFunctionsRunner::FitTopTransferFunctionsRunner( const std::string&
 , useNonT_( config_.getParameter< bool >( "useNonT" ) )
 , refGen_( config_.getParameter< bool >( "refGen" ) )
 , scale_( config_.getParameter< bool >( "scale" ) )
-, overwrite_( config_.getParameter< bool >( "overwrite" ) ? TObject::kOverwrite : 0 )
 , objCats_( config_.getParameter< edm::ParameterSet >( "objects" ).getParameterNamesForType< edm::ParameterSet >() )
 {
 
@@ -60,6 +59,7 @@ FitTopTransferFunctionsRunner::FitTopTransferFunctionsRunner( const std::string&
   usePileup_ = configIO.getParameter< bool >( "usePileUp" );
   const std::string& configIOPileUp( configIO.getParameter< std::string >( "pileUp" ) );
   const std::string& configIOOutFile( configIO.getParameter< std::string >( "outputFile" ) );
+  overwrite_    = configIO.getParameter< bool >( "overwrite" ) ? TObject::kOverwrite : 0 );
   writeFiles_   = configIO.getParameter< bool >( "writeFiles" );
   writeFilesPt_ = configIO.getParameter< bool >( "writeFilesPt" );
   sample_       = configIO.getParameter< std::string >( "sample" );

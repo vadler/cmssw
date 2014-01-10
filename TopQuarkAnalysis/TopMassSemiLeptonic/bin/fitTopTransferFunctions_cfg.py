@@ -40,7 +40,6 @@ fitTopTransferFunctions = cms.PSet(
 , useNonT   = cms.bool( True )
 , refGen    = cms.bool( True )
 , scale     = cms.bool( True )
-, overwrite = cms.bool( False )
 )
 
 fitTopTransferFunctions.io = cms.PSet(
@@ -51,6 +50,7 @@ fitTopTransferFunctions.io = cms.PSet(
 , usePileUp    = cms.bool( False )
 , pileUp       = cms.string( 'PileUpWeightTrue' ) # 'PileUpWeightTrue' or 'PileUpWeightObserved'
 , outputFile   = cms.string( '' ) # defined below
+, overwrite    = cms.bool( False )
 , writeFiles   = cms.bool( True )
 , writeFilesPt = cms.bool( True )
 , pathOut      = cms.string( '' ) # defined below

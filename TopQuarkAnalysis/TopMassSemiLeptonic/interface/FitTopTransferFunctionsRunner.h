@@ -31,11 +31,11 @@ namespace my {
       bool                       useNonT_;
       bool                       refGen_;
       bool                       scale_;
-      int                        overwrite_;
       bool                       writeFiles_;
       bool                       writeFilesPt_;
       bool                       refSel_;
       bool                       usePileup_;
+      int                        overwrite_;
       std::string                sample_;
       std::string                pathOut_;
       bool                       plot_;

@@ -333,10 +333,9 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
     const std::string nameEtaRebin( nameRebin + "_" + binEta );
     HistosTransEta histosRebinTransEta( objCat, nameEtaRebin, configObjDeltaPtBins, configObjDeltaPtMax, nPtBins, dataContainer.ptBins(), titleTrans_, baseTitlePt_, titlePtT_, titlePt_, titleEta_, histosVecTransEta.at( uEta), configObjWidthFactor );
     // Fill
-    fillPerCategoryBin( uEta, histosRebinTrans, histosRebinTransEta, configObjMinPt, configObjMaxEta, configObjMaxDR );
+    fillPerCategoryBin( uEta, histosRebinTrans, histosRebinTransEta, configObjMinPt, configObjMaxEta, configObjMaxDR, true );
     histosRebinVecTransEta.push_back( histosRebinTransEta );
   } // loop:uEta < nEtaBins
-  if ( plot_ ) plotFillPerCategoryBin( histosRebinTrans );
   histosVecRebinTrans_.push_back( histosRebinTrans );
   histosVecRebinVecTransEta_.push_back( histosRebinVecTransEta );
 
@@ -371,7 +370,7 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
 }
 
 
-void FitTopTransferFunctionsRunner::fillPerCategoryBin( unsigned uEta, HistosTrans& histosTrans, HistosTransEta& histosTransEta, double minPt, double maxEta, double maxDR )
+void FitTopTransferFunctionsRunner::fillPerCategoryBin( unsigned uEta, HistosTrans& histosTrans, HistosTransEta& histosTransEta, double minPt, double maxEta, double maxDR, bool rebin )
 {
   TCanvas canvas;
   // Loop over pt bins
@@ -388,17 +387,19 @@ void FitTopTransferFunctionsRunner::fillPerCategoryBin( unsigned uEta, HistosTra
         histosTrans.histVecPtTrans.at( uPt )->Fill( value, weight );
         histosTransEta.histTrans->Fill( value, weight );
         histosTrans.histTrans->Fill( value, weight );
-        const Double_t etaGenSymm( useSymm_ ? std::fabs( objectData_.back().etaGenPt( uEta, uPt ).at( uEntry ) ) : objectData_.back().etaGenPt( uEta, uPt ).at( uEntry ) );
-        const Double_t etaSymm( useSymm_ ? std::fabs( objectData_.back().etaPt( uEta, uPt ).at( uEntry ) ) : objectData_.back().etaPt( uEta, uPt ).at( uEntry ) );
-        const Double_t etaRef( refGen_ ? etaGenSymm : etaSymm );
-        histosTransEta.histTransMapPt->Fill( ptRef, value, weight );
-        histosTrans.histVecPtTransMapEta.at( uPt )->Fill( etaRef, value, weight);
-        histosTrans.histTransMapPt->Fill( ptRef, value, weight );
-        histosTrans.histTransMapEta->Fill( etaRef, value, weight );
+        if ( ! rebin ) {
+          const Double_t etaGenSymm( useSymm_ ? std::fabs( objectData_.back().etaGenPt( uEta, uPt ).at( uEntry ) ) : objectData_.back().etaGenPt( uEta, uPt ).at( uEntry ) );
+          const Double_t etaSymm( useSymm_ ? std::fabs( objectData_.back().etaPt( uEta, uPt ).at( uEntry ) ) : objectData_.back().etaPt( uEta, uPt ).at( uEntry ) );
+          const Double_t etaRef( refGen_ ? etaGenSymm : etaSymm );
+          histosTransEta.histTransMapPt->Fill( ptRef, value, weight );
+          histosTrans.histVecPtTransMapEta.at( uPt )->Fill( etaRef, value, weight);
+          histosTrans.histTransMapPt->Fill( ptRef, value, weight );
+          histosTrans.histTransMapEta->Fill( etaRef, value, weight );
+        }
       }
     } // loop: uEntry < objectData_.back().sizePt( uEta, uPt )
   } // loop:uPt < nPtBins
-  if ( plot_ ) {
+  if ( plot_ && ! rebin ) {
     histosTransEta.histTransMapPt->Draw();
     for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosTransEta.histTransMapPt->GetName() + "." + formatPlots_.at( uForm )  ).c_str() );
   }
@@ -904,10 +905,11 @@ bool FitTopTransferFunctionsRunner::transferPerCategory( unsigned uCat )
               << myName_ << " --> INFO:" << std::endl
               << "    Transfer function determination for object category " << objCat << std::endl;
   }
+
   if ( verbose_ > 2 ) {
     std::cout << std::endl
               << myName_ << " --> DEBUG:" << std::endl
-              << "    Scaled transfer functions... " << std::endl;
+              << "    Transfer functions... " << std::endl;
   }
   transferPerCategoryLoop( objCat );
 
@@ -999,10 +1001,11 @@ bool FitTopTransferFunctionsRunner::compatibilityPerCategory( unsigned uCat )
               << myName_ << " --> INFO:" << std::endl
               << "    Transfer function compatibility for object category " << objCat << std::endl;
   }
+
   if ( verbose_ > 2 ) {
     std::cout << std::endl
               << myName_ << " --> DEBUG:" << std::endl
-              << "    Scaled transfer function compatibilities... " << std::endl;
+              << "    Transfer function compatibilities... " << std::endl;
   }
   compatibilityPerCategoryLoop( objCat );
 
@@ -1141,10 +1144,11 @@ bool FitTopTransferFunctionsRunner::writeFilesPerCategory( unsigned uCat )
               << "    Writing files for object category " << objCat << std::endl
               << "        to " << pathOut_ << std::endl;
   }
+
   if ( verbose_ > 2 ) {
     std::cout << std::endl
               << myName_ << " --> DEBUG:" << std::endl
-              << "    Scaled transfer functions... " << std::endl;
+              << "    Transfer function files... " << std::endl;
   }
   writeFilesPerCategoryLoop( objCat );
 

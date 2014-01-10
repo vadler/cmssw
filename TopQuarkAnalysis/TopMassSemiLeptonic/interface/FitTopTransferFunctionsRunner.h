@@ -154,7 +154,7 @@ namespace my {
       /// These functions are private, since their use underlies certain restrictions, like e.g.:
       /// - run only once;
       /// - run only during first loop over categories due to the usage of std::vector::back().
-      void fillPerCategoryBin( unsigned uEta, HistosTrans& histosTrans, HistosTransEta& histosTransEta, double minPt, double maxEta, double maxDR );
+      void fillPerCategoryBin( unsigned uEta, HistosTrans& histosTrans, HistosTransEta& histosTransEta, double minPt, double maxEta, double maxDR, bool rebin = false );
       void plotFillPerCategoryBin( HistosTrans& histosTrans );
       void fitPerCategoryLoop( const std::string& objCat );
       void fitPerCategoryBin( const std::string& objCat, TDirectory* dirOut, TransferFunction& transfer, TransferFunctionCollection& transferColl, HistosTransEta& histosTransEta, std::vector< HistosDependency >& histosVecDependency );

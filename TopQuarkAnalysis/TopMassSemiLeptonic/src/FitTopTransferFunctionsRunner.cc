@@ -402,7 +402,7 @@ void FitTopTransferFunctionsRunner::fillPerCategoryBin( unsigned uEta, HistosTra
     } // loop: uEntry < objectData_.back().sizePt( uEta, uPt )
   } // loop:uPt < nPtBins
   if ( plot_ && ! rebin && fitEtaBins_ ) {
-    histosTransEta.histTransMapPt->Draw();
+    histosTransEta.histTransMapPt->Draw( "ColZ" );
     for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosTransEta.histTransMapPt->GetName() + "." + formatPlots_.at( uForm )  ).c_str() );
   }
 }
@@ -413,12 +413,12 @@ void FitTopTransferFunctionsRunner::plotFillPerCategoryBin( HistosTrans& histosT
   TCanvas canvas;
   // Loop over pt bins
   for ( unsigned uPt = 0; uPt < objectData_.back().nPtBins(); ++uPt ) {
-    histosTrans.histVecPtTransMapEta.at( uPt )->Draw();
+    histosTrans.histVecPtTransMapEta.at( uPt )->Draw( "ColZ" );
     for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosTrans.histVecPtTransMapEta.at( uPt )->GetName() + "." + formatPlots_.at( uForm ) ).c_str() );
   }
-  histosTrans.histTransMapPt->Draw();
+  histosTrans.histTransMapPt->Draw( "ColZ" );
   for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosTrans.histTransMapPt->GetName() + "." + formatPlots_.at( uForm )  ).c_str() );
-  histosTrans.histTransMapEta->Draw();
+  histosTrans.histTransMapEta->Draw( "ColZ" );
   for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosTrans.histTransMapEta->GetName() + "." + formatPlots_.at( uForm )  ).c_str() );
 }
 

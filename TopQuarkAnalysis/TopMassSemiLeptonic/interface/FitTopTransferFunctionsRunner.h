@@ -84,8 +84,6 @@ namespace my {
       std::vector< std::vector< HistosTransEta > > histosVecRebinVecTransEta_;
       std::vector< HistosTrans >                   histosVecRebinScaleTrans_;
       std::vector< std::vector< HistosTransEta > > histosVecRebinScaleVecTransEta_;
-      std::vector< HistosDependency >                histosVecRebinDependency_;
-      std::vector< std::vector< HistosDependency > > histosVecRebinVecDependencyEta_;
       std::vector< HistosDependency >                histosVecRebinScaleDependency_;
       std::vector< std::vector< HistosDependency > > histosVecRebinScaleVecDependencyEta_;
       // Transfer functions

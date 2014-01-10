@@ -59,7 +59,7 @@ FitTopTransferFunctionsRunner::FitTopTransferFunctionsRunner( const std::string&
   usePileup_ = configIO.getParameter< bool >( "usePileUp" );
   const std::string& configIOPileUp( configIO.getParameter< std::string >( "pileUp" ) );
   const std::string& configIOOutFile( configIO.getParameter< std::string >( "outputFile" ) );
-  overwrite_    = configIO.getParameter< bool >( "overwrite" ) ? TObject::kOverwrite : 0 );
+  overwrite_    = configIO.getParameter< bool >( "overwrite" ) ? TObject::kOverwrite : 0;
   writeFiles_   = configIO.getParameter< bool >( "writeFiles" );
   fit0D_        = configIO.getParameter< bool >( "fit0D" );
   fit1D_        = configIO.getParameter< bool >( "fit1D" );
@@ -982,8 +982,7 @@ void FitTopTransferFunctionsRunner::transferPerCategoryBin( const std::string& o
   transferFunction->SetNpy();
   transferFunction->GetXaxis()->SetTitle( titleTrans_.c_str() );
   transferFunction->GetYaxis()->SetTitle( titlePt_.c_str() );
-  if ( overwrite_ ) transferFunction->Write( 0, TObject::kOverwrite );
-  else              transferFunction->Write();
+  transferFunction->Write( 0, overwrite_ );
 
   for ( unsigned uPt = 0; uPt < histosTransEta.histVecPtTrans.size(); ++uPt ) {
     const std::string binPt( boost::lexical_cast< std::string >( uPt ) );

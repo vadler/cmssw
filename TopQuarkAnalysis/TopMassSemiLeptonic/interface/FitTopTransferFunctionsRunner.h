@@ -80,6 +80,8 @@ namespace my {
       TF1* dependencyFunction_;
       TF1* resolutionFunction_;
       // Histograms
+      std::vector< HistosTrans >                   histosVecScaleTrans_;
+      std::vector< std::vector< HistosTransEta > > histosVecScaleVecTransEta_;
       std::vector< HistosTrans >                   histosVecRebinTrans_;
       std::vector< std::vector< HistosTransEta > > histosVecRebinVecTransEta_;
       std::vector< HistosTrans >                   histosVecRebinScaleTrans_;

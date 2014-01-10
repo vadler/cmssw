@@ -310,6 +310,34 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
   } // loop:uEta < nEtaBins
   if ( plot_ ) plotFillPerCategoryBin( histosTrans );
 
+  // Add scaled histograms
+  if ( verbose_ > 2 ) {
+    std::cout << std::endl
+              << myName_ << " --> DEBUG:" << std::endl
+              << "    Scaling histograms... " << std::endl;
+  }
+  // Create histograms
+  dirsOutObjCatSubFit_.back()->cd();
+  if ( verbose_ > 2 ) gDirectory->pwd();
+  std::string nameScale( name + "_Scale" );
+  HistosTrans histosScaleTrans( histosTrans, nameScale, baseTitlePt_ );
+  histosVecScaleTrans_.push_back( histosScaleTrans );
+  // Loop over eta bins
+  if ( fitEtaBins_ ) {
+    std::vector< HistosTransEta > histosScaleVecTransEta;
+    for ( unsigned uEta = 0; uEta < nEtaBins; ++uEta ) {
+      // Create histograms
+      dirsOutObjCatSubFitEta_.back().at( uEta )->cd();
+      if ( verbose_ > 2 ) gDirectory->pwd();
+      const std::string binEta( gDirectory->GetName() );
+      const std::string nameEtaScale( nameScale + "_" + binEta );
+      HistosTransEta histosScaleTransEta( histosVecTransEta.at( uEta ), nameEtaScale, baseTitlePt_ );
+      // Fill
+      histosScaleVecTransEta.push_back( histosScaleTransEta );
+    } // loop:uEta < nEtaBins
+    histosVecScaleVecTransEta_.push_back( histosScaleVecTransEta );
+  }
+
   // Re-bin histograms
   if ( verbose_ > 2 ) {
     std::cout << std::endl
@@ -339,7 +367,7 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
   histosVecRebinTrans_.push_back( histosRebinTrans );
   if ( fitEtaBins_ ) histosVecRebinVecTransEta_.push_back( histosRebinVecTransEta );
 
-  // Add scaled histograms
+  // Add scaled re-binned histograms
   if ( verbose_ > 2 ) {
     std::cout << std::endl
               << myName_ << " --> DEBUG:" << std::endl
@@ -348,7 +376,7 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
   // Create histograms
   dirsOutObjCatSubFit_.back()->cd();
   if ( verbose_ > 2 ) gDirectory->pwd();
-  std::string nameRebinScale( nameRebin + "Scale" );
+  std::string nameRebinScale( name + "_RebinScale" );
   HistosTrans histosRebinScaleTrans( histosRebinTrans, nameRebinScale, baseTitlePt_, true );
   histosVecRebinScaleTrans_.push_back( histosRebinScaleTrans );
   // Loop over eta bins

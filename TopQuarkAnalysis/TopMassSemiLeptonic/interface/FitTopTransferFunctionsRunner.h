@@ -30,7 +30,6 @@ namespace my {
       bool                       useAlt_;
       bool                       useNonT_;
       bool                       refGen_;
-      bool                       scale_;
       bool                       writeFiles_;
       bool                       fit0D_;
       bool                       fit1D_;
@@ -156,7 +155,7 @@ namespace my {
       /// These functions are private, since their use underlies certain restrictions, like e.g.:
       /// - run only once;
       /// - run only during first loop over categories due to the usage of std::vector::back().
-      void fillPerCategoryBin( unsigned uEta, HistosTrans& histosTrans, HistosTransEta& histosTransEta, double minPt, double maxEta, double maxDR );
+      void fillPerCategoryBin( unsigned uEta, HistosTrans& histosTrans, HistosTransEta& histosTransEta, double minPt, double maxEta, double maxDR, bool scale = false );
       void plotFillPerCategoryBin( HistosTrans& histosTrans );
       void fitPerCategoryLoop( const std::string& objCat, bool scale = false );
       void fitPerCategoryBin( const std::string& objCat, TDirectory* dirOut, TransferFunction& transfer, TransferFunctionCollection& transferColl, HistosTransEta& histosTransEta, std::vector< HistosDependency >& histosVecDependency, bool scale = false );

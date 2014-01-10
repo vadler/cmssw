@@ -38,7 +38,6 @@ FitTopTransferFunctionsRunner::FitTopTransferFunctionsRunner( const std::string&
 , useAlt_( config_.getParameter< bool >( "useAlt" ) )
 , useNonT_( config_.getParameter< bool >( "useNonT" ) )
 , refGen_( config_.getParameter< bool >( "refGen" ) )
-, scale_( config_.getParameter< bool >( "scale" ) )
 , objCats_( config_.getParameter< edm::ParameterSet >( "objects" ).getParameterNamesForType< edm::ParameterSet >() )
 {
 
@@ -342,39 +341,37 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
   histosVecRebinVecTransEta_.push_back( histosRebinVecTransEta );
 
   // Add scaled histograms
-  if ( scale_ ) {
-    if ( verbose_ > 2 ) {
-      std::cout << std::endl
-                << myName_ << " --> DEBUG:" << std::endl
-                << "    Scaling re-binned histograms... " << std::endl;
-    }
-    // Create histograms
-    dirsOutObjCatSubFit_.back()->cd();
-    if ( verbose_ > 2 ) gDirectory->pwd();
-    std::string nameRebinScale( nameRebin + "Scale" );
-    HistosTrans histosRebinScaleTrans( histosRebinTrans, nameRebinScale, baseTitlePt_, true );
-    histosVecRebinScaleTrans_.push_back( histosRebinScaleTrans );
-    // Loop over eta bins
-    std::vector< HistosTransEta > histosRebinScaleVecTransEta;
-    for ( unsigned uEta = 0; uEta < nEtaBins; ++uEta ) {
-      // Create histograms
-      dirsOutObjCatSubFitEta_.back().at( uEta )->cd();
-      if ( verbose_ > 2 ) gDirectory->pwd();
-      const std::string binEta( gDirectory->GetName() );
-      const std::string nameEtaRebinScale( nameRebinScale + "_" + binEta );
-      HistosTransEta histosRebinScaleTransEta( histosVecRebinVecTransEta_.back().at( uEta ), nameEtaRebinScale, baseTitlePt_, true );
-      // Fill
-      histosRebinScaleVecTransEta.push_back( histosRebinScaleTransEta );
-    } // loop:uEta < nEtaBins
-    histosVecRebinScaleVecTransEta_.push_back( histosRebinScaleVecTransEta );
+  if ( verbose_ > 2 ) {
+    std::cout << std::endl
+              << myName_ << " --> DEBUG:" << std::endl
+              << "    Scaling re-binned histograms... " << std::endl;
   }
+  // Create histograms
+  dirsOutObjCatSubFit_.back()->cd();
+  if ( verbose_ > 2 ) gDirectory->pwd();
+  std::string nameRebinScale( nameRebin + "Scale" );
+  HistosTrans histosRebinScaleTrans( histosRebinTrans, nameRebinScale, baseTitlePt_, true );
+  histosVecRebinScaleTrans_.push_back( histosRebinScaleTrans );
+  // Loop over eta bins
+  std::vector< HistosTransEta > histosRebinScaleVecTransEta;
+  for ( unsigned uEta = 0; uEta < nEtaBins; ++uEta ) {
+    // Create histograms
+    dirsOutObjCatSubFitEta_.back().at( uEta )->cd();
+    if ( verbose_ > 2 ) gDirectory->pwd();
+    const std::string binEta( gDirectory->GetName() );
+    const std::string nameEtaRebinScale( nameRebinScale + "_" + binEta );
+    HistosTransEta histosRebinScaleTransEta( histosVecRebinVecTransEta_.back().at( uEta ), nameEtaRebinScale, baseTitlePt_, true );
+    // Fill
+    histosRebinScaleVecTransEta.push_back( histosRebinScaleTransEta );
+  } // loop:uEta < nEtaBins
+  histosVecRebinScaleVecTransEta_.push_back( histosRebinScaleVecTransEta );
 
   return true;
 
 }
 
 
-void FitTopTransferFunctionsRunner::fillPerCategoryBin( unsigned uEta, HistosTrans& histosTrans, HistosTransEta& histosTransEta, double minPt, double maxEta, double maxDR )
+void FitTopTransferFunctionsRunner::fillPerCategoryBin( unsigned uEta, HistosTrans& histosTrans, HistosTransEta& histosTransEta, double minPt, double maxEta, double maxDR, bool scale )
 {
   TCanvas canvas;
   // Loop over pt bins
@@ -390,13 +387,13 @@ void FitTopTransferFunctionsRunner::fillPerCategoryBin( unsigned uEta, HistosTra
         histosTrans.histVecPtTrans.at( uPt )->Fill( value, objectData_.back().weightPt( uEta, uPt ).at( uEntry ) );
         histosTransEta.histTrans->Fill( value, objectData_.back().weightPt( uEta, uPt ).at( uEntry ) );
         histosTrans.histTrans->Fill( value, objectData_.back().weightPt( uEta, uPt ).at( uEntry ) );
-        if ( ! ( scale_ && histosTransEta.histVecPtTrans.at( uPt )->Integral("width") == 0. ) ) {
+        if ( ! ( scale && histosTransEta.histVecPtTrans.at( uPt )->Integral("width") == 0. ) ) {
           const Double_t etaGenSymm( useSymm_ ? std::fabs( objectData_.back().etaGenPt( uEta, uPt ).at( uEntry ) ) : objectData_.back().etaGenPt( uEta, uPt ).at( uEntry ) );
           const Double_t etaSymm( useSymm_ ? std::fabs( objectData_.back().etaPt( uEta, uPt ).at( uEntry ) ) : objectData_.back().etaPt( uEta, uPt ).at( uEntry ) );
           const Double_t etaRef( refGen_ ? etaGenSymm : etaSymm );
-          const Double_t weightPt( scale_ ? objectData_.back().weightPt( uEta, uPt ).at( uEntry ) / histosTrans.histVecPtTrans.at( uPt )->Integral("width") : objectData_.back().weightPt( uEta, uPt ).at( uEntry ) );
-          const Double_t weightEta( scale_ ? objectData_.back().weightPt( uEta, uPt ).at( uEntry ) / histosTransEta.histTrans->Integral("width") : objectData_.back().weightPt( uEta, uPt ).at( uEntry ) );
-          const Double_t weightEtaPt( scale_ ? objectData_.back().weightPt( uEta, uPt ).at( uEntry ) / histosTransEta.histVecPtTrans.at( uPt )->Integral("width") : objectData_.back().weightPt( uEta, uPt ).at( uEntry ) );
+          const Double_t weightPt( scale ? objectData_.back().weightPt( uEta, uPt ).at( uEntry ) / histosTrans.histVecPtTrans.at( uPt )->Integral("width") : objectData_.back().weightPt( uEta, uPt ).at( uEntry ) );
+          const Double_t weightEta( scale ? objectData_.back().weightPt( uEta, uPt ).at( uEntry ) / histosTransEta.histTrans->Integral("width") : objectData_.back().weightPt( uEta, uPt ).at( uEntry ) );
+          const Double_t weightEtaPt( scale ? objectData_.back().weightPt( uEta, uPt ).at( uEntry ) / histosTransEta.histVecPtTrans.at( uPt )->Integral("width") : objectData_.back().weightPt( uEta, uPt ).at( uEntry ) );
           histosTransEta.histTransMapPt->Fill( ptRef, value, weightEtaPt );
           histosTrans.histVecPtTransMapEta.at( uPt )->Fill( etaRef, value, weightEtaPt);
           histosTrans.histTransMapPt->Fill( ptRef, value, weightPt );
@@ -687,18 +684,11 @@ bool FitTopTransferFunctionsRunner::fitPerCategory( unsigned uCat )
               << "        comment              : " << transferPt.Comment()            << std::endl;
   }
   if ( verbose_ > 2 ) {
-    if ( scale_ ) {
-      std::cout << std::endl
-                << myName_ << " --> DEBUG:" << std::endl
-                << "    Fitting scaled distributions... " << std::endl;
-    }
-    else {
-      std::cout << std::endl
-                << myName_ << " --> DEBUG:" << std::endl
-                << "    Fitting unscaled distributions... " << std::endl;
-    }
+    std::cout << std::endl
+              << myName_ << " --> DEBUG:" << std::endl
+              << "    Fitting scaled distributions... " << std::endl;
   }
-  fitPerCategoryLoop( objCat, scale_ );
+  fitPerCategoryLoop( objCat, true );
 
   return true;
 
@@ -812,18 +802,11 @@ bool FitTopTransferFunctionsRunner::dependencyPerCategory( unsigned uCat )
               << "    Dependency fitting for object category " << objCat << std::endl;
   }
   if ( verbose_ > 2 ) {
-    if ( scale_ ) {
-      std::cout << std::endl
-                << myName_ << " --> DEBUG:" << std::endl
-                << "    Fitting scaled dependencies... " << std::endl;
-    }
-    else {
-      std::cout << std::endl
-                << myName_ << " --> DEBUG:" << std::endl
-                << "    Fitting unscaled dependencies... " << std::endl;
-    }
+    std::cout << std::endl
+              << myName_ << " --> DEBUG:" << std::endl
+              << "    Fitting scaled dependencies... " << std::endl;
   }
-  dependencyPerCategoryLoop( objCat, scale_ );
+  dependencyPerCategoryLoop( objCat, true );
 
   return true;
 
@@ -931,18 +914,11 @@ bool FitTopTransferFunctionsRunner::transferPerCategory( unsigned uCat )
               << "    Transfer function determination for object category " << objCat << std::endl;
   }
   if ( verbose_ > 2 ) {
-    if ( scale_ ) {
-      std::cout << std::endl
-                << myName_ << " --> DEBUG:" << std::endl
-                << "    Scaled transfer functions... " << std::endl;
-    }
-    else {
-      std::cout << std::endl
-                << myName_ << " --> DEBUG:" << std::endl
-                << "    Unscaled transfer functions... " << std::endl;
-    }
+    std::cout << std::endl
+              << myName_ << " --> DEBUG:" << std::endl
+              << "    Scaled transfer functions... " << std::endl;
   }
-  transferPerCategoryLoop( objCat, scale_ );
+  transferPerCategoryLoop( objCat, true );
 
   return true;
 
@@ -1035,18 +1011,11 @@ bool FitTopTransferFunctionsRunner::compatibilityPerCategory( unsigned uCat )
               << "    Transfer function compatibility for object category " << objCat << std::endl;
   }
   if ( verbose_ > 2 ) {
-    if ( scale_ ) {
-      std::cout << std::endl
-                << myName_ << " --> DEBUG:" << std::endl
-                << "    Scaled transfer function compatibilities... " << std::endl;
-    }
-    else {
-      std::cout << std::endl
-                << myName_ << " --> DEBUG:" << std::endl
-                << "    Unscaled transfer function compatibilities... " << std::endl;
-    }
+    std::cout << std::endl
+              << myName_ << " --> DEBUG:" << std::endl
+              << "    Scaled transfer function compatibilities... " << std::endl;
   }
-  compatibilityPerCategoryLoop( objCat, scale_ );
+  compatibilityPerCategoryLoop( objCat, true );
 
   return true;
 
@@ -1202,18 +1171,11 @@ bool FitTopTransferFunctionsRunner::writeFilesPerCategory( unsigned uCat )
               << "        to " << pathOut_ << std::endl;
   }
   if ( verbose_ > 2 ) {
-    if ( scale_ ) {
-      std::cout << std::endl
-                << myName_ << " --> DEBUG:" << std::endl
-                << "    Scaled transfer functions... " << std::endl;
-    }
-    else {
-      std::cout << std::endl
-                << myName_ << " --> DEBUG:" << std::endl
-                << "    Unscaled transfer functions... " << std::endl;
-    }
+    std::cout << std::endl
+              << myName_ << " --> DEBUG:" << std::endl
+              << "    Scaled transfer functions... " << std::endl;
   }
-  writeFilesPerCategoryLoop( objCat, scale_ );
+  writeFilesPerCategoryLoop( objCat, true );
 
   return true;
 

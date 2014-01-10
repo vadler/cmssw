@@ -39,7 +39,6 @@ fitTopTransferFunctions = cms.PSet(
 , useAlt    = cms.bool( True )
 , useNonT   = cms.bool( True )
 , refGen    = cms.bool( True )
-, scale     = cms.bool( True )
 )
 
 fitTopTransferFunctions.io = cms.PSet(

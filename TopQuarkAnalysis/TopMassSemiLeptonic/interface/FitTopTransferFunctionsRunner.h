@@ -34,6 +34,7 @@ namespace my {
       bool                       fit0D_;
       bool                       fit1D_;
       bool                       fit2D_;
+      bool                       fitEtaBins_;
       bool                       refSel_;
       bool                       usePileup_;
       int                        overwrite_;
@@ -50,7 +51,6 @@ namespace my {
       double                     fitRange_;
       unsigned                   minEntriesFactor_;
       std::vector< unsigned >    excludeVec_;
-      bool                       fitEtaBins_;
       double                     fitMaxPt_;
       // Input
       TFile*                                   fileIn_;

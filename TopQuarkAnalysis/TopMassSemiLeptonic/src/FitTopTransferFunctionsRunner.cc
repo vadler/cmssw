@@ -63,6 +63,7 @@ FitTopTransferFunctionsRunner::FitTopTransferFunctionsRunner( const std::string&
   fit0D_        = configIO.getParameter< bool >( "fit0D" );
   fit1D_        = configIO.getParameter< bool >( "fit1D" );
   fit2D_        = configIO.getParameter< bool >( "fit2D" );
+  fitEtaBins_   = configIO.getParameter< bool >( "fitEtaBins" );
   sample_       = configIO.getParameter< std::string >( "sample" );
   pathOut_      = configIO.getParameter< std::string >( "pathOut" );
   plot_         = configIO.getParameter< bool >( "plot" );
@@ -306,93 +307,101 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
     HistosTransEta histosTransEta( objCat, nameEta, configObjDeltaPtBins, configObjDeltaPtMax, nPtBins, dataContainer.ptBins(), titleTrans_, baseTitlePt_, titlePtT_, titlePt_, titleEta_ );
     // Fill
     fillPerCategoryBin( uEta, histosTrans, histosTransEta, configObjMinPt, configObjMaxEta, configObjMaxDR );
-    if ( fitEtaBins_ ) histosVecTransEta.push_back( histosTransEta );
+    histosVecTransEta.push_back( histosTransEta );
   } // loop:uEta < nEtaBins
   if ( plot_ ) plotFillPerCategoryBin( histosTrans );
 
   // Add scaled histograms
-  if ( verbose_ > 2 ) {
-    std::cout << std::endl
-              << myName_ << " --> DEBUG:" << std::endl
-              << "    Scaling histograms... " << std::endl;
-  }
-  // Create histograms
-  dirsOutObjCatSubFit_.back()->cd();
-  if ( verbose_ > 2 ) gDirectory->pwd();
-  std::string nameScale( name + "_Scale" );
-  HistosTrans histosScaleTrans( histosTrans, nameScale, baseTitlePt_ );
-  histosVecScaleTrans_.push_back( histosScaleTrans );
-  // Loop over eta bins
-  if ( fitEtaBins_ ) {
-    std::vector< HistosTransEta > histosScaleVecTransEta;
-    for ( unsigned uEta = 0; uEta < nEtaBins; ++uEta ) {
-      // Create histograms
-      dirsOutObjCatSubFitEta_.back().at( uEta )->cd();
-      if ( verbose_ > 2 ) gDirectory->pwd();
-      const std::string binEta( gDirectory->GetName() );
-      const std::string nameEtaScale( nameScale + "_" + binEta );
-      HistosTransEta histosScaleTransEta( histosVecTransEta.at( uEta ), nameEtaScale, baseTitlePt_ );
-      // Fill
-      histosScaleVecTransEta.push_back( histosScaleTransEta );
-    } // loop:uEta < nEtaBins
-    histosVecScaleVecTransEta_.push_back( histosScaleVecTransEta );
+  if ( fit2D_ ) {
+
+    if ( verbose_ > 2 ) {
+      std::cout << std::endl
+                << myName_ << " --> DEBUG:" << std::endl
+                << "    Scaling histograms... " << std::endl;
+    }
+    // Create histograms
+    dirsOutObjCatSubFit_.back()->cd();
+    if ( verbose_ > 2 ) gDirectory->pwd();
+    std::string nameScale( name + "_Scale" );
+    HistosTrans histosScaleTrans( histosTrans, nameScale, baseTitlePt_ );
+    histosVecScaleTrans_.push_back( histosScaleTrans );
+    // Loop over eta bins
+    if ( fitEtaBins_ ) {
+      std::vector< HistosTransEta > histosScaleVecTransEta;
+      for ( unsigned uEta = 0; uEta < nEtaBins; ++uEta ) {
+        // Create histograms
+        dirsOutObjCatSubFitEta_.back().at( uEta )->cd();
+        if ( verbose_ > 2 ) gDirectory->pwd();
+        const std::string binEta( gDirectory->GetName() );
+        const std::string nameEtaScale( nameScale + "_" + binEta );
+        HistosTransEta histosScaleTransEta( histosVecTransEta.at( uEta ), nameEtaScale, baseTitlePt_ );
+        // Fill
+        histosScaleVecTransEta.push_back( histosScaleTransEta );
+      } // loop:uEta < nEtaBins
+      histosVecScaleVecTransEta_.push_back( histosScaleVecTransEta );
+    }
+
   }
 
   // Re-bin histograms
-  if ( verbose_ > 2 ) {
-    std::cout << std::endl
-              << myName_ << " --> DEBUG:" << std::endl
-              << "    Re-binning histograms... " << std::endl;
-  }
+  if ( fit0D_ || fit1D_ ) {
 
-  // Create histograms
-  dirsOutObjCatSubFit_.back()->cd();
-  if ( verbose_ > 2 ) gDirectory->pwd();
-  const std::string nameRebin( name + "_Rebin" );
-  HistosTrans histosRebinTrans( objCat, nameRebin, configObjDeltaPtBins, configObjDeltaPtMax, nPtBins, dataContainer.ptBins(), nEtaBins, dataContainer.etaBins(), titleTrans_, baseTitlePt_, titlePtT_, titlePt_, titleEta_, histosTrans, configObjWidthFactor );
+    if ( verbose_ > 2 ) {
+      std::cout << std::endl
+                << myName_ << " --> DEBUG:" << std::endl
+                << "    Re-binning histograms... " << std::endl;
+    }
 
-  // Loop over eta bins
-  std::vector< HistosTransEta > histosRebinVecTransEta;
-  for ( unsigned uEta = 0; uEta < nEtaBins; ++uEta ) {
     // Create histograms
-    dirsOutObjCatSubFitEta_.back().at( uEta )->cd();
+    dirsOutObjCatSubFit_.back()->cd();
     if ( verbose_ > 2 ) gDirectory->pwd();
-    const std::string binEta( gDirectory->GetName() );
-    const std::string nameEtaRebin( nameRebin + "_" + binEta );
-    HistosTransEta histosRebinTransEta( objCat, nameEtaRebin, configObjDeltaPtBins, configObjDeltaPtMax, nPtBins, dataContainer.ptBins(), titleTrans_, baseTitlePt_, titlePtT_, titlePt_, titleEta_, histosVecTransEta.at( uEta), configObjWidthFactor );
-    // Fill
-    fillPerCategoryBin( uEta, histosRebinTrans, histosRebinTransEta, configObjMinPt, configObjMaxEta, configObjMaxDR, true );
-    if ( fitEtaBins_ ) histosRebinVecTransEta.push_back( histosRebinTransEta );
-  } // loop:uEta < nEtaBins
-  histosVecRebinTrans_.push_back( histosRebinTrans );
-  if ( fitEtaBins_ ) histosVecRebinVecTransEta_.push_back( histosRebinVecTransEta );
+    const std::string nameRebin( name + "_Rebin" );
+    HistosTrans histosRebinTrans( objCat, nameRebin, configObjDeltaPtBins, configObjDeltaPtMax, nPtBins, dataContainer.ptBins(), nEtaBins, dataContainer.etaBins(), titleTrans_, baseTitlePt_, titlePtT_, titlePt_, titleEta_, histosTrans, configObjWidthFactor );
 
-  // Add scaled re-binned histograms
-  if ( verbose_ > 2 ) {
-    std::cout << std::endl
-              << myName_ << " --> DEBUG:" << std::endl
-              << "    Scaling re-binned histograms... " << std::endl;
-  }
-  // Create histograms
-  dirsOutObjCatSubFit_.back()->cd();
-  if ( verbose_ > 2 ) gDirectory->pwd();
-  std::string nameRebinScale( name + "_RebinScale" );
-  HistosTrans histosRebinScaleTrans( histosRebinTrans, nameRebinScale, baseTitlePt_, true );
-  histosVecRebinScaleTrans_.push_back( histosRebinScaleTrans );
-  // Loop over eta bins
-  if ( fitEtaBins_ ) {
-    std::vector< HistosTransEta > histosRebinScaleVecTransEta;
+    // Loop over eta bins
+    std::vector< HistosTransEta > histosRebinVecTransEta;
     for ( unsigned uEta = 0; uEta < nEtaBins; ++uEta ) {
       // Create histograms
       dirsOutObjCatSubFitEta_.back().at( uEta )->cd();
       if ( verbose_ > 2 ) gDirectory->pwd();
       const std::string binEta( gDirectory->GetName() );
-      const std::string nameEtaRebinScale( nameRebinScale + "_" + binEta );
-      HistosTransEta histosRebinScaleTransEta( histosVecRebinVecTransEta_.back().at( uEta ), nameEtaRebinScale, baseTitlePt_, true );
+      const std::string nameEtaRebin( nameRebin + "_" + binEta );
+      HistosTransEta histosRebinTransEta( objCat, nameEtaRebin, configObjDeltaPtBins, configObjDeltaPtMax, nPtBins, dataContainer.ptBins(), titleTrans_, baseTitlePt_, titlePtT_, titlePt_, titleEta_, histosVecTransEta.at( uEta), configObjWidthFactor );
       // Fill
-      histosRebinScaleVecTransEta.push_back( histosRebinScaleTransEta );
+      fillPerCategoryBin( uEta, histosRebinTrans, histosRebinTransEta, configObjMinPt, configObjMaxEta, configObjMaxDR, true );
+      histosRebinVecTransEta.push_back( histosRebinTransEta );
     } // loop:uEta < nEtaBins
-    histosVecRebinScaleVecTransEta_.push_back( histosRebinScaleVecTransEta );
+    histosVecRebinTrans_.push_back( histosRebinTrans );
+    if ( fitEtaBins_ ) histosVecRebinVecTransEta_.push_back( histosRebinVecTransEta );
+
+    // Add scaled re-binned histograms
+    if ( verbose_ > 2 ) {
+      std::cout << std::endl
+                << myName_ << " --> DEBUG:" << std::endl
+                << "    Scaling re-binned histograms... " << std::endl;
+    }
+    // Create histograms
+    dirsOutObjCatSubFit_.back()->cd();
+    if ( verbose_ > 2 ) gDirectory->pwd();
+    std::string nameRebinScale( name + "_RebinScale" );
+    HistosTrans histosRebinScaleTrans( histosRebinTrans, nameRebinScale, baseTitlePt_, true );
+    histosVecRebinScaleTrans_.push_back( histosRebinScaleTrans );
+    // Loop over eta bins
+    if ( fitEtaBins_ ) {
+      std::vector< HistosTransEta > histosRebinScaleVecTransEta;
+      for ( unsigned uEta = 0; uEta < nEtaBins; ++uEta ) {
+        // Create histograms
+        dirsOutObjCatSubFitEta_.back().at( uEta )->cd();
+        if ( verbose_ > 2 ) gDirectory->pwd();
+        const std::string binEta( gDirectory->GetName() );
+        const std::string nameEtaRebinScale( nameRebinScale + "_" + binEta );
+        HistosTransEta histosRebinScaleTransEta( histosVecRebinVecTransEta_.back().at( uEta ), nameEtaRebinScale, baseTitlePt_, true );
+        // Fill
+        histosRebinScaleVecTransEta.push_back( histosRebinScaleTransEta );
+      } // loop:uEta < nEtaBins
+      histosVecRebinScaleVecTransEta_.push_back( histosRebinScaleVecTransEta );
+    }
+
   }
 
   return true;
@@ -429,7 +438,7 @@ void FitTopTransferFunctionsRunner::fillPerCategoryBin( unsigned uEta, HistosTra
       }
     } // loop: uEntry < objectData_.back().sizePt( uEta, uPt )
   } // loop:uPt < nPtBins
-  if ( plot_ && ! rebin && fitEtaBins_ ) {
+  if ( plot_ && ( ! rebin ) && fitEtaBins_ ) {
     histosTransEta.histTransMapPt->Draw( "ColZ" );
     for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosTransEta.histTransMapPt->GetName() + "." + formatPlots_.at( uForm )  ).c_str() );
   }
@@ -469,7 +478,6 @@ bool FitTopTransferFunctionsRunner::fitPerCategory( unsigned uCat )
   fitFuncID_  = configObj.getParameter< std::string >( "fitFunction" );
   depFuncID_  = configObj.getParameter< std::string >( "dependencyFunction" );
   resFuncID_  = configObj.getParameter< std::string >( "resolutionFunction" );
-  fitEtaBins_ = configObj.getParameter< bool >( "fitEtaBins" );
   fitRange_   = configObj.getParameter< double >( "fitRange" );
   fitOptions_ = configObj.getParameter< std::string >( "fitOptions" );
   if      ( verbose_ < 2 ) fitOptions_.append( "Q" );
@@ -754,7 +762,7 @@ void FitTopTransferFunctionsRunner::fitPerCategoryBin( const std::string& objCat
   histosVecDependency.push_back( histosDependency );
 
   // Plot
-  if ( plot_ ) {
+  if ( fit1D_ && plot_ ) {
     TCanvas canvas;
     histosDependency.histPtProb->Draw();
     const std::string entryHisto( "from " + titlePtT_ + " bins" );

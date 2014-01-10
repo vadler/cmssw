@@ -89,23 +89,21 @@ namespace my {
       std::vector< HistosDependency >                histosVecRebinScaleDependency_;
       std::vector< std::vector< HistosDependency > > histosVecRebinScaleVecDependencyEta_;
       // Transfer functions
-//       std::vector< TransferFunction >                          transferVecScale_;
-//       std::vector< TransferFunctionCollection >                transferVecScaleVecPt_;            // for 1-D only
-//       std::vector< TransferFunctionCollection >                transferVecScaleVecEta_;
-//       std::vector< std::vector< TransferFunctionCollection > > transferVecScaleVecEtaVecPt_;      // for 1-D only
+      std::vector< TransferFunction >                          transferVecScale_;
+      std::vector< TransferFunctionCollection >                transferVecScaleVecEta_;
       std::vector< TransferFunction >                          transferVecRebinScale_;
-      std::vector< TransferFunctionCollection >                transferVecRebinScaleVecPt_;       // for 1-D only
+      std::vector< TransferFunctionCollection >                transferVecRebinScaleVecPt_;
       std::vector< TransferFunctionCollection >                transferVecRebinScaleVecEta_;
-      std::vector< std::vector< TransferFunctionCollection > > transferVecRebinScaleVecEtaVecPt_; // for 1-D only
+      std::vector< std::vector< TransferFunctionCollection > > transferVecRebinScaleVecEtaVecPt_;
       // Compatibility
-//       std::vector< std::vector< Double_t > >                pChi2VecScaleVecTrans_;
-//       std::vector< Double_t >                               avPChi2VecScaleTrans_;
-//       std::vector< std::vector< std::vector< Double_t > > > pChi2VecScaleVecTransEta_;
-//       std::vector< std::vector< Double_t > >                avPChi2VecScaleTransEta_;
-//       std::vector< std::vector< Double_t > >                pKSVecScaleVecTrans_;
-//       std::vector< Double_t >                               avKSVecScaleTrans_;
-//       std::vector< std::vector< std::vector< Double_t > > > pKSVecScaleVecTransEta_;
-//       std::vector< std::vector< Double_t > >                avPKSVecScaleTransEta_;
+      std::vector< std::vector< Double_t > >                pChi2VecScaleVecTrans_;
+      std::vector< Double_t >                               avPChi2VecScaleTrans_;
+      std::vector< std::vector< std::vector< Double_t > > > pChi2VecScaleVecTransEta_;
+      std::vector< std::vector< Double_t > >                avPChi2VecScaleTransEta_;
+      std::vector< std::vector< Double_t > >                pKSVecScaleVecTrans_;
+      std::vector< Double_t >                               avKSVecScaleTrans_;
+      std::vector< std::vector< std::vector< Double_t > > > pKSVecScaleVecTransEta_;
+      std::vector< std::vector< Double_t > >                avPKSVecScaleTransEta_;
       std::vector< std::vector< Double_t > >                pChi2VecRebinScaleVecTrans_;
       std::vector< Double_t >                               avPChi2VecRebinScaleTrans_;
       std::vector< std::vector< std::vector< Double_t > > > pChi2VecRebinScaleVecTransEta_;

@@ -688,14 +688,14 @@ bool FitTopTransferFunctionsRunner::fitPerCategory( unsigned uCat )
   TransferFunctionCollection transferVecPt( nPtBins, transferPt );
   TransferFunctionCollection transferVecEta( nEtaBins, transferPt );
   std::vector< TransferFunctionCollection > transferVecEtaPt( nEtaBins, transferVecPt );
-//   transferVecRebin_.push_back( transferPt );
-//   transferVecRebinVecPt_.push_back( transferVecPt );
+  transferVecScale_.push_back( transferPt );
   transferVecRebinScale_.push_back( transferPt );
   transferVecRebinScaleVecPt_.push_back( transferVecPt );
-//   transferVecRebinVecEta_.push_back( transferVecEta );
-//   transferVecRebinVecEtaVecPt_.push_back( transferVecEtaPt );
-  transferVecRebinScaleVecEta_.push_back( transferVecEta );
-  transferVecRebinScaleVecEtaVecPt_.push_back( transferVecEtaPt );
+  if ( fitEtaBins_ ) {
+    transferVecScaleVecEta_.push_back( transferVecEta );
+    transferVecRebinScaleVecEta_.push_back( transferVecEta );
+    transferVecRebinScaleVecEtaVecPt_.push_back( transferVecEtaPt );
+  }
   if ( verbose_ > 1 ) {
     std::cout << std::endl
               << myName_ << " --> INFO:" << std::endl
@@ -710,12 +710,8 @@ bool FitTopTransferFunctionsRunner::fitPerCategory( unsigned uCat )
               << "        dependency variable  : " << transferPt.Dependency()         << std::endl
               << "        comment              : " << transferPt.Comment()            << std::endl;
   }
-  if ( verbose_ > 2 ) {
-    std::cout << std::endl
-              << myName_ << " --> DEBUG:" << std::endl
-              << "    Fitting scaled distributions... " << std::endl;
-  }
-  fitPerCategoryLoop( objCat );
+
+  if ( fit0D_ || fit1D_ ) fitPerCategoryLoop( objCat );
 
   return true;
 
@@ -724,6 +720,12 @@ bool FitTopTransferFunctionsRunner::fitPerCategory( unsigned uCat )
 
 void FitTopTransferFunctionsRunner::fitPerCategoryLoop( const std::string& objCat )
 {
+  if ( verbose_ > 2 ) {
+    std::cout << std::endl
+              << myName_ << " --> DEBUG:" << std::endl
+              << "    Fitting scaled distributions... " << std::endl;
+  }
+
   fitPerCategoryBin( objCat, dirsOutObjCatSubFit_.back(), transferVecRebinScale_.back(), transferVecRebinScaleVecPt_.back(), histosVecRebinScaleTrans_.back(), histosVecRebinScaleDependency_ );
 
   // Loop over eta bins
@@ -787,7 +789,7 @@ void FitTopTransferFunctionsRunner::fitPerCategoryFit( TransferFunction& transfe
           transfer.SetError( uPar, fitTrans->GetParError( uPar ) );
         }
       }
-      if ( histosDependency != 0 && uPt >= 0 ) { // 2-D
+      if ( fit1D_ && histosDependency != 0 && uPt >= 0 ) {
         histosDependency->histPtProb->SetBinContent( uPt + 1, log10( fitTransResultPtr->Prob() ) );
         for ( Int_t uPar = 0; uPar < nParFit; ++uPar ) {
           histosDependency->histVecPtPar.at( uPar )->SetBinContent( uPt + 1, transfer.Parameter( uPar ) );
@@ -825,12 +827,8 @@ bool FitTopTransferFunctionsRunner::dependencyPerCategory( unsigned uCat )
               << myName_ << " --> INFO:" << std::endl
               << "    Dependency fitting for object category " << objCat << std::endl;
   }
-  if ( verbose_ > 2 ) {
-    std::cout << std::endl
-              << myName_ << " --> DEBUG:" << std::endl
-              << "    Fitting scaled dependencies... " << std::endl;
-  }
-  dependencyPerCategoryLoop( objCat );
+
+  if ( fit1D_ ) dependencyPerCategoryLoop( objCat );
 
   return true;
 
@@ -839,6 +837,12 @@ bool FitTopTransferFunctionsRunner::dependencyPerCategory( unsigned uCat )
 
 void FitTopTransferFunctionsRunner::dependencyPerCategoryLoop( const std::string& objCat )
 {
+  if ( verbose_ > 2 ) {
+    std::cout << std::endl
+              << myName_ << " --> DEBUG:" << std::endl
+              << "    Fitting scaled dependencies... " << std::endl;
+  }
+
   dependencyPerCategoryBin( objCat, dirsOutObjCatSubFit_.back(), transferVecRebinScale_.back(), histosVecRebinScaleDependency_.back() );
 
   // Loop over eta bins
@@ -936,12 +940,7 @@ bool FitTopTransferFunctionsRunner::transferPerCategory( unsigned uCat )
               << "    Transfer function determination for object category " << objCat << std::endl;
   }
 
-  if ( verbose_ > 2 ) {
-    std::cout << std::endl
-              << myName_ << " --> DEBUG:" << std::endl
-              << "    Transfer functions... " << std::endl;
-  }
-  transferPerCategoryLoop( objCat );
+  if ( fit1D_ ) transferPerCategoryLoop( objCat );
 
   return true;
 
@@ -950,6 +949,12 @@ bool FitTopTransferFunctionsRunner::transferPerCategory( unsigned uCat )
 
 void FitTopTransferFunctionsRunner::transferPerCategoryLoop( const std::string& objCat )
 {
+  if ( verbose_ > 2 ) {
+    std::cout << std::endl
+              << myName_ << " --> DEBUG:" << std::endl
+              << "    Transfer functions... " << std::endl;
+  }
+
   transferPerCategoryBin( objCat, dirsOutObjCatSubFit_.back(), transferVecRebinScale_.back(), histosVecRebinScaleTrans_.back() );
 
   // Loop over eta bins
@@ -1032,12 +1037,7 @@ bool FitTopTransferFunctionsRunner::compatibilityPerCategory( unsigned uCat )
               << "    Transfer function compatibility for object category " << objCat << std::endl;
   }
 
-  if ( verbose_ > 2 ) {
-    std::cout << std::endl
-              << myName_ << " --> DEBUG:" << std::endl
-              << "    Transfer function compatibilities... " << std::endl;
-  }
-  compatibilityPerCategoryLoop( objCat );
+  if ( fit1D_ ) compatibilityPerCategoryLoop( objCat );
 
   return true;
 
@@ -1046,6 +1046,12 @@ bool FitTopTransferFunctionsRunner::compatibilityPerCategory( unsigned uCat )
 
 void FitTopTransferFunctionsRunner::compatibilityPerCategoryLoop( const std::string& objCat )
 {
+  if ( verbose_ > 2 ) {
+    std::cout << std::endl
+              << myName_ << " --> DEBUG:" << std::endl
+              << "    Transfer function compatibilities... " << std::endl;
+  }
+
   compatibilityPerCategoryBin( objCat, dirsOutObjCatSubFit_.back(), transferVecRebinScale_.back(), histosVecRebinTrans_.back(), -1 );
 
   // Loop over eta bins
@@ -1175,11 +1181,6 @@ bool FitTopTransferFunctionsRunner::writeFilesPerCategory( unsigned uCat )
               << "        to " << pathOut_ << std::endl;
   }
 
-  if ( verbose_ > 2 ) {
-    std::cout << std::endl
-              << myName_ << " --> DEBUG:" << std::endl
-              << "    Transfer function files... " << std::endl;
-  }
   writeFilesPerCategoryLoop( objCat );
 
   return true;
@@ -1189,10 +1190,16 @@ bool FitTopTransferFunctionsRunner::writeFilesPerCategory( unsigned uCat )
 
 void FitTopTransferFunctionsRunner::writeFilesPerCategoryLoop( const std::string& objCat )
 {
+  if ( verbose_ > 2 ) {
+    std::cout << std::endl
+              << myName_ << " --> DEBUG:" << std::endl
+              << "    Transfer function files... " << std::endl;
+  }
+
   const int nPtBins( objectData_.back().nPtBins() );
   const int nEtaBins( objectData_.back().nEtaBins() );
 
-  writeFilesPerCategoryBin( objCat, transferVecRebinScale_.back(), histosVecRebinTrans_.back().histTrans->GetName(), -1, -1 );
+  if ( fit1D_ ) writeFilesPerCategoryBin( objCat, transferVecRebinScale_.back(), histosVecRebinTrans_.back().histTrans->GetName(), -1, -1 );
   // Loop over pt bins
   if ( fit0D_ ) {
     for ( int uPt = 0; uPt < nPtBins; ++uPt ) {
@@ -1206,7 +1213,7 @@ void FitTopTransferFunctionsRunner::writeFilesPerCategoryLoop( const std::string
   // Loop over eta bins
   if ( fitEtaBins_ ) {
     for ( int uEta = 0; uEta < nEtaBins; ++uEta ) {
-      writeFilesPerCategoryBin( objCat, transferVecRebinScaleVecEta_.back().at( uEta ), histosVecRebinVecTransEta_.back().at( uEta ).histTrans->GetName(), -1, uEta );
+      if ( fit1D_ ) writeFilesPerCategoryBin( objCat, transferVecRebinScaleVecEta_.back().at( uEta ), histosVecRebinVecTransEta_.back().at( uEta ).histTrans->GetName(), -1, uEta );
       // Loop over pt bins
       if ( fit0D_ ) {
         for ( int uPt = 0; uPt < nPtBins; ++uPt ) {

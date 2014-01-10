@@ -61,7 +61,9 @@ FitTopTransferFunctionsRunner::FitTopTransferFunctionsRunner( const std::string&
   const std::string& configIOOutFile( configIO.getParameter< std::string >( "outputFile" ) );
   overwrite_    = configIO.getParameter< bool >( "overwrite" ) ? TObject::kOverwrite : 0 );
   writeFiles_   = configIO.getParameter< bool >( "writeFiles" );
-  writeFilesPt_ = configIO.getParameter< bool >( "writeFilesPt" );
+  fit0D_        = configIO.getParameter< bool >( "fit0D" );
+  fit1D_        = configIO.getParameter< bool >( "fit1D" );
+  fit2D_        = configIO.getParameter< bool >( "fit2D" );
   sample_       = configIO.getParameter< std::string >( "sample" );
   pathOut_      = configIO.getParameter< std::string >( "pathOut" );
   plot_         = configIO.getParameter< bool >( "plot" );
@@ -1227,7 +1229,7 @@ void FitTopTransferFunctionsRunner::writeFilesPerCategoryLoop( const std::string
   if ( scale ) writeFilesPerCategoryBin( objCat, transferVecRebinScale_.back(), histosVecRebinTrans_.back().histTrans->GetName(), -1, -1, scale );
   else         writeFilesPerCategoryBin( objCat, transferVecRebin_.back(), histosVecRebinTrans_.back().histTrans->GetName(), -1, -1, scale );
   // Loop over pt bins
-  if ( writeFilesPt_ ) {
+  if ( fit0D_ ) {
     for ( int uPt = 0; uPt < nPtBins; ++uPt ) {
       const std::string binPt( boost::lexical_cast< std::string >( uPt ) );
       std::string namePt( histosVecRebinTrans_.back().histTrans->GetName() );
@@ -1243,7 +1245,7 @@ void FitTopTransferFunctionsRunner::writeFilesPerCategoryLoop( const std::string
       if ( scale ) writeFilesPerCategoryBin( objCat, transferVecRebinScaleVecEta_.back().at( uEta ), histosVecRebinVecTransEta_.back().at( uEta ).histTrans->GetName(), -1, uEta, scale );
       else         writeFilesPerCategoryBin( objCat, transferVecRebinVecEta_.back().at( uEta ), histosVecRebinVecTransEta_.back().at( uEta ).histTrans->GetName(), -1, uEta, scale );
       // Loop over pt bins
-      if ( writeFilesPt_ ) {
+      if ( fit0D_ ) {
         for ( int uPt = 0; uPt < nPtBins; ++uPt ) {
           const std::string binPt( boost::lexical_cast< std::string >( uPt ) );
           std::string namePt( histosVecRebinVecTransEta_.back().at( uEta ).histTrans->GetName() );

@@ -32,7 +32,9 @@ namespace my {
       bool                       refGen_;
       bool                       scale_;
       bool                       writeFiles_;
-      bool                       writeFilesPt_;
+      bool                       fit0D_;
+      bool                       fit1D_;
+      bool                       fit2D_;
       bool                       refSel_;
       bool                       usePileup_;
       int                        overwrite_;

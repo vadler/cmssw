@@ -19,7 +19,9 @@ fitTopTransferFunctions = cms.PSet(
         pathPlots = cms.string('/afs/cern.ch/work/v/vadler/cms/Top/CMSSW_5_3_13/output/plots/fitTopTransferFunctions/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MCatNLO_L3_unambiguousOnly_Ref_'),
         formatPlots = cms.vstring('png', 'pdf'),
         pileUp = cms.string('PileUpWeightTrue'),
-        writeFilesPt = cms.bool(True),
+        fit0D = cms.bool(True),
+        fit1D = cms.bool(False),
+        fit2D = cms.bool(False),
         fullStats = cms.bool(True),
         inputFile = cms.string('file:/afs/cern.ch/work/v/vadler/cms/Top/CMSSW_5_3_13/output/analyzeHitFit_fromSummer11-coarseEta_Summer12_MCatNLO_L3_unambiguousOnly.root')
     ),

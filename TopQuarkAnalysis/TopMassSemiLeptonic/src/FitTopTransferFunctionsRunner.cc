@@ -340,6 +340,19 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
       } // loop:uEta < nEtaBins
       histosVecScaleVecTransEta_.push_back( histosScaleVecTransEta );
     }
+    // Plot
+    if ( plot_ ) {
+//       plotFillPerCategoryBin( histosScaleTrans );
+      TCanvas canvas;
+      histosVecScaleTrans_.back().histTransScaleMapPt->Draw( "ColZ" );
+      for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosVecScaleTrans_.back().histTransScaleMapPt->GetName() + "." + formatPlots_.at( uForm )  ).c_str() );
+      if ( fitEtaBins_ ) {
+        for ( unsigned uEta = 0; uEta < nEtaBins; ++uEta ) {
+          histosVecScaleVecTransEta_.back().at( uEta ).histTransScaleMapPt->Draw( "ColZ" );
+          for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosVecScaleVecTransEta_.back().at( uEta ).histTransScaleMapPt->GetName() + "." + formatPlots_.at( uForm )  ).c_str() );
+        }
+      }
+    }
 
   }
 
@@ -752,10 +765,10 @@ void FitTopTransferFunctionsRunner::fitPerCategoryBin( const std::string& objCat
   // Create histograms
   dirOut->cd();
   if ( verbose_ > 2 ) gDirectory->pwd();
-  HistosDependency histosDependency( objCat, histosTransEta.name, objectData_.back().nPtBins(), objectData_.back().ptBins(), transfer.NParFit(), baseTitlePt_, titlePt_ );
 
   // Fit
   fitPerCategoryFit( transfer, histosTransEta.histTrans, 0, -1 );
+  HistosDependency histosDependency( objCat, histosTransEta.name, objectData_.back().nPtBins(), objectData_.back().ptBins(), transfer.NParFit(), baseTitlePt_, titlePt_ );
   for ( unsigned uPt = 0; uPt < histosTransEta.histVecPtTrans.size(); ++uPt ) {
     fitPerCategoryFit( transferColl.at( uPt ), histosTransEta.histVecPtTrans.at( uPt ), &histosDependency, uPt );
   }
@@ -836,7 +849,7 @@ bool FitTopTransferFunctionsRunner::dependencyPerCategory( unsigned uCat )
               << "    Dependency fitting for object category " << objCat << std::endl;
   }
 
-  if ( fit1D_ ) dependencyPerCategoryLoop( objCat );
+  if ( fit1D_ || fit2D_ ) dependencyPerCategoryLoop( objCat );
 
   return true;
 
@@ -851,12 +864,14 @@ void FitTopTransferFunctionsRunner::dependencyPerCategoryLoop( const std::string
               << "    Fitting scaled dependencies... " << std::endl;
   }
 
-  dependencyPerCategoryBin( objCat, dirsOutObjCatSubFit_.back(), transferVecRebinScale_.back(), histosVecRebinScaleDependency_.back() );
+  if ( fit1D_ ) dependencyPerCategoryBin( objCat, dirsOutObjCatSubFit_.back(), transferVecRebinScale_.back(), histosVecRebinScaleDependency_.back() );
+  if ( fit2D_ ) dependencyPerCategoryFit( objCat, dirsOutObjCatSubFit_.back(), transferVecScale_.back(), histosVecScaleTrans_.back() );
 
   // Loop over eta bins
   if ( fitEtaBins_ ) {
     for ( unsigned uEta = 0; uEta < dirsOutObjCatSubFitEta_.back().size(); ++uEta ) {
-      dependencyPerCategoryBin( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecRebinScaleVecEta_.back().at( uEta ), histosVecRebinScaleVecDependencyEta_.back().at( uEta ) );
+      if ( fit1D_ ) dependencyPerCategoryBin( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecRebinScaleVecEta_.back().at( uEta ), histosVecRebinScaleVecDependencyEta_.back().at( uEta ) );
+      if ( fit2D_ ) dependencyPerCategoryFit( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecScaleVecEta_.back().at( uEta ), histosVecScaleVecTransEta_.back().at( uEta ) );
     } // loop: uEta < nEtaBins
   }
 }
@@ -933,6 +948,22 @@ void FitTopTransferFunctionsRunner::dependencyPerCategoryBin( const std::string&
       std::cout << "[" << i << "]: \t"  << transfer.Print( i ) << std::endl;
     }
     std::cout << "[all]: \t" << transfer.PrintFit2D() << std::endl;
+  }
+
+}
+
+
+void FitTopTransferFunctionsRunner::dependencyPerCategoryFit( const std::string& objCat, TDirectory* dirOut, TransferFunction& transfer, HistosTransEta& histosTransEta )
+{
+
+  const std::string nameHist( histosTransEta.histTransScaleMapPt->GetName() );
+  const std::string nameHistFit( nameHist + "_fit" );
+  TF2* fitFunc( new TF2( nameHistFit.c_str(), transfer.Formula().c_str() ) );
+
+  if ( verbose_ > 2 ) {
+    std::cout << myName_ << " --> DEBUG:" << std::endl
+                  << "    transfer function in directory "; dirOut->pwd();
+    std::cout << transfer.PrintFit2D() << std::endl;
   }
 
 }

@@ -20,7 +20,7 @@ my::HistosTransEta::HistosTransEta( const HistosTransEta& histosTransEta, const 
   const std::string nameTransMapPt( nameTrans + "_Map_Pt" );
   histTransMapPt = new TH2D( *( ( TH2D* )( histosTransEta.histTransMapPt->Clone( nameTransMapPt.c_str() ) ) ) );
   const std::string nameTransScaleMapPt( nameTrans + "_ScaleMap_Pt" );
-  histTransScaleMapPt = new TH2D( *( ( TH2D* )( histosTransEta.histTransScaleMapPt->Clone( nameTransScaleMapPt.c_str() ) ) ) );
+  histTransScaleMapPt = new TH2D( nameTransScaleMapPt.c_str(), histosTransEta.histTransScaleMapPt->GetTitle(), histosTransEta.histTransScaleMapPt->GetNbinsY(), histosTransEta.histTransScaleMapPt->GetYaxis()->GetXbins()->GetArray(), histosTransEta.histTransScaleMapPt->GetNbinsX(), histosTransEta.histTransScaleMapPt->GetXaxis()->GetXbins()->GetArray() );
 
   for ( unsigned uPt = 0; uPt < histosTransEta.histVecPtTrans.size(); ++uPt ) {
     const std::string binPt( boost::lexical_cast< std::string >( uPt ) );
@@ -51,7 +51,7 @@ my::HistosTransEta::HistosTransEta( const std::string& objCat, const std::string
   histTransMapPt->SetYTitle( titleTrans.c_str() );
   histTransMapPt->SetZTitle( "events" );
   const std::string nameTransScaleMapPt( nameTrans + "_ScaleMap_Pt" );
-  histTransScaleMapPt = new TH2D( *( ( TH2D* )( histTransMapPt->Clone( nameTransScaleMapPt.c_str() ) ) ) );
+  histTransScaleMapPt = new TH2D( nameTransScaleMapPt.c_str(), objCat.c_str(), nPtBinsHistos, -ptMaxHistos, ptMaxHistos, nPtBins, ptBins.data() );
 
   for ( unsigned uPt = 0; uPt < nPtBins; ++uPt ) {
     const std::string binPt( boost::lexical_cast< std::string >( uPt ) );
@@ -86,7 +86,7 @@ my::HistosTransEta::HistosTransEta( const std::string& objCat, const std::string
   histTransMapPt->SetYTitle( titleTrans.c_str() );
   histTransMapPt->SetZTitle( "events" );
   const std::string nameTransScaleMapPt( nameTrans + "_ScaleMap_Pt" );
-  histTransScaleMapPt = new TH2D( *( ( TH2D* )( histTransMapPt->Clone( nameTransScaleMapPt.c_str() ) ) ) );
+  histTransScaleMapPt = new TH2D( nameTransScaleMapPt.c_str(), objCat.c_str(), nPtBinsHistos, -ptMaxHistos, ptMaxHistos, nPtBins, ptBins.data() );
 
   for ( unsigned uPt = 0; uPt < nPtBins; ++uPt ) {
     const Double_t meanPtTrans( histosOrig.histVecPtTrans.at( uPt )->GetMean() );

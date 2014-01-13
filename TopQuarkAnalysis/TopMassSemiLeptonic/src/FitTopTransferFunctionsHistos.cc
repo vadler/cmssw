@@ -20,7 +20,10 @@ my::HistosTransEta::HistosTransEta( const HistosTransEta& histosTransEta, const 
   const std::string nameTransMapPt( nameTrans + "_Map_Pt" );
   histTransMapPt = new TH2D( *( ( TH2D* )( histosTransEta.histTransMapPt->Clone( nameTransMapPt.c_str() ) ) ) );
   const std::string nameTransScaleMapPt( nameTrans + "_ScaleMap_Pt" );
-  histTransScaleMapPt = new TH2D( nameTransScaleMapPt.c_str(), histosTransEta.histTransScaleMapPt->GetTitle(), histosTransEta.histTransScaleMapPt->GetNbinsY(), histosTransEta.histTransScaleMapPt->GetYaxis()->GetXbins()->GetArray(), histosTransEta.histTransScaleMapPt->GetNbinsX(), histosTransEta.histTransScaleMapPt->GetXaxis()->GetXbins()->GetArray() );
+  histTransScaleMapPt = new TH2D( *( ( TH2D* )( histosTransEta.histTransScaleMapPt->Clone( nameTransScaleMapPt.c_str() ) ) ) );
+  histTransScaleMapPt->SetXTitle( histosTransEta.histTransScaleMapPt->GetYaxis()->GetTitle() );
+  histTransScaleMapPt->SetYTitle( histosTransEta.histTransScaleMapPt->GetXaxis()->GetTitle() );
+  histTransScaleMapPt->SetZTitle( histosTransEta.histTransScaleMapPt->GetZaxis()->GetTitle() );
 
   for ( unsigned uPt = 0; uPt < histosTransEta.histVecPtTrans.size(); ++uPt ) {
     const std::string binPt( boost::lexical_cast< std::string >( uPt ) );
@@ -52,6 +55,9 @@ my::HistosTransEta::HistosTransEta( const std::string& objCat, const std::string
   histTransMapPt->SetZTitle( "events" );
   const std::string nameTransScaleMapPt( nameTrans + "_ScaleMap_Pt" );
   histTransScaleMapPt = new TH2D( nameTransScaleMapPt.c_str(), objCat.c_str(), nPtBinsHistos, -ptMaxHistos, ptMaxHistos, nPtBins, ptBins.data() );
+  histTransScaleMapPt->SetXTitle( titleTrans.c_str() );
+  histTransScaleMapPt->SetYTitle( titlePt.c_str() );
+  histTransScaleMapPt->SetZTitle( "events" );
 
   for ( unsigned uPt = 0; uPt < nPtBins; ++uPt ) {
     const std::string binPt( boost::lexical_cast< std::string >( uPt ) );
@@ -87,6 +93,9 @@ my::HistosTransEta::HistosTransEta( const std::string& objCat, const std::string
   histTransMapPt->SetZTitle( "events" );
   const std::string nameTransScaleMapPt( nameTrans + "_ScaleMap_Pt" );
   histTransScaleMapPt = new TH2D( nameTransScaleMapPt.c_str(), objCat.c_str(), nPtBinsHistos, -ptMaxHistos, ptMaxHistos, nPtBins, ptBins.data() );
+  histTransScaleMapPt->SetXTitle( titleTrans.c_str() );
+  histTransScaleMapPt->SetYTitle( titlePt.c_str() );
+  histTransScaleMapPt->SetZTitle( "events" );
 
   for ( unsigned uPt = 0; uPt < nPtBins; ++uPt ) {
     const Double_t meanPtTrans( histosOrig.histVecPtTrans.at( uPt )->GetMean() );
@@ -114,7 +123,7 @@ void my::HistosTransEta::scale()
   for ( unsigned uPt = 0; uPt < histVecPtTrans.size(); ++uPt ) {
     if ( histVecPtTrans.at( uPt )->Integral( "width" ) != 0. ) histVecPtTrans.at( uPt )->Scale( 1. / histVecPtTrans.at( uPt )->Integral( "width" ) );
     for ( Int_t iDeltaPt = 0; iDeltaPt <= histVecPtTrans.at( uPt )->GetNbinsX(); ++iDeltaPt ) {
-      histTransScaleMapPt->SetBinContent( ( Int_t )uPt, iDeltaPt, histVecPtTrans.at( uPt )->GetBinContent( iDeltaPt ) );
+      histTransScaleMapPt->SetBinContent( iDeltaPt, ( Int_t )uPt + 1, histVecPtTrans.at( uPt )->GetBinContent( iDeltaPt ) );
     }
   }
   if ( histTransScaleMapPt->Integral( "width" ) != 0. ) histTransScaleMapPt->Scale( 1. / histTransScaleMapPt->Integral( "width" ) ); // FIXME: Is this correct?

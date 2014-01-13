@@ -323,7 +323,7 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
     dirsOutObjCatSubFit_.back()->cd();
     if ( verbose_ > 2 ) gDirectory->pwd();
     std::string nameScale( name + "_Scale" );
-    HistosTrans histosScaleTrans( histosTrans, nameScale, baseTitlePt_ );
+    HistosTrans histosScaleTrans( histosTrans, nameScale, baseTitlePt_, true );
     histosVecScaleTrans_.push_back( histosScaleTrans );
     // Loop over eta bins
     if ( fitEtaBins_ ) {
@@ -334,7 +334,7 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
         if ( verbose_ > 2 ) gDirectory->pwd();
         const std::string binEta( gDirectory->GetName() );
         const std::string nameEtaScale( nameScale + "_" + binEta );
-        HistosTransEta histosScaleTransEta( histosVecTransEta.at( uEta ), nameEtaScale, baseTitlePt_ );
+        HistosTransEta histosScaleTransEta( histosVecTransEta.at( uEta ), nameEtaScale, baseTitlePt_, true );
         // Fill
         histosScaleVecTransEta.push_back( histosScaleTransEta );
       } // loop:uEta < nEtaBins
@@ -1000,8 +1000,8 @@ void FitTopTransferFunctionsRunner::transferPerCategoryBin( const std::string& o
     const std::string namePtTransferFunction( namePt + "_TransferFunction" );
     TF1* transferFunctionPt( new TF1( ( ( TF1& )( *( transfer.Function( ( objectData_.back().ptBins().at( uPt ) + objectData_.back().ptBins().at( uPt + 1 ) ) / 2., 0 ).Clone( namePtTransferFunction.c_str() ) ) ) ) ) );
     transferFunctionPt->SetRange( histosTransEta.histVecPtTrans.at( uPt )->GetXaxis()->GetXmin(), histosTransEta.histVecPtTrans.at( uPt )->GetXaxis()->GetXmax() );
-    transferFunctionPt->SetLineColor( kRed );
-    transferFunctionPt->SetLineStyle( 2 );
+    transferFunctionPt->SetLineColor( kBlack );
+//     transferFunctionPt->SetLineStyle( 2 );
     histosTransEta.histVecPtTrans.at( uPt )->GetListOfFunctions()->Add( transferFunctionPt );
   }
 
@@ -1175,7 +1175,7 @@ bool FitTopTransferFunctionsRunner::writeFilesPerCategory( unsigned uCat )
   if ( pathOut_.empty() ) {
     if ( verbose_ > 0 ) {
       std::cout << std::endl
-                << myName_ << " --> EARNING:" << std::endl
+                << myName_ << " --> WARNING:" << std::endl
                 << "    No path for transfer function output specified" << std::endl;
     }
     return false;

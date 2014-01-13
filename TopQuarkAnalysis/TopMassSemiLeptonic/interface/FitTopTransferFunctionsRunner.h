@@ -25,7 +25,7 @@ namespace my {
       // Config
       edm::ParameterSet          config_;
       unsigned                   verbose_;
-      int                        maxEvents_; // FIXME: still needs to be propageted
+      int                        maxEvents_;
       bool                       useSymm_;
       bool                       useAlt_;
       bool                       useNonT_;

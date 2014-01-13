@@ -9,7 +9,7 @@
 using namespace my;
 
 
-my::HistosTransEta::HistosTransEta( const HistosTransEta& histosTransEta, const std::string& baseName, const std::string& baseTitlePt, bool scale )
+my::HistosTransEta::HistosTransEta( const HistosTransEta& histosTransEta, const std::string& baseName, const std::string& baseTitlePt, bool doScale )
 : name( baseName )
 {
   const std::string nameTrans( baseName + "_Trans" );
@@ -36,7 +36,7 @@ my::HistosTransEta::HistosTransEta( const HistosTransEta& histosTransEta, const 
     legVecPtTrans.push_back( legPtTrans );
   }
 
-  if ( scale ) this->scale();
+  if ( doScale ) scale();
 }
 
 my::HistosTransEta::HistosTransEta( const std::string& objCat, const std::string& baseName, const unsigned nPtBinsHistos, const double ptMaxHistos, const unsigned nPtBins, const std::vector< Double_t >& ptBins, const std::string& titleTrans, const std::string& baseTitlePt, const std::string& titlePtT, const std::string& titlePt, const std::string& titleEta )
@@ -130,8 +130,8 @@ void my::HistosTransEta::scale()
 }
 
 
-my::HistosTrans::HistosTrans( const HistosTrans& histosTrans, const std::string& baseName, const std::string& baseTitlePt, bool scale )
-: HistosTransEta( histosTrans, baseName, baseTitlePt, scale )
+my::HistosTrans::HistosTrans( const HistosTrans& histosTrans, const std::string& baseName, const std::string& baseTitlePt, bool doScale )
+: HistosTransEta( histosTrans, baseName, baseTitlePt, doScale )
 {
   const std::string nameTransMapEta( baseName + "_Trans_Map_Eta" );
   histTransMapEta = new TH2D( *( ( TH2D* )( histosTrans.histTransMapEta->Clone( nameTransMapEta.c_str() ) ) ) );
@@ -143,7 +143,7 @@ my::HistosTrans::HistosTrans( const HistosTrans& histosTrans, const std::string&
     histVecPtTransMapEta.push_back( histPtTransMapEta );
   }
 
-  if ( scale ) this->scale();
+  if ( doScale ) scale();
 }
 
 

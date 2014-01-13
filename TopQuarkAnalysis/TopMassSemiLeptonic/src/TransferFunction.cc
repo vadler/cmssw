@@ -222,7 +222,60 @@ void TransferFunction::ClearErrors()
   }
 }
 
-// Getters
+// Getters .
+
+std::string TransferFunction::TransferFunctionString( int norm ) const
+{
+  TString fitStr;
+  if ( FitFunction().empty() && ! FitFunctionString().empty() ) {
+    fitStr = TString( FitFunctionString() );
+  }
+  else {
+    fitStr = TString( FitFunction() );
+  }
+  if ( fitStr.Length() == 0 ) return std::string();
+  unsigned count( 0 );
+  for ( unsigned i = 0; i < NParFit(); ++i ) {
+    if ( ( int )i == norm ) continue;
+    TString funcStr;
+    if ( sigmaPars_.find( i ) == sigmaPars_.end() ) {
+      if ( DependencyFunction().empty() && ! DependencyFunctionString().empty() ) {
+        funcStr = TString( DependencyFunctionString() );
+      }
+      else {
+        funcStr = TString( DependencyFunction() );
+      }
+    }
+    else {
+      if ( ResolutionFunction().empty() && ! ResolutionFunctionString().empty() ) {
+        funcStr = TString( ResolutionFunctionString() );
+      }
+      else {
+        funcStr = TString( ResolutionFunction() );
+      }
+    }
+    if ( funcStr.Length() == 0 ) continue;
+    for ( unsigned j = 0; j < pars2D_.at( i ).size(); ++j ) {
+      TString parStr( "[" + boost::lexical_cast< std::string >( j ) + "]" );
+      TString parStrNew( "{" + boost::lexical_cast< std::string >( count ) + "}" ); // FIXME: Just stupid manipulation.
+      funcStr.ReplaceAll( parStr, parStrNew );
+      funcStr.ReplaceAll( "x", "y" );
+      funcStr.ReplaceAll( "eyp", "exp" ); // Fixing unwanted replacements
+      ++count;
+    }
+    funcStr.Prepend( "(" );
+    funcStr.Append( ")" );
+    TString parStr( "[" + boost::lexical_cast< std::string >( i ) + "]" );
+    fitStr.ReplaceAll( parStr, funcStr );
+  }
+  for ( unsigned i = 0; i < NParFit(); ++i ) {
+    TString parStr( "[" + boost::lexical_cast< std::string >( i ) + "]" );
+    fitStr.ReplaceAll( parStr, "1." );
+  }
+  fitStr.ReplaceAll( "{", "[" ); // FIXME: Just stupid manipulation (s. above).
+  fitStr.ReplaceAll( "}", "]" ); // FIXME: Just stupid manipulation (s. above).
+  return std::string( fitStr.Data() );
+}
 
 // Evaluate
 
@@ -257,54 +310,15 @@ TransferFunction TransferFunction::FunctionErrorsDown() const
 // FIXME: Adapt to resolution function
 TF2 TransferFunction::Function( int norm ) const
 {
-  TString fitStr;
-  if ( FitFunction().empty() && ! FitFunctionString().empty() ) {
-    fitStr = TString( FitFunctionString() );
-  }
-  else {
-    fitStr = TString( FitFunction() );
-  }
+  TString fitStr( TransferFunctionString( norm ) );
   if ( fitStr.Length() == 0 ) return TF2();
   std::vector< double > pars;
   for ( unsigned i = 0; i < NParFit(); ++i ) {
     if ( ( int )i == norm ) continue;
-    TString funcStr;
-    if ( sigmaPars_.find( i ) == sigmaPars_.end() ) {
-      if ( DependencyFunction().empty() && ! DependencyFunctionString().empty() ) {
-        funcStr = TString( DependencyFunctionString() );
-      }
-      else {
-        funcStr = TString( DependencyFunction() );
-      }
-    }
-    else {
-      if ( ResolutionFunction().empty() && ! ResolutionFunctionString().empty() ) {
-        funcStr = TString( ResolutionFunctionString() );
-      }
-      else {
-        funcStr = TString( ResolutionFunction() );
-      }
-    }
-    if ( funcStr.Length() == 0 ) continue;
     for ( unsigned j = 0; j < pars2D_.at( i ).size(); ++j ) {
-      TString parStr( "[" + boost::lexical_cast< std::string >( j ) + "]" );
-      TString parStrNew( "{" + boost::lexical_cast< std::string >( pars.size() ) + "}" ); // FIXME: Just stupid manipulation.
-      funcStr.ReplaceAll( parStr, parStrNew );
-      funcStr.ReplaceAll( "x", "y" );
-      funcStr.ReplaceAll( "eyp", "exp" ); // Fixing unwanted replacements
       pars.push_back( pars2D_.at( i ).at( j ) );
     }
-    funcStr.Prepend( "(" );
-    funcStr.Append( ")" );
-    TString parStr( "[" + boost::lexical_cast< std::string >( i ) + "]" );
-    fitStr.ReplaceAll( parStr, funcStr );
   }
-  for ( unsigned i = 0; i < NParFit(); ++i ) {
-    TString parStr( "[" + boost::lexical_cast< std::string >( i ) + "]" );
-    fitStr.ReplaceAll( parStr, "1." );
-  }
-  fitStr.ReplaceAll( "{", "[" ); // FIXME: Just stupid manipulation (s. above).
-  fitStr.ReplaceAll( "}", "]" ); // FIXME: Just stupid manipulation (s. above).
   TF2 function( "", fitStr );
   for ( unsigned i = 0; i < pars.size(); ++i ) {
     function.SetParameter( ( Int_t )i, pars.at( i ) );

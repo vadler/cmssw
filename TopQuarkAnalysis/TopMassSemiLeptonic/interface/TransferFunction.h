@@ -275,6 +275,9 @@ namespace my {
       /// Get the number of parameters in the dependency function.
       unsigned NParResolution() const { return resolutionFunction_.GetNpar(); };
 
+      /// Get the resolution function string.
+      std::string TransferFunctionString( int norm = 0 ) const;
+
       /// Get the name of the dependency variable.
       std::string Dependency() const { return dependency_; };
 
@@ -323,7 +326,8 @@ namespace my {
       /// variable.
       TF1 Function( double dependencyValue, int norm = 0 ) const;
 
-      /// Get the 2D transfer function as string.
+      /// Get the 2D transfer function as string, with its parameters set to
+      /// their numerical values.
       /// The function is returned in the format for filling a TFormula (s.
       /// data members).
       std::string Formula( int norm = 0 ) const;

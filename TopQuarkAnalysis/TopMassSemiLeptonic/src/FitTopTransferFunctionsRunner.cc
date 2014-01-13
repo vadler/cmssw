@@ -958,7 +958,8 @@ void FitTopTransferFunctionsRunner::dependencyPerCategoryFit( const std::string&
 
   const std::string nameHist( histosTransEta.histTransScaleMapPt->GetName() );
   const std::string nameHistFit( nameHist + "_fit" );
-  TF2* fitFunc( new TF2( nameHistFit.c_str(), transfer.Formula().c_str() ) );
+std::cout << "DEBUG transfer.Formula(): " << transfer.TransferFunctionString() << std::endl;
+  TF2* fitFunc( new TF2( nameHistFit.c_str(), transfer.TransferFunctionString().c_str() ) );
 
   if ( verbose_ > 2 ) {
     std::cout << myName_ << " --> DEBUG:" << std::endl

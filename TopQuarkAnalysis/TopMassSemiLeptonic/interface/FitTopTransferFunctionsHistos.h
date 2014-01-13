@@ -26,7 +26,7 @@ namespace my {
     std::vector< TLegend* > legVecPtTrans;
 
     HistosTransEta() {};
-    HistosTransEta( const HistosTransEta& histosTransEta, const std::string& baseName, const std::string& baseTitlePt, bool scale = false );
+    HistosTransEta( const HistosTransEta& histosTransEta, const std::string& baseName, const std::string& baseTitlePt, bool doScale = false );
     explicit HistosTransEta( const std::string& objCat, const std::string& baseName, const unsigned nPtBinsHistos, const double ptMaxHistos, const unsigned nPtBins, const std::vector< Double_t >& ptBins, const std::string& titleTrans, const std::string& baseTitlePt, const std::string& titlePtT, const std::string& titlePt, const std::string& titleEta );
     explicit HistosTransEta( const std::string& objCat, const std::string& baseName, const unsigned nPtBinsHistos, const double ptMaxHistos, const unsigned nPtBins, const std::vector< Double_t >& ptBins, const std::string& titleTrans, const std::string& baseTitlePt, const std::string& titlePtT, const std::string& titlePt, const std::string& titleEta, const HistosTransEta& histosOrig, const double widthFactor );
     virtual ~HistosTransEta() {};
@@ -42,7 +42,7 @@ namespace my {
     std::vector< TH2D* > histVecPtTransMapEta;
 
     HistosTrans() : HistosTransEta() {};
-    HistosTrans( const HistosTrans& histosTrans, const std::string& baseName, const std::string& baseTitlePt, bool scale = false );
+    HistosTrans( const HistosTrans& histosTrans, const std::string& baseName, const std::string& baseTitlePt, bool doScale = false );
     explicit HistosTrans( const std::string& objCat, const std::string& baseName, const unsigned nPtBinsHistos, const double ptMaxHistos, const unsigned nPtBins, const std::vector< Double_t >& ptBins, const unsigned nEtaBins, const std::vector< Double_t >& etaBins, const std::string& titleTrans, const std::string& baseTitlePt, const std::string& titlePtT, const std::string& titlePt, const std::string& titleEta );
     explicit HistosTrans( const std::string& objCat, const std::string& baseName, const unsigned nPtBinsHistos, const double ptMaxHistos, const unsigned nPtBins, const std::vector< Double_t >& ptBins, const unsigned nEtaBins, const std::vector< Double_t >& etaBins, const std::string& titleTrans, const std::string& baseTitlePt, const std::string& titlePtT, const std::string& titlePt, const std::string& titleEta, const HistosTrans& histosOrig, const double widthFactor );
     virtual ~HistosTrans() {};

@@ -159,9 +159,9 @@ namespace my {
       void fitPerCategoryFit( TransferFunction& transfer, TH1D* histoTrans, HistosDependency* histosDependency, int uPt );
       void dependencyPerCategoryLoop( const std::string& objCat );
       void dependencyPerCategoryBin( const std::string& objCat, TDirectory* dirOut, TransferFunction& transfer, HistosDependency& histosDependency );
-      void dependencyPerCategoryFit( const std::string& objCat, TDirectory* dirOut, TransferFunction& transfer, HistosTransEta& histosTransEta );
       void transferPerCategoryLoop( const std::string& objCat );
       void transferPerCategoryBin( const std::string& objCat, TDirectory* dirOut, TransferFunction& transfer, HistosTransEta& histosTransEta );
+      void transferPerCategoryFit( const std::string& objCat, TDirectory* dirOut, TransferFunction& transfer, HistosTransEta& histosTransEta );
       void compatibilityPerCategoryLoop( const std::string& objCat );
       void compatibilityPerCategoryBin( const std::string& objCat, TDirectory* dirOut, TransferFunction& transfer, HistosTransEta& histosTransEta, int uEta );
       void writeFilesPerCategoryLoop( const std::string& objCat );

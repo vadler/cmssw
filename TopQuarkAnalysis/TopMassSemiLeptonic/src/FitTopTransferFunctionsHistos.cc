@@ -21,8 +21,8 @@ my::HistosTransEta::HistosTransEta( const HistosTransEta& histosTransEta, const 
   histTransMapPt = new TH2D( *( ( TH2D* )( histosTransEta.histTransMapPt->Clone( nameTransMapPt.c_str() ) ) ) );
   const std::string nameTransScaleMapPt( nameTrans + "_ScaleMap_Pt" );
   histTransScaleMapPt = new TH2D( *( ( TH2D* )( histosTransEta.histTransScaleMapPt->Clone( nameTransScaleMapPt.c_str() ) ) ) );
-  histTransScaleMapPt->SetXTitle( histosTransEta.histTransScaleMapPt->GetYaxis()->GetTitle() );
-  histTransScaleMapPt->SetYTitle( histosTransEta.histTransScaleMapPt->GetXaxis()->GetTitle() );
+  histTransScaleMapPt->SetXTitle( histosTransEta.histTransScaleMapPt->GetXaxis()->GetTitle() );
+  histTransScaleMapPt->SetYTitle( histosTransEta.histTransScaleMapPt->GetYaxis()->GetTitle() );
   histTransScaleMapPt->SetZTitle( histosTransEta.histTransScaleMapPt->GetZaxis()->GetTitle() );
 
   for ( unsigned uPt = 0; uPt < histosTransEta.histVecPtTrans.size(); ++uPt ) {

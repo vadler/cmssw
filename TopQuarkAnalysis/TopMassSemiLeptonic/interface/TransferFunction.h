@@ -278,6 +278,9 @@ namespace my {
       /// Get the resolution function string.
       std::string TransferFunctionString( int norm = 0 ) const;
 
+      /// Get the number of parameters in the dependency function.
+      unsigned NParTransfer() const { return ( NParFit() - SigmaPars().size() ) * NParDependency() + SigmaPars().size() * NParResolution(); };
+
       /// Get the name of the dependency variable.
       std::string Dependency() const { return dependency_; };
 

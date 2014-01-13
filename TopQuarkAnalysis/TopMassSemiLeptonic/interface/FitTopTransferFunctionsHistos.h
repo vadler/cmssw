@@ -20,6 +20,7 @@ namespace my {
     TH1D*    histTrans;
     TLegend* legTrans;
     TH2D*    histTransMapPt;
+    TH2D*    histTransScaleMapPt;
     // Per pt bin
     std::vector< TH1D* >    histVecPtTrans;
     std::vector< TLegend* > legVecPtTrans;

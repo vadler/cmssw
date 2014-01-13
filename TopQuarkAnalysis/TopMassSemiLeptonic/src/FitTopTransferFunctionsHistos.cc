@@ -19,6 +19,8 @@ my::HistosTransEta::HistosTransEta( const HistosTransEta& histosTransEta, const 
   legTrans->SetHeader( histTrans->GetTitle() );
   const std::string nameTransMapPt( nameTrans + "_Map_Pt" );
   histTransMapPt = new TH2D( *( ( TH2D* )( histosTransEta.histTransMapPt->Clone( nameTransMapPt.c_str() ) ) ) );
+  const std::string nameTransScaleMapPt( nameTrans + "_ScaleMap_Pt" );
+  histTransScaleMapPt = new TH2D( *( ( TH2D* )( histosTransEta.histTransScaleMapPt->Clone( nameTransScaleMapPt.c_str() ) ) ) );
 
   for ( unsigned uPt = 0; uPt < histosTransEta.histVecPtTrans.size(); ++uPt ) {
     const std::string binPt( boost::lexical_cast< std::string >( uPt ) );
@@ -48,6 +50,8 @@ my::HistosTransEta::HistosTransEta( const std::string& objCat, const std::string
   histTransMapPt->SetXTitle( titlePt.c_str() );
   histTransMapPt->SetYTitle( titleTrans.c_str() );
   histTransMapPt->SetZTitle( "events" );
+  const std::string nameTransScaleMapPt( nameTrans + "_ScaleMap_Pt" );
+  histTransScaleMapPt = new TH2D( *( ( TH2D* )( histTransMapPt->Clone( nameTransScaleMapPt.c_str() ) ) ) );
 
   for ( unsigned uPt = 0; uPt < nPtBins; ++uPt ) {
     const std::string binPt( boost::lexical_cast< std::string >( uPt ) );
@@ -81,6 +85,8 @@ my::HistosTransEta::HistosTransEta( const std::string& objCat, const std::string
   histTransMapPt->SetXTitle( titlePt.c_str() );
   histTransMapPt->SetYTitle( titleTrans.c_str() );
   histTransMapPt->SetZTitle( "events" );
+  const std::string nameTransScaleMapPt( nameTrans + "_ScaleMap_Pt" );
+  histTransScaleMapPt = new TH2D( *( ( TH2D* )( histTransMapPt->Clone( nameTransScaleMapPt.c_str() ) ) ) );
 
   for ( unsigned uPt = 0; uPt < nPtBins; ++uPt ) {
     const Double_t meanPtTrans( histosOrig.histVecPtTrans.at( uPt )->GetMean() );
@@ -107,7 +113,11 @@ void my::HistosTransEta::scale()
   if ( histTransMapPt->Integral( "width" ) != 0. ) histTransMapPt->Scale( 1. / histTransMapPt->Integral( "width" ) ); // FIXME: Is this correct?
   for ( unsigned uPt = 0; uPt < histVecPtTrans.size(); ++uPt ) {
     if ( histVecPtTrans.at( uPt )->Integral( "width" ) != 0. ) histVecPtTrans.at( uPt )->Scale( 1. / histVecPtTrans.at( uPt )->Integral( "width" ) );
+    for ( Int_t iDeltaPt = 0; iDeltaPt <= histVecPtTrans.at( uPt )->GetNbinsX(); ++iDeltaPt ) {
+      histTransScaleMapPt->SetBinContent( ( Int_t )uPt, iDeltaPt, histVecPtTrans.at( uPt )->GetBinContent( iDeltaPt ) );
+    }
   }
+  if ( histTransScaleMapPt->Integral( "width" ) != 0. ) histTransScaleMapPt->Scale( 1. / histTransScaleMapPt->Integral( "width" ) ); // FIXME: Is this correct?
 }
 
 

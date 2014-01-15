@@ -270,11 +270,17 @@ void my::mixParametersDoubleGaussian( TransferFunction& transfer, TF1 const* fit
   //. This function assumes fit functions of the form
   // - [0]*(exp(-0.5*((x-[1])/[2])**2) + [3]*exp(-0.5*((x-[4])/[5])**2))/(([2]+[3]*[5])*sqrt(2*pi)) (double Gaussian)
   transfer.SetParameter( 0, fit->GetParameter( 0 ) );
+  transfer.SetError( 0, fit->GetParError( 0 ) );
   transfer.SetParameter( 1, fit->GetParameter( 4 ) );
+  transfer.SetError( 1, fit->GetParError( 4 ) );
   transfer.SetParameter( 2, fit->GetParameter( 5 ) );
+  transfer.SetError( 2, fit->GetParError( 5 ) );
   transfer.SetParameter( 3, 1. / fit->GetParameter( 3 ) );
+  transfer.SetError( 3, fit->GetParError( 3 ) / (fit->GetParameter( 3 ) * fit->GetParameter( 3 ) ) );
   transfer.SetParameter( 4, fit->GetParameter( 1 ) );
+  transfer.SetError( 4, fit->GetParError( 1 ) );
   transfer.SetParameter( 5, fit->GetParameter( 2 ) );
+  transfer.SetError( 5, fit->GetParError( 2 ) );
 }
 
 

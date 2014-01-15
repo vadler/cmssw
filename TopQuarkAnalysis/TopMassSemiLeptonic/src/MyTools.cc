@@ -194,39 +194,62 @@ void my::initialiseFitParameters( TF1* fit, TH1D const* histo, const std::string
 
 void my::initialiseDependencyParameters( TF1* dep, TH1D const* histo, const std::string& depFuncId )
 {
-  // Starting points
-  Double_t x1( histo->GetBinCenter( 5 ) );
-  Double_t y1( histo->GetBinContent( 5 ) );
-  Double_t x2( histo->GetBinCenter( histo->GetNbinsX() - 2 ) );
-  Double_t y2( histo->GetBinContent( histo->GetNbinsX() - 2 ) );
-  if ( depFuncId == "linear" || depFuncId == "squared" ) {
-    // Constant
-    Double_t a( ( x2 * y1 - x1 * y2 ) / ( x2 - x1 ) );
-    dep->SetParameter( 0, a > 0. ? a : 0. );
-    dep->SetParName( 0, "Constant a" );
-    dep->SetParLimits( 0, 0., 100. );
-    // Slope
-    dep->SetParameter( 1, ( y2 - y1 ) / ( x2 - x1 ) );
-    dep->SetParName( 1, "Slope b" );
-    // Curvature
-    if ( depFuncId == "squared" ) {
-      dep->SetParameter( 2, 0. );
-      dep->SetParName( 2, "Curvature c" );
-    }
-  }
-  else if ( depFuncId == "resolution" ) {
+  if ( depFuncId == "resolution" ) {
     dep->SetParameter( 0, 0. );
     dep->SetParName( 0, "Noise N" );
     dep->SetParameter( 1, 0. );
     dep->SetParName( 1, "Resolution R" );
     dep->SetParameter( 2, 0. );
     dep->SetParName( 2, "Constant C" );
+    return;
   }
+  // Constant
+  dep->SetParName( 0, "Constant a" );
+  // Slope
+  dep->SetParName( 1, "Slope b" );
+  // Curvature
+  if ( depFuncId == "squared" ) {
+    dep->SetParameter( 2, 0. );
+    dep->SetParName( 2, "Curvature c" );
+  }
+  // Starting points
+  Int_t minBin( 0 );
+  Int_t maxBin( histo->GetNbinsX() + 1 );
+  for ( Int_t bin = 1; bin <= histo->GetNbinsX(); ++bin ) {
+    if ( histo->GetBinContent( bin ) != 0. ) {
+      minBin = bin;
+      break;
+    }
+  }
+  for ( Int_t bin = histo->GetNbinsX(); bin > minBin; --bin ) {
+    if ( histo->GetBinContent( bin ) != 0. ) {
+      maxBin = bin;
+      break;
+    }
+  }
+  if ( ( minBin == 0 || maxBin == histo->GetNbinsX() + 1 ) || minBin == maxBin ) {
+    // Constant
+    dep->SetParameter( 0, 0. );
+    dep->SetParLimits( 0, 0., 100. );
+    // Slope
+    dep->SetParameter( 1, 0. );
+    return;
+  }
+  Double_t x1( histo->GetBinCenter( minBin ) );
+  Double_t y1( histo->GetBinContent( minBin ) );
+  Double_t x2( histo->GetBinCenter( maxBin ) );
+  Double_t y2( histo->GetBinContent( maxBin ) );
+  // Constant
+  Double_t a( ( x2 * y1 - x1 * y2 ) / ( x2 - x1 ) );
+  dep->SetParameter( 0, a > 0. ? a : 0. );
+  dep->SetParLimits( 0, 0., 100. );
+  // Slope
+  dep->SetParameter( 1, ( y2 - y1 ) / ( x2 - x1 ) );
 }
 
+// FIXME
 void my::initialiseTransferParameters( TF2* fit, TH2D const* histo, const std::string& fitFuncId, const std::string& depFuncId, const std::string& resFuncId )
 {
-  // FIXME
   for ( Int_t uPar = 0; uPar < fit->GetNpar(); ++uPar ) {
     fit->SetParameter( uPar, 0. );
   }

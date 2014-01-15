@@ -201,8 +201,10 @@ void my::initialiseDependencyParameters( TF1* dep, TH1D const* histo, const std:
   Double_t y2( histo->GetBinContent( histo->GetNbinsX() - 2 ) );
   if ( depFuncId == "linear" || depFuncId == "squared" ) {
     // Constant
-    dep->SetParameter( 0, ( x2 * y1 - x1 * y2 ) / ( x2 - x1 ) );
+    Double_t a( ( x2 * y1 - x1 * y2 ) / ( x2 - x1 ) );
+    dep->SetParameter( 0, a > 0. ? a : 0. );
     dep->SetParName( 0, "Constant a" );
+    fit->SetParLimits( 0, 0., 100. );
     // Slope
     dep->SetParameter( 1, ( y2 - y1 ) / ( x2 - x1 ) );
     dep->SetParName( 1, "Slope b" );
@@ -235,7 +237,7 @@ bool my::checkParametersDoubleGaussian( TF1 const* fit, const std::string& fitFu
   //. This function assumes fit functions of the form
   // - [0]*(exp(-0.5*((x-[1])/[2])**2) + [3]*exp(-0.5*((x-[4])/[5])**2))/(([2]+[3]*[5])*sqrt(2*pi)) (double Gaussian)
   if ( fitFuncId != "dGauss" ) return false;
-  if ( fit->GetParameter( 2 ) < fit->GetParameter( 5 ) || std::fabs( fit->GetParameter( 3 ) ) < 1. ) return false;
+  if ( fit->GetParameter( 2 ) < fit->GetParameter( 5 ) ) return false;
   std::cout << std::endl
             << " --> WARNING:" << std::endl
             << "    function " << fit->GetName() << " mixed parameters." << std::endl;

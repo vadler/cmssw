@@ -222,6 +222,14 @@ void my::initialiseDependencyParameters( TF1* dep, TH1D const* histo, const std:
   }
 }
 
+void my::initialiseTransferParameters( TF2* fit, TH2D const* histo, const std::string& fitFuncId, const std::string& depFuncId, const std::string& resFuncId )
+{
+  // FIXME
+  for ( Int_t uPar = 0; uPar < fit->GetNpar(); ++uPar ) {
+    fit->SetParameter( uPar, 0. );
+  }
+}
+
 bool my::checkParametersDoubleGaussian( TF1 const* fit, const std::string& fitFuncId )
 {
   //. This function assumes fit functions of the form

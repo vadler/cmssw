@@ -22,6 +22,7 @@ namespace my {
 
   void initialiseFitParameters( TF1* fit, TH1D const* histo, const std::string& fitFuncId, bool scale );
   void initialiseDependencyParameters( TF1* dep, TH1D const* histo, const std::string& depFuncId );
+  void initialiseTransferParameters( TF2* fit, TH2D const* histo, const std::string& fitFuncId, const std::string& depFuncId, const std::string& resFuncId );
   bool checkParametersDoubleGaussian( TF1 const* fit, const std::string& fitFuncId );
   void mixParametersDoubleGaussian( TransferFunction& transfer, TF1 const* fit );
 

@@ -1055,22 +1055,34 @@ void FitTopTransferFunctionsRunner::transferPerCategoryFit( const std::string& o
 
   const std::string nameHist( histosTransEta.histTransScaleMapPt->GetName() );
   const std::string nameHistFit( nameHist + "_fit" );
+std::cout << "DEBUG NAME --> " << nameHist << std::endl;
+std::cout << "DEBUG TransferFunctionString: " << transfer.TransferFunctionString() << std::endl;
   TF2* fitFunc( new TF2( nameHistFit.c_str(), transfer.TransferFunctionString().c_str(), histosTransEta.histTransScaleMapPt->GetXaxis()->GetXmin(), histosTransEta.histTransScaleMapPt->GetXaxis()->GetXmax(), histosTransEta.histTransScaleMapPt->GetYaxis()->GetXmin(), histosTransEta.histTransScaleMapPt->GetYaxis()->GetXmax() ) );
-//   initialiseTransferParameters( fitFunc, histosTransEta.histTransScaleMapPt );
-  for ( unsigned uPar = 0; uPar < transfer.NParTransfer() - transfer.NParDependency(); ++uPar ) fitFunc->SetParameter( uPar, 1. ); // FIXME
+  initialiseTransferParameters( fitFunc, histosTransEta.histTransScaleMapPt, fitFuncID_, depFuncID_, resFuncID_ );
+TCanvas canvas;
+fitFunc->Draw("Surf3Z");
+canvas.Print(std::string(pathPlots_ + "test.png").c_str());
   TFitResultPtr fitResultPtr( histosTransEta.histTransScaleMapPt->Fit( fitFunc, fitOptions_.c_str() ) );
+for ( unsigned uPar = 0; uPar < transfer.NParTransfer() - transfer.NParDependency(); ++uPar ) std::cout << "DEBUG par " << uPar << ": " << fitFunc->GetParameter( uPar ) << std::endl;
+std::cout << "DEBUG fitResultPtr: " << fitResultPtr << std::endl;
   if ( fitResultPtr >= 0 ) {
     if ( fitResultPtr->Status() == 0 && fitResultPtr->Ndf() != 0. ) {
-//       for ( Int_t uDep = 0; uDep < nPar; ++uDep ) {
-//         if ( ! transfer.SetParameter( uPar, uDep, fitFunc->GetParameter( uDep ) ) ) {
-//           std::cout << myName_ << " --> ERROR:" << std::endl
-//                     << "    parameter index pair (" << uPar << "," << uDep << ") not available in transfer function"; dirOut->pwd();
-//         }
-//         if ( ! transfer.SetError( uPar, uDep, fitFunc->GetParError( uDep ) ) ) {
-//           std::cout << myName_ << " --> ERROR:" << std::endl
-//                     << "    error index pair (" << uPar << "," << uDep << ") not available in transfer function"; dirOut->pwd();
-//         }
-//       }
+      unsigned count( 0 );
+      for ( unsigned uParFit = 1; uParFit < transfer.NParFit(); ++uParFit ) { // first parameter is norm!
+        std::set< int > sigmaPars( transfer.SigmaPars() );
+        const unsigned nPar( sigmaPars.find( uParFit ) == sigmaPars.end() ? transfer.NParDependency() : transfer.NParResolution() );
+        for ( unsigned uPar = 0; uPar < nPar; ++uPar ) {
+          if ( ! transfer.SetParameter( uParFit, uPar, fitFunc->GetParameter( count ) ) ) {
+            std::cout << myName_ << " --> ERROR:" << std::endl
+                      << "    parameter index pair (" << uParFit << "," << uPar << ") not available in transfer function"; dirOut->pwd();
+          }
+          if ( ! transfer.SetError( uParFit, uPar, fitFunc->GetParError( count ) ) ) {
+            std::cout << myName_ << " --> ERROR:" << std::endl
+                      << "    error index pair (" << uParFit << "," << uPar << ") not available in transfer function"; dirOut->pwd();
+          }
+          ++count;
+        }
+      }
     }
     else {
       if ( verbose_ > 0 ) {

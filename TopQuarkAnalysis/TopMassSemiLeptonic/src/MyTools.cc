@@ -240,9 +240,7 @@ void my::initialiseDependencyParameters( TF1* dep, TH1D const* histo, const std:
   Double_t x2( histo->GetBinCenter( maxBin ) );
   Double_t y2( histo->GetBinContent( maxBin ) );
   // Constant
-  Double_t a( ( x2 * y1 - x1 * y2 ) / ( x2 - x1 ) );
-  dep->SetParameter( 0, a > 0. ? a : 0. );
-  dep->SetParLimits( 0, 0., 100. );
+  dep->SetParameter( 0, ( x2 * y1 - x1 * y2 ) / ( x2 - x1 ) );
   // Slope
   dep->SetParameter( 1, ( y2 - y1 ) / ( x2 - x1 ) );
 }

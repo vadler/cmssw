@@ -22,6 +22,7 @@ fitTopTransferFunctions = cms.PSet(
         fit1D = cms.bool(False),
         fit2D = cms.bool(False),
         histAddEdges = cms.bool( True ),
+        fitEtaBins = cms.bool( True ),
         fullStats = cms.bool(False),
         inputFile = cms.string('file:/afs/cern.ch/work/v/vadler/cms/Top/CMSSW_5_3_13/output/analyzeHitFit_fromSummer11-coarseEta_Summer12_MadGraph_L3_unambiguousOnly.root')
     ),

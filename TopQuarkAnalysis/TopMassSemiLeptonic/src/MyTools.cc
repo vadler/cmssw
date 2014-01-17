@@ -258,7 +258,8 @@ bool my::checkParametersDoubleGaussian( TF1 const* fit, const std::string& fitFu
   //. This function assumes fit functions of the form
   // - [0]*(exp(-0.5*((x-[1])/[2])**2) + [3]*exp(-0.5*((x-[4])/[5])**2))/(([2]+[3]*[5])*sqrt(2*pi)) (double Gaussian)
   if ( fitFuncId != "dGauss" ) return false;
-  if ( fit->GetParameter( 2 ) < fit->GetParameter( 5 ) ) return false;
+//   if ( fit->GetParameter( 2 ) < fit->GetParameter( 5 ) ) return false;
+  if ( fit->GetParameter( 2 ) < fit->GetParameter( 5 ) || std::fabs( fit->GetParameter( 3 ) ) < 1. ) return false;
   std::cout << std::endl
             << " --> WARNING:" << std::endl
             << "    function " << fit->GetName() << " mixed parameters." << std::endl;
@@ -282,7 +283,6 @@ void my::mixParametersDoubleGaussian( TransferFunction& transfer, TF1 const* fit
   transfer.SetParameter( 5, fit->GetParameter( 2 ) );
   transfer.SetError( 5, fit->GetParError( 2 ) );
 }
-
 
 
 #include <TKey.h>

@@ -279,33 +279,34 @@ std::string TransferFunction::TransferFunctionString( int norm ) const
 
 // Evaluate
 
-TransferFunction TransferFunction::FunctionErrorsUp() const
-{
-  TransferFunction transferFunction( *this );
-  for ( unsigned i = 0; i < transferFunction.NParFit(); ++i ) {
-    transferFunction.SetParameter( i, transferFunction.Parameter( i ) + transferFunction.Error( i ) );
-    unsigned nPar( transferFunction.sigmaPars_.find( i ) == transferFunction.sigmaPars_.end() ? transferFunction.NParDependency() : transferFunction.NParResolution() );
-    for ( unsigned j = 0; j < nPar; ++j ) {
-      transferFunction.SetParameter( i, j, transferFunction.Parameter( i, j ) + transferFunction.Error( i, j ) );
-    }
-  }
-  transferFunction.ClearErrors();
-  return transferFunction;
-}
-
-TransferFunction TransferFunction::FunctionErrorsDown() const
-{
-  TransferFunction transferFunction( *this );
-  for ( unsigned i = 0; i < transferFunction.NParFit(); ++i ) {
-    transferFunction.SetParameter( i, transferFunction.Parameter( i ) - transferFunction.Error( i ) );
-    unsigned nPar( transferFunction.sigmaPars_.find( i ) == transferFunction.sigmaPars_.end() ? transferFunction.NParDependency() : transferFunction.NParResolution() );
-    for ( unsigned j = 0; j < nPar; ++j ) {
-      transferFunction.SetParameter( i, j, transferFunction.Parameter( i, j ) - transferFunction.Error( i, j ) );
-    }
-  }
-  transferFunction.ClearErrors();
-  return transferFunction;
-}
+// FIXME: These need proper error determination
+// TransferFunction TransferFunction::FunctionErrorsUp() const
+// {
+//   TransferFunction transferFunction( *this );
+//   for ( unsigned i = 0; i < transferFunction.NParFit(); ++i ) {
+//     transferFunction.SetParameter( i, transferFunction.Parameter( i ) + transferFunction.Error( i ) );
+//     unsigned nPar( transferFunction.sigmaPars_.find( i ) == transferFunction.sigmaPars_.end() ? transferFunction.NParDependency() : transferFunction.NParResolution() );
+//     for ( unsigned j = 0; j < nPar; ++j ) {
+//       transferFunction.SetParameter( i, j, transferFunction.Parameter( i, j ) + transferFunction.Error( i, j ) );
+//     }
+//   }
+//   transferFunction.ClearErrors();
+//   return transferFunction;
+// }
+//
+// TransferFunction TransferFunction::FunctionErrorsDown() const
+// {
+//   TransferFunction transferFunction( *this );
+//   for ( unsigned i = 0; i < transferFunction.NParFit(); ++i ) {
+//     transferFunction.SetParameter( i, transferFunction.Parameter( i ) - transferFunction.Error( i ) );
+//     unsigned nPar( transferFunction.sigmaPars_.find( i ) == transferFunction.sigmaPars_.end() ? transferFunction.NParDependency() : transferFunction.NParResolution() );
+//     for ( unsigned j = 0; j < nPar; ++j ) {
+//       transferFunction.SetParameter( i, j, transferFunction.Parameter( i, j ) - transferFunction.Error( i, j ) );
+//     }
+//   }
+//   transferFunction.ClearErrors();
+//   return transferFunction;
+// }
 
 // FIXME: Adapt to resolution function
 TF2 TransferFunction::Function( int norm ) const

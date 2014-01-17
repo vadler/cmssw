@@ -318,8 +318,9 @@ namespace my {
       /// Evaluate
 
       /// Get the TransferFunction with errors applied
-      TransferFunction FunctionErrorsUp() const;
-      TransferFunction FunctionErrorsDown() const;
+      // FIXME: These need proper error determination
+//       TransferFunction FunctionErrorsUp() const;
+//       TransferFunction FunctionErrorsDown() const;
 
       /// Get the 2D transfer function as ROOT function.
       TF2 Function( int norm = 0 ) const;

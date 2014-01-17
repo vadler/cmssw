@@ -54,8 +54,8 @@ FitTopTransferFunctionsRunner::FitTopTransferFunctionsRunner( const std::string&
   const edm::ParameterSet& configIO( config_.getParameter< edm::ParameterSet >( "io" ) );
   const bool         configIOFullStats( configIO.getParameter< bool >( "fullStats" ) );
   const std::string& configIOInFile( configIO.getParameter< std::string >( "inputFile" ) );
-  refSel_ = configIO.getParameter< bool >( "refSel" );
-  usePileup_ = configIO.getParameter< bool >( "usePileUp" );
+  refSel_       = configIO.getParameter< bool >( "refSel" );
+  usePileup_    = configIO.getParameter< bool >( "usePileUp" );
   const std::string& configIOPileUp( configIO.getParameter< std::string >( "pileUp" ) );
   const std::string& configIOOutFile( configIO.getParameter< std::string >( "outputFile" ) );
   overwrite_    = configIO.getParameter< bool >( "overwrite" ) ? TObject::kOverwrite : 0;
@@ -63,6 +63,7 @@ FitTopTransferFunctionsRunner::FitTopTransferFunctionsRunner( const std::string&
   fit0D_        = configIO.getParameter< bool >( "fit0D" );
   fit1D_        = configIO.getParameter< bool >( "fit1D" );
   fit2D_        = configIO.getParameter< bool >( "fit2D" );
+  histAddEdges_ = configIO.getParameter< bool >( "histAddEdges" );
   fitEtaBins_   = configIO.getParameter< bool >( "fitEtaBins" );
   sample_       = configIO.getParameter< std::string >( "sample" );
   pathOut_      = configIO.getParameter< std::string >( "pathOut" );
@@ -1018,6 +1019,20 @@ void FitTopTransferFunctionsRunner::transferPerCategoryBin( const std::string& o
     transferFunctionPt->SetLineColor( kBlack );
 //     transferFunctionPt->SetLineStyle( 2 );
     histosTransEta.histVecPtTrans.at( uPt )->GetListOfFunctions()->Add( transferFunctionPt );
+    if ( histAddEdges_ ) {
+      const std::string namePtTransferFunctionLow( namePtTransferFunction + "Low" );
+      TF1* transferFunctionPtLow( new TF1( ( ( TF1& )( *( transfer.Function( objectData_.back().ptBins().at( uPt ), 0 ).Clone( namePtTransferFunctionLow.c_str() ) ) ) ) ) );
+      transferFunctionPtLow->SetRange( histosTransEta.histVecPtTrans.at( uPt )->GetXaxis()->GetXmin(), histosTransEta.histVecPtTrans.at( uPt )->GetXaxis()->GetXmax() );
+      transferFunctionPtLow->SetLineColor( kBlack );
+      transferFunctionPtLow->SetLineStyle( 2 );
+      histosTransEta.histVecPtTrans.at( uPt )->GetListOfFunctions()->Add( transferFunctionPtLow );
+      const std::string namePtTransferFunctionHigh( namePtTransferFunction + "High" );
+      TF1* transferFunctionPtHigh( new TF1( ( ( TF1& )( *( transfer.Function( objectData_.back().ptBins().at( uPt + 1 ), 0 ).Clone( namePtTransferFunctionHigh.c_str() ) ) ) ) ) );
+      transferFunctionPtHigh->SetRange( histosTransEta.histVecPtTrans.at( uPt )->GetXaxis()->GetXmin(), histosTransEta.histVecPtTrans.at( uPt )->GetXaxis()->GetXmax() );
+      transferFunctionPtHigh->SetLineColor( kBlack );
+      transferFunctionPtHigh->SetLineStyle( 3 );
+      histosTransEta.histVecPtTrans.at( uPt )->GetListOfFunctions()->Add( transferFunctionPtHigh );
+    }
   }
 
   if ( plot_ ) {
@@ -1034,15 +1049,28 @@ void FitTopTransferFunctionsRunner::transferPerCategoryBin( const std::string& o
     for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosTransEta.histTrans->GetName() + "." + formatPlots_.at( uForm ) ).c_str() );
 
     const std::string entryTransfer( "projected 2-D transfer function at " + titlePtT_ + " bin centre" );
+    const std::string entryTransferLow( "projected 2-D transfer function at " + titlePtT_ + " low bin edge" );
+    const std::string entryTransferHigh( "projected 2-D transfer function at " + titlePtT_ + " high bin edge" );
     for ( unsigned uPt = 0; uPt < histosTransEta.histVecPtTrans.size(); ++uPt ) {
+      const std::string binPt( boost::lexical_cast< std::string >( uPt ) );
+      const std::string namePt( name + "_" + baseTitlePt_ + binPt );
+      const std::string namePtTransferFunction( namePt + "_TransferFunction" );
       histosTransEta.histVecPtTrans.at( uPt )->Draw();
-      std::string header( histosTransEta.legVecPtTrans.at( uPt )->GetHeader() );
+      TLegend* legend( histosTransEta.legVecPtTrans.at( uPt ) );
+      std::string header( legend->GetHeader() );
       header += ", scaled";
-      histosTransEta.legVecPtTrans.at( uPt )->SetHeader( header.c_str() );
-      histosTransEta.legVecPtTrans.at( uPt )->AddEntry( histosTransEta.histVecPtTrans.at( uPt ), "MC", "LEP" );
-      histosTransEta.legVecPtTrans.at( uPt )->AddEntry( histosTransEta.histVecPtTrans.at( uPt )->GetListOfFunctions()->First(), "fitted 1-D transfer function", "L" );
-      histosTransEta.legVecPtTrans.at( uPt )->AddEntry( histosTransEta.histVecPtTrans.at( uPt )->GetListOfFunctions()->Last(), entryTransfer.c_str(), "L" );
-      histosTransEta.legVecPtTrans.at( uPt )->Draw();
+      const TList* funcList( histosTransEta.histVecPtTrans.at( uPt )->GetListOfFunctions() );
+      legend->SetHeader( header.c_str() );
+      legend->AddEntry( histosTransEta.histVecPtTrans.at( uPt ), "MC", "LEP" );
+      legend->AddEntry( funcList->First(), "fitted 1-D transfer function", "L" );
+      legend->AddEntry( funcList->FindObject( namePtTransferFunction.c_str() ), entryTransfer.c_str(), "L" );
+      if ( histAddEdges_ ) {
+        const std::string namePtTransferFunctionLow( namePtTransferFunction + "Low" );
+        legend->AddEntry( funcList->FindObject( namePtTransferFunctionLow.c_str() ), entryTransferLow.c_str(), "L" );
+        const std::string namePtTransferFunctionHigh( namePtTransferFunction + "High" );
+        legend->AddEntry( funcList->FindObject( namePtTransferFunctionHigh.c_str() ), entryTransferHigh.c_str(), "L" );
+      }
+      legend->Draw();
       for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosTransEta.histVecPtTrans.at( uPt )->GetName() + "." + formatPlots_.at( uForm ) ).c_str() );
     }
   }

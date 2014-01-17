@@ -34,6 +34,7 @@ namespace my {
       bool                       fit0D_;
       bool                       fit1D_;
       bool                       fit2D_;
+      bool                       histAddEdges_;
       bool                       fitEtaBins_;
       bool                       refSel_;
       bool                       usePileup_;

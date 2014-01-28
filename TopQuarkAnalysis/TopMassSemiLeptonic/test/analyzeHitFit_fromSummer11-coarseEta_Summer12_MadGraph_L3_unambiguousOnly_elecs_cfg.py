@@ -75,134 +75,6 @@ process.source = cms.Source("PoolSource",
         '/store/user/vadler/cms/Top/CMSSW_5_3_10_patch1/data/Summer12_MadGraph/skimHitFit_8_1_Ut0.root',
         '/store/user/vadler/cms/Top/CMSSW_5_3_10_patch1/data/Summer12_MadGraph/skimHitFit_9_1_9vN.root')
 )
-process.findTtSemiLepJetCombGeom = cms.EDProducer("TtSemiLepJetCombGeom",
-    minBDiscBJets = cms.double(1.0),
-    maxNJets = cms.int32(4),
-    bTagAlgorithm = cms.string('trackCountingHighEffBJetTags'),
-    leps = cms.InputTag("selectedPatMuons"),
-    maxBDiscLightJets = cms.double(3.0),
-    useBTagging = cms.bool(False),
-    useDeltaR = cms.bool(True),
-    jets = cms.InputTag("selectedPatJets")
-)
-
-
-process.findTtSemiLepJetCombMVA = cms.EDProducer("TtSemiLepJetCombMVAComputer",
-    jets = cms.InputTag("selectedPatJets"),
-    mets = cms.InputTag("patMETs"),
-    maxNJets = cms.int32(4),
-    leps = cms.InputTag("selectedPatMuons"),
-    maxNComb = cms.int32(1)
-)
-
-
-process.findTtSemiLepJetCombMaxSumPtWMass = cms.EDProducer("TtSemiLepJetCombMaxSumPtWMass",
-    minBDiscBJets = cms.double(1.0),
-    maxNJets = cms.int32(4),
-    bTagAlgorithm = cms.string('trackCountingHighEffBJetTags'),
-    leps = cms.InputTag("selectedPatMuons"),
-    maxBDiscLightJets = cms.double(3.0),
-    useBTagging = cms.bool(False),
-    jets = cms.InputTag("selectedPatJets"),
-    wMass = cms.double(80.4)
-)
-
-
-process.findTtSemiLepJetCombWMassDeltaTopMass = cms.EDProducer("TtSemiLepJetCombWMassDeltaTopMass",
-    minBDiscBJets = cms.double(1.0),
-    mets = cms.InputTag("patMETs"),
-    maxNJets = cms.int32(4),
-    bTagAlgorithm = cms.string('trackCountingHighEffBJetTags'),
-    leps = cms.InputTag("selectedPatMuons"),
-    maxBDiscLightJets = cms.double(3.0),
-    useBTagging = cms.bool(False),
-    neutrinoSolutionType = cms.int32(-1),
-    jets = cms.InputTag("selectedPatJets"),
-    wMass = cms.double(80.4)
-)
-
-
-process.findTtSemiLepJetCombWMassMaxSumPt = cms.EDProducer("TtSemiLepJetCombWMassMaxSumPt",
-    minBDiscBJets = cms.double(1.0),
-    maxNJets = cms.int32(4),
-    bTagAlgorithm = cms.string('trackCountingHighEffBJetTags'),
-    leps = cms.InputTag("selectedPatMuons"),
-    maxBDiscLightJets = cms.double(3.0),
-    useBTagging = cms.bool(False),
-    jets = cms.InputTag("selectedPatJets"),
-    wMass = cms.double(80.4)
-)
-
-
-process.hitFitTtSemiLepEventHypothesis = cms.EDProducer("TtSemiLepHitFitProducerMuon",
-    jesB = cms.double(1.0),
-    jes = cms.double(1.0),
-    bTagAlgo = cms.string('trackCountingHighEffBJetTags'),
-    maxNJets = cms.int32(4),
-    maxNComb = cms.int32(1),
-    leps = cms.InputTag("selectedPatMuons"),
-    maxBDiscLightJets = cms.double(3.0),
-    useBTagging = cms.bool(False),
-    mW = cms.double(80.4),
-    mTop = cms.double(0.0),
-    jetCorrectionLevel = cms.string('L3Absolute'),
-    mets = cms.InputTag("patMETs"),
-    jets = cms.InputTag("selectedPatJets"),
-    minBDiscBJets = cms.double(1.0)
-)
-
-
-process.kinFitTtSemiLepEventHypothesis = cms.EDProducer("TtSemiLepKinFitProducerMuon",
-    minBDiscBJets = cms.double(1.0),
-    mets = cms.InputTag("patMETs"),
-    bTagAlgo = cms.string('trackCountingHighEffBJetTags'),
-    maxNJets = cms.int32(4),
-    maxNComb = cms.int32(1),
-    jetEnergyResolutionScaleFactors = cms.vdouble(1.0),
-    maxBDiscLightJets = cms.double(3.0),
-    useBTagging = cms.bool(False),
-    jetEnergyResolutionEtaBinning = cms.vdouble(0.0, -1.0),
-    maxF = cms.double(0.0001),
-    maxNrIter = cms.uint32(500),
-    useOnlyMatch = cms.bool(False),
-    lepParametrisation = cms.uint32(1),
-    match = cms.InputTag("findTtSemiLepJetCombMVA"),
-    leps = cms.InputTag("selectedPatMuons"),
-    mW = cms.double(80.4),
-    jets = cms.InputTag("selectedPatJets"),
-    jetParametrisation = cms.uint32(1),
-    maxDeltaS = cms.double(5e-05),
-    mTop = cms.double(173.0),
-    metParametrisation = cms.uint32(1),
-    constraints = cms.vuint32(1, 2)
-)
-
-
-process.ttSemiLepEvent = cms.EDProducer("TtSemiLepEvtBuilder",
-    genMatch = cms.PSet(
-        sumPt = cms.InputTag("ttSemiLepJetPartonMatch","SumPt"),
-        sumDR = cms.InputTag("ttSemiLepJetPartonMatch","SumDR")
-    ),
-    hitFit = cms.PSet(
-        chi2 = cms.InputTag("hitFitTtSemiLepEventHypothesis","Chi2"),
-        sigmt = cms.InputTag("hitFitTtSemiLepEventHypothesis","SigMT"),
-        prob = cms.InputTag("hitFitTtSemiLepEventHypothesis","Prob"),
-        mt = cms.InputTag("hitFitTtSemiLepEventHypothesis","MT")
-    ),
-    verbosity = cms.int32(0),
-    mvaDisc = cms.PSet(
-        meth = cms.InputTag("findTtSemiLepJetCombMVA","Method"),
-        disc = cms.InputTag("findTtSemiLepJetCombMVA","Discriminators")
-    ),
-    decayChannel1 = cms.int32(2),
-    hypotheses = cms.VInputTag("ttSemiLepHypGenMatch"),
-    genEvent = cms.InputTag("genEvt"),
-    kinFit = cms.PSet(
-        chi2 = cms.InputTag("kinFitTtSemiLepEventHypothesis","Chi2"),
-        prob = cms.InputTag("kinFitTtSemiLepEventHypothesis","Prob")
-    ),
-    decayChannel2 = cms.int32(0)
-)
 
 
 process.ttSemiLepEventHitFitElectrons = cms.EDProducer("TtSemiLepEvtBuilder",
@@ -226,33 +98,6 @@ process.ttSemiLepEventHitFitElectrons = cms.EDProducer("TtSemiLepEvtBuilder",
         prob = cms.InputTag("kinFitTtSemiLepEventHypothesis","Prob")
     ),
     hypotheses = cms.VInputTag("ttSemiLepHypGenMatchHitFitElectrons"),
-    genEvent = cms.InputTag("genEvt"),
-    decayChannel1 = cms.int32(2),
-    decayChannel2 = cms.int32(0)
-)
-
-
-process.ttSemiLepEventHitFitMuons = cms.EDProducer("TtSemiLepEvtBuilder",
-    genMatch = cms.PSet(
-        sumPt = cms.InputTag("ttSemiLepJetPartonMatchHitFitMuons","SumPt"),
-        sumDR = cms.InputTag("ttSemiLepJetPartonMatchHitFitMuons","SumDR")
-    ),
-    hitFit = cms.PSet(
-        chi2 = cms.InputTag("hitFitTtSemiLepEventHypothesis","Chi2"),
-        sigmt = cms.InputTag("hitFitTtSemiLepEventHypothesis","SigMT"),
-        prob = cms.InputTag("hitFitTtSemiLepEventHypothesis","Prob"),
-        mt = cms.InputTag("hitFitTtSemiLepEventHypothesis","MT")
-    ),
-    verbosity = cms.int32(0),
-    mvaDisc = cms.PSet(
-        meth = cms.InputTag("findTtSemiLepJetCombMVA","Method"),
-        disc = cms.InputTag("findTtSemiLepJetCombMVA","Discriminators")
-    ),
-    kinFit = cms.PSet(
-        chi2 = cms.InputTag("kinFitTtSemiLepEventHypothesis","Chi2"),
-        prob = cms.InputTag("kinFitTtSemiLepEventHypothesis","Prob")
-    ),
-    hypotheses = cms.VInputTag("ttSemiLepHypGenMatchHitFitMuons"),
     genEvent = cms.InputTag("genEvt"),
     decayChannel1 = cms.int32(2),
     decayChannel2 = cms.int32(0)
@@ -286,33 +131,6 @@ process.ttSemiLepEventMCMatchElectrons = cms.EDProducer("TtSemiLepEvtBuilder",
 )
 
 
-process.ttSemiLepEventMCMatchMuons = cms.EDProducer("TtSemiLepEvtBuilder",
-    genMatch = cms.PSet(
-        sumPt = cms.InputTag("ttSemiLepJetPartonMatchMCMatchMuons","SumPt"),
-        sumDR = cms.InputTag("ttSemiLepJetPartonMatchMCMatchMuons","SumDR")
-    ),
-    hitFit = cms.PSet(
-        chi2 = cms.InputTag("hitFitTtSemiLepEventHypothesis","Chi2"),
-        sigmt = cms.InputTag("hitFitTtSemiLepEventHypothesis","SigMT"),
-        prob = cms.InputTag("hitFitTtSemiLepEventHypothesis","Prob"),
-        mt = cms.InputTag("hitFitTtSemiLepEventHypothesis","MT")
-    ),
-    verbosity = cms.int32(0),
-    mvaDisc = cms.PSet(
-        meth = cms.InputTag("findTtSemiLepJetCombMVA","Method"),
-        disc = cms.InputTag("findTtSemiLepJetCombMVA","Discriminators")
-    ),
-    kinFit = cms.PSet(
-        chi2 = cms.InputTag("kinFitTtSemiLepEventHypothesis","Chi2"),
-        prob = cms.InputTag("kinFitTtSemiLepEventHypothesis","Prob")
-    ),
-    hypotheses = cms.VInputTag("ttSemiLepHypGenMatchMCMatchMuons"),
-    genEvent = cms.InputTag("genEvt"),
-    decayChannel1 = cms.int32(2),
-    decayChannel2 = cms.int32(0)
-)
-
-
 process.ttSemiLepEventReferenceElectrons = cms.EDProducer("TtSemiLepEvtBuilder",
     genMatch = cms.PSet(
         sumPt = cms.InputTag("ttSemiLepJetPartonMatchReferenceElectrons","SumPt"),
@@ -340,44 +158,6 @@ process.ttSemiLepEventReferenceElectrons = cms.EDProducer("TtSemiLepEvtBuilder",
 )
 
 
-process.ttSemiLepEventReferenceMuons = cms.EDProducer("TtSemiLepEvtBuilder",
-    genMatch = cms.PSet(
-        sumPt = cms.InputTag("ttSemiLepJetPartonMatchReferenceMuons","SumPt"),
-        sumDR = cms.InputTag("ttSemiLepJetPartonMatchReferenceMuons","SumDR")
-    ),
-    hitFit = cms.PSet(
-        chi2 = cms.InputTag("hitFitTtSemiLepEventHypothesis","Chi2"),
-        sigmt = cms.InputTag("hitFitTtSemiLepEventHypothesis","SigMT"),
-        prob = cms.InputTag("hitFitTtSemiLepEventHypothesis","Prob"),
-        mt = cms.InputTag("hitFitTtSemiLepEventHypothesis","MT")
-    ),
-    verbosity = cms.int32(0),
-    mvaDisc = cms.PSet(
-        meth = cms.InputTag("findTtSemiLepJetCombMVA","Method"),
-        disc = cms.InputTag("findTtSemiLepJetCombMVA","Discriminators")
-    ),
-    kinFit = cms.PSet(
-        chi2 = cms.InputTag("kinFitTtSemiLepEventHypothesis","Chi2"),
-        prob = cms.InputTag("kinFitTtSemiLepEventHypothesis","Prob")
-    ),
-    hypotheses = cms.VInputTag("ttSemiLepHypGenMatchReferenceMuons"),
-    genEvent = cms.InputTag("genEvt"),
-    decayChannel1 = cms.int32(2),
-    decayChannel2 = cms.int32(0)
-)
-
-
-process.ttSemiLepHypGenMatch = cms.EDProducer("TtSemiLepHypGenMatch",
-    mets = cms.InputTag("patMETs"),
-    jetCorrectionLevel = cms.string('L3Absolute'),
-    leps = cms.InputTag("selectedPatMuons"),
-    neutrinoSolutionType = cms.int32(-1),
-    nJetsConsidered = cms.InputTag("ttSemiLepJetPartonMatch","NumberOfConsideredJets"),
-    jets = cms.InputTag("selectedPatJets"),
-    match = cms.InputTag("ttSemiLepJetPartonMatch")
-)
-
-
 process.ttSemiLepHypGenMatchHitFitElectrons = cms.EDProducer("TtSemiLepHypGenMatch",
     mets = cms.InputTag("patMETs"),
     jetCorrectionLevel = cms.string('L3Absolute'),
@@ -386,17 +166,6 @@ process.ttSemiLepHypGenMatchHitFitElectrons = cms.EDProducer("TtSemiLepHypGenMat
     nJetsConsidered = cms.InputTag("ttSemiLepJetPartonMatchHitFitElectrons","NumberOfConsideredJets"),
     jets = cms.InputTag("selectedPatJetsHitFit"),
     match = cms.InputTag("ttSemiLepJetPartonMatchHitFitElectrons")
-)
-
-
-process.ttSemiLepHypGenMatchHitFitMuons = cms.EDProducer("TtSemiLepHypGenMatch",
-    mets = cms.InputTag("patMETs"),
-    jetCorrectionLevel = cms.string('L3Absolute'),
-    leps = cms.InputTag("selectedPatMuonsHitFit"),
-    neutrinoSolutionType = cms.int32(-1),
-    nJetsConsidered = cms.InputTag("ttSemiLepJetPartonMatchHitFitMuons","NumberOfConsideredJets"),
-    jets = cms.InputTag("selectedPatJetsHitFit"),
-    match = cms.InputTag("ttSemiLepJetPartonMatchHitFitMuons")
 )
 
 
@@ -411,17 +180,6 @@ process.ttSemiLepHypGenMatchMCMatchElectrons = cms.EDProducer("TtSemiLepHypGenMa
 )
 
 
-process.ttSemiLepHypGenMatchMCMatchMuons = cms.EDProducer("TtSemiLepHypGenMatch",
-    mets = cms.InputTag("patMETs"),
-    jetCorrectionLevel = cms.string('L3Absolute'),
-    leps = cms.InputTag("selectedPatMuonsMCMatch"),
-    neutrinoSolutionType = cms.int32(-1),
-    nJetsConsidered = cms.InputTag("ttSemiLepJetPartonMatchMCMatchMuons","NumberOfConsideredJets"),
-    jets = cms.InputTag("selectedPatJetsMCMatch"),
-    match = cms.InputTag("ttSemiLepJetPartonMatchMCMatchMuons")
-)
-
-
 process.ttSemiLepHypGenMatchReferenceElectrons = cms.EDProducer("TtSemiLepHypGenMatch",
     mets = cms.InputTag("patMETs"),
     jetCorrectionLevel = cms.string('L3Absolute'),
@@ -433,131 +191,7 @@ process.ttSemiLepHypGenMatchReferenceElectrons = cms.EDProducer("TtSemiLepHypGen
 )
 
 
-process.ttSemiLepHypGenMatchReferenceMuons = cms.EDProducer("TtSemiLepHypGenMatch",
-    mets = cms.InputTag("patMETs"),
-    jetCorrectionLevel = cms.string('L3Absolute'),
-    leps = cms.InputTag("referencePatMuons"),
-    neutrinoSolutionType = cms.int32(-1),
-    nJetsConsidered = cms.InputTag("ttSemiLepJetPartonMatchReferenceMuons","NumberOfConsideredJets"),
-    jets = cms.InputTag("referencePatJets"),
-    match = cms.InputTag("ttSemiLepJetPartonMatchReferenceMuons")
-)
-
-
-process.ttSemiLepHypGeom = cms.EDProducer("TtSemiLepHypGeom",
-    mets = cms.InputTag("patMETs"),
-    jetCorrectionLevel = cms.string('L3Absolute'),
-    leps = cms.InputTag("selectedPatMuons"),
-    neutrinoSolutionType = cms.int32(-1),
-    nJetsConsidered = cms.InputTag("findTtSemiLepJetCombGeom","NumberOfConsideredJets"),
-    jets = cms.InputTag("selectedPatJets"),
-    match = cms.InputTag("findTtSemiLepJetCombGeom")
-)
-
-
-process.ttSemiLepHypHitFit = cms.EDProducer("TtSemiLepHypHitFit",
-    status = cms.InputTag("hitFitTtSemiLepEventHypothesis","Status"),
-    mets = cms.InputTag("patMETs"),
-    partonsLepB = cms.InputTag("hitFitTtSemiLepEventHypothesis","PartonsLepB"),
-    neutrinos = cms.InputTag("hitFitTtSemiLepEventHypothesis","Neutrinos"),
-    leps = cms.InputTag("selectedPatMuons"),
-    partonsHadB = cms.InputTag("hitFitTtSemiLepEventHypothesis","PartonsHadB"),
-    leptons = cms.InputTag("hitFitTtSemiLepEventHypothesis","Leptons"),
-    nJetsConsidered = cms.InputTag("hitFitTtSemiLepEventHypothesis","NumberOfConsideredJets"),
-    jets = cms.InputTag("selectedPatJetsAK5PF"),
-    partonsHadQ = cms.InputTag("hitFitTtSemiLepEventHypothesis","PartonsHadQ"),
-    partonsHadP = cms.InputTag("hitFitTtSemiLepEventHypothesis","PartonsHadP"),
-    match = cms.InputTag("hitFitTtSemiLepEventHypothesis")
-)
-
-
-process.ttSemiLepHypKinFit = cms.EDProducer("TtSemiLepHypKinFit",
-    status = cms.InputTag("kinFitTtSemiLepEventHypothesis","Status"),
-    mets = cms.InputTag("patMETs"),
-    partonsLepB = cms.InputTag("kinFitTtSemiLepEventHypothesis","PartonsLepB"),
-    neutrinos = cms.InputTag("kinFitTtSemiLepEventHypothesis","Neutrinos"),
-    leps = cms.InputTag("selectedPatMuons"),
-    partonsHadB = cms.InputTag("kinFitTtSemiLepEventHypothesis","PartonsHadB"),
-    leptons = cms.InputTag("kinFitTtSemiLepEventHypothesis","Leptons"),
-    nJetsConsidered = cms.InputTag("kinFitTtSemiLepEventHypothesis","NumberOfConsideredJets"),
-    jets = cms.InputTag("selectedPatJets"),
-    partonsHadQ = cms.InputTag("kinFitTtSemiLepEventHypothesis","PartonsHadQ"),
-    partonsHadP = cms.InputTag("kinFitTtSemiLepEventHypothesis","PartonsHadP"),
-    match = cms.InputTag("kinFitTtSemiLepEventHypothesis")
-)
-
-
-process.ttSemiLepHypMVADisc = cms.EDProducer("TtSemiLepHypMVADisc",
-    mets = cms.InputTag("patMETs"),
-    jetCorrectionLevel = cms.string('L3Absolute'),
-    leps = cms.InputTag("selectedPatMuons"),
-    neutrinoSolutionType = cms.int32(-1),
-    nJetsConsidered = cms.InputTag("findTtSemiLepJetCombMVA","NumberOfConsideredJets"),
-    jets = cms.InputTag("selectedPatJets"),
-    match = cms.InputTag("findTtSemiLepJetCombMVA")
-)
-
-
-process.ttSemiLepHypMaxSumPtWMass = cms.EDProducer("TtSemiLepHypMaxSumPtWMass",
-    mets = cms.InputTag("patMETs"),
-    jetCorrectionLevel = cms.string('L3Absolute'),
-    leps = cms.InputTag("selectedPatMuons"),
-    neutrinoSolutionType = cms.int32(-1),
-    nJetsConsidered = cms.InputTag("findTtSemiLepJetCombMaxSumPtWMass","NumberOfConsideredJets"),
-    jets = cms.InputTag("selectedPatJets"),
-    match = cms.InputTag("findTtSemiLepJetCombMaxSumPtWMass")
-)
-
-
-process.ttSemiLepHypWMassDeltaTopMass = cms.EDProducer("TtSemiLepHypWMassDeltaTopMass",
-    mets = cms.InputTag("patMETs"),
-    jetCorrectionLevel = cms.string('L3Absolute'),
-    leps = cms.InputTag("selectedPatMuons"),
-    neutrinoSolutionType = cms.int32(-1),
-    nJetsConsidered = cms.InputTag("findTtSemiLepJetCombWMassDeltaTopMass","NumberOfConsideredJets"),
-    jets = cms.InputTag("selectedPatJets"),
-    match = cms.InputTag("findTtSemiLepJetCombWMassDeltaTopMass")
-)
-
-
-process.ttSemiLepHypWMassMaxSumPt = cms.EDProducer("TtSemiLepHypWMassMaxSumPt",
-    mets = cms.InputTag("patMETs"),
-    jetCorrectionLevel = cms.string('L3Absolute'),
-    leps = cms.InputTag("selectedPatMuons"),
-    neutrinoSolutionType = cms.int32(-1),
-    nJetsConsidered = cms.InputTag("findTtSemiLepJetCombWMassMaxSumPt","NumberOfConsideredJets"),
-    jets = cms.InputTag("selectedPatJets"),
-    match = cms.InputTag("findTtSemiLepJetCombWMassMaxSumPt")
-)
-
-
-process.ttSemiLepJetPartonMatch = cms.EDProducer("TtSemiLepJetPartonMatch",
-    maxDist = cms.double(0.3),
-    useMaxDist = cms.bool(False),
-    maxNJets = cms.int32(6),
-    algorithm = cms.string('unambiguousOnly'),
-    maxNComb = cms.int32(1),
-    verbosity = cms.int32(0),
-    partonsToIgnore = cms.vstring(),
-    useDeltaR = cms.bool(True),
-    jets = cms.InputTag("selectedPatJets")
-)
-
-
 process.ttSemiLepJetPartonMatchHitFitElectrons = cms.EDProducer("TtSemiLepJetPartonMatch",
-    maxDist = cms.double(0.3),
-    useMaxDist = cms.bool(False),
-    maxNJets = cms.int32(6),
-    algorithm = cms.string('unambiguousOnly'),
-    maxNComb = cms.int32(1),
-    verbosity = cms.int32(0),
-    partonsToIgnore = cms.vstring(),
-    useDeltaR = cms.bool(True),
-    jets = cms.InputTag("selectedPatJetsHitFit")
-)
-
-
-process.ttSemiLepJetPartonMatchHitFitMuons = cms.EDProducer("TtSemiLepJetPartonMatch",
     maxDist = cms.double(0.3),
     useMaxDist = cms.bool(False),
     maxNJets = cms.int32(6),
@@ -583,33 +217,7 @@ process.ttSemiLepJetPartonMatchMCMatchElectrons = cms.EDProducer("TtSemiLepJetPa
 )
 
 
-process.ttSemiLepJetPartonMatchMCMatchMuons = cms.EDProducer("TtSemiLepJetPartonMatch",
-    maxDist = cms.double(0.3),
-    useMaxDist = cms.bool(False),
-    maxNJets = cms.int32(6),
-    algorithm = cms.string('unambiguousOnly'),
-    maxNComb = cms.int32(1),
-    verbosity = cms.int32(0),
-    partonsToIgnore = cms.vstring(),
-    useDeltaR = cms.bool(True),
-    jets = cms.InputTag("selectedPatJetsMCMatch")
-)
-
-
 process.ttSemiLepJetPartonMatchReferenceElectrons = cms.EDProducer("TtSemiLepJetPartonMatch",
-    maxDist = cms.double(0.3),
-    useMaxDist = cms.bool(False),
-    maxNJets = cms.int32(6),
-    algorithm = cms.string('unambiguousOnly'),
-    maxNComb = cms.int32(1),
-    verbosity = cms.int32(0),
-    partonsToIgnore = cms.vstring(),
-    useDeltaR = cms.bool(True),
-    jets = cms.InputTag("referencePatJets")
-)
-
-
-process.ttSemiLepJetPartonMatchReferenceMuons = cms.EDProducer("TtSemiLepJetPartonMatch",
     maxDist = cms.double(0.3),
     useMaxDist = cms.bool(False),
     maxNJets = cms.int32(6),
@@ -664,36 +272,13 @@ process.ttSemiLepHypSelectionFilterElectronsReference = cms.EDFilter("TtSemiLepH
 )
 
 
-process.ttSemiLepHypSelectionFilterMuons = cms.EDFilter("TtSemiLepHypSelectionFilter",
-    ttSemiLepHyp = cms.string('kGenMatch'),
-    leptonSelector = cms.string('selectedPatMuonsHitFit'),
-    jetSelector = cms.string('selectedPatJetsHitFit'),
-    processName = cms.string('SKIM'),
-    ttSemiLepHypLeptons = cms.InputTag("selectedPatMuonsMCMatch"),
-    ttSemiLepEvt = cms.InputTag("ttSemiLepEventMCMatchMuons"),
-    ttSemiLepHypJets = cms.InputTag("selectedPatJetsMCMatch")
-)
-
-
-process.ttSemiLepHypSelectionFilterMuonsReference = cms.EDFilter("TtSemiLepHypSelectionFilter",
-    jetCut = cms.string('pt > 30. && numberOfDaughters > 1 && chargedEmEnergyFraction < 0.99 && neutralHadronEnergyFraction < 0.99 && neutralEmEnergyFraction < 0.99 && (chargedHadronEnergyFraction > 0. || abs(eta) >= 2.4) && (chargedMultiplicity > 0 || abs(eta) >= 2.4) && abs(eta) < 3.0 && abs(eta) < 2.5'),
-    ttSemiLepHyp = cms.string('kGenMatch'),
-    leptonSelector = cms.string('referencePatMuons'),
-    jetSelector = cms.string('referencePatJets'),
-    processName = cms.string('SKIM'),
-    ttSemiLepHypLeptons = cms.InputTag("selectedPatMuonsMCMatch"),
-    ttSemiLepEvt = cms.InputTag("ttSemiLepEventMCMatchMuons"),
-    ttSemiLepHypJets = cms.InputTag("selectedPatJetsMCMatch"),
-    leptonCut = cms.string('isTrackerMuon && pt > 26. && abs(eta) < 2.1 && globalTrack.normalizedChi2 < 10. && globalTrack.hitPattern.numberOfValidMuonHits > 0 && abs(dB) < 0.02 && innerTrack.hitPattern.trackerLayersWithMeasurement > 8 && innerTrack.hitPattern.pixelLayersWithMeasurement >= 1 && numberOfMatches > 1 && (chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.125')
-)
-
-
 process.analyzeHitFit = cms.EDAnalyzer("AnalyzeHitFit",
     patJets = cms.InputTag("selectedPatJetsHitFit"),
+    allJets = cms.bool(False),
     pileUpFileMCObserved = cms.FileInPath('CommonTools/MyTools/data/pileUpFileMC_Fall11inTime.root'),
     patElectrons = cms.InputTag("selectedPatElectronsHitFit"),
     patMETs = cms.InputTag("patMETs"),
-    pathPlots = cms.string('/afs/cern.ch/user/v/vadler/cms/Top/CMSSW_5_3_11/output/plots/analyzeHitFit/analyzeHitFit_fromSummer11-coarseEta_Summer12_MadGraph_L3_unambiguousOnly_'),
+    pathPlots = cms.string('/afs/cern.ch/user/v/vadler/work/cms/Top/CMSSW_5_3_13/output/plots/analyzeHitFit/analyzeHitFit_fromSummer11-coarseEta_Summer12_MadGraph_L3_unambiguousOnly_elecs_'),
     metPtBins = cms.vdouble(10.0, 20.0, 29.0, 37.0, 44.0,
         51.0, 59.0, 69.0, 80.0, 96.0,
         122.0, 200.0, 300.0),
@@ -732,10 +317,11 @@ process.analyzeHitFit = cms.EDAnalyzer("AnalyzeHitFit",
 
 process.analyzeHitFitReference = cms.EDAnalyzer("AnalyzeHitFit",
     patJets = cms.InputTag("referencePatJets"),
+    allJets = cms.bool(False),
     pileUpFileMCObserved = cms.FileInPath('CommonTools/MyTools/data/pileUpFileMC_Fall11inTime.root'),
     patElectrons = cms.InputTag("referencePatElectrons"),
     patMETs = cms.InputTag("patMETs"),
-    pathPlots = cms.string('/afs/cern.ch/user/v/vadler/cms/Top/CMSSW_5_3_11/output/plots/analyzeHitFit/analyzeHitFit_fromSummer11-coarseEta_Summer12_MadGraph_L3_unambiguousOnly_'),
+    pathPlots = cms.string('/afs/cern.ch/user/v/vadler/work/cms/Top/CMSSW_5_3_13/output/plots/analyzeHitFit/analyzeHitFit_fromSummer11-coarseEta_Summer12_MadGraph_L3_unambiguousOnly_elecs_'),
     metPtBins = cms.vdouble(10.0, 20.0, 29.0, 37.0, 44.0,
         51.0, 59.0, 69.0, 80.0, 96.0,
         122.0, 200.0, 300.0),
@@ -772,34 +358,13 @@ process.analyzeHitFitReference = cms.EDAnalyzer("AnalyzeHitFit",
 )
 
 
-process.makeHypothesis_genMatchMCMatchMuons = cms.Sequence(process.ttSemiLepJetPartonMatchMCMatchMuons+process.ttSemiLepHypGenMatchMCMatchMuons)
-
-
-process.makeHypothesis_geom = cms.Sequence(process.findTtSemiLepJetCombGeom+process.ttSemiLepHypGeom)
-
-
 process.makeHypothesis_genMatchReferenceElectrons = cms.Sequence(process.ttSemiLepJetPartonMatchReferenceElectrons+process.ttSemiLepHypGenMatchReferenceElectrons)
 
 
 process.makeTtSemiLepHypothesesReferenceElectrons = cms.Sequence(process.makeHypothesis_genMatchReferenceElectrons)
 
 
-process.makeHypothesis_genMatch = cms.Sequence(process.ttSemiLepJetPartonMatch+process.ttSemiLepHypGenMatch)
-
-
-process.makeHypothesis_hitFit = cms.Sequence(process.hitFitTtSemiLepEventHypothesis+process.ttSemiLepHypHitFit)
-
-
 process.makeHypothesis_genMatchMCMatchElectrons = cms.Sequence(process.ttSemiLepJetPartonMatchMCMatchElectrons+process.ttSemiLepHypGenMatchMCMatchElectrons)
-
-
-process.makeTtSemiLepHypothesesMCMatchMuons = cms.Sequence(process.makeHypothesis_genMatchMCMatchMuons)
-
-
-process.makeTtSemiLepHypotheses = cms.Sequence(process.makeHypothesis_genMatch)
-
-
-process.makeHypothesis_maxSumPtWMass = cms.Sequence(process.findTtSemiLepJetCombMaxSumPtWMass+process.ttSemiLepHypMaxSumPtWMass)
 
 
 process.makeHypothesis_genMatchHitFitElectrons = cms.Sequence(process.ttSemiLepJetPartonMatchHitFitElectrons+process.ttSemiLepHypGenMatchHitFitElectrons)
@@ -808,61 +373,25 @@ process.makeHypothesis_genMatchHitFitElectrons = cms.Sequence(process.ttSemiLepJ
 process.makeTtSemiLepEventReferenceElectrons = cms.Sequence(process.makeTtSemiLepHypothesesReferenceElectrons+process.ttSemiLepEventReferenceElectrons)
 
 
-process.makeHypothesis_wMassMaxSumPt = cms.Sequence(process.findTtSemiLepJetCombWMassMaxSumPt+process.ttSemiLepHypWMassMaxSumPt)
-
-
-process.makeHypothesis_genMatchHitFitMuons = cms.Sequence(process.ttSemiLepJetPartonMatchHitFitMuons+process.ttSemiLepHypGenMatchHitFitMuons)
-
-
-process.makeHypothesis_kinFit = cms.Sequence(process.kinFitTtSemiLepEventHypothesis+process.ttSemiLepHypKinFit)
-
-
-process.makeHypothesis_mvaDisc = cms.Sequence(process.findTtSemiLepJetCombMVA+process.ttSemiLepHypMVADisc)
-
-
-process.makeTtSemiLepEvent = cms.Sequence(process.makeTtSemiLepHypotheses+process.ttSemiLepEvent)
-
-
-process.makeTtSemiLepEventMCMatchMuons = cms.Sequence(process.makeTtSemiLepHypothesesMCMatchMuons+process.ttSemiLepEventMCMatchMuons)
-
-
 process.makeTtSemiLepHypothesesMCMatchElectrons = cms.Sequence(process.makeHypothesis_genMatchMCMatchElectrons)
-
-
-process.makeHypothesis_genMatchReferenceMuons = cms.Sequence(process.ttSemiLepJetPartonMatchReferenceMuons+process.ttSemiLepHypGenMatchReferenceMuons)
-
-
-process.makeHypothesis_wMassDeltaTopMass = cms.Sequence(process.findTtSemiLepJetCombWMassDeltaTopMass+process.ttSemiLepHypWMassDeltaTopMass)
 
 
 process.makeTtSemiLepHypothesesHitFitElectrons = cms.Sequence(process.makeHypothesis_genMatchHitFitElectrons)
 
 
-process.makeTtSemiLepHypothesesReferenceMuons = cms.Sequence(process.makeHypothesis_genMatchReferenceMuons)
-
-
 process.makeTtSemiLepEventMCMatchElectrons = cms.Sequence(process.makeTtSemiLepHypothesesMCMatchElectrons+process.ttSemiLepEventMCMatchElectrons)
-
-
-process.makeTtSemiLepHypothesesHitFitMuons = cms.Sequence(process.makeHypothesis_genMatchHitFitMuons)
 
 
 process.makeTtSemiLepEventHitFitElectrons = cms.Sequence(process.makeTtSemiLepHypothesesHitFitElectrons+process.ttSemiLepEventHitFitElectrons)
 
 
-process.makeTtSemiLepEventReferenceMuons = cms.Sequence(process.makeTtSemiLepHypothesesReferenceMuons+process.ttSemiLepEventReferenceMuons)
+process.matcherSequenceBase = cms.Sequence(process.makeTtSemiLepEventMCMatchElectrons)
 
 
-process.matcherSequenceBase = cms.Sequence(process.makeTtSemiLepEventMCMatchMuons+process.makeTtSemiLepEventMCMatchElectrons)
+process.matcherSequenceReference = cms.Sequence(process.makeTtSemiLepEventReferenceElectrons)
 
 
-process.matcherSequenceReference = cms.Sequence(process.makeTtSemiLepEventReferenceMuons+process.makeTtSemiLepEventReferenceElectrons)
-
-
-process.makeTtSemiLepEventHitFitMuons = cms.Sequence(process.makeTtSemiLepHypothesesHitFitMuons+process.ttSemiLepEventHitFitMuons)
-
-
-process.matcherSequence = cms.Sequence(process.makeTtSemiLepEventHitFitMuons+process.makeTtSemiLepEventHitFitElectrons)
+process.matcherSequence = cms.Sequence(process.makeTtSemiLepEventHitFitElectrons)
 
 
 process.standardPath = cms.Path(process.hltHighLevel+process.matcherSequenceBase+process.matcherSequence+process.analyzeHitFit)

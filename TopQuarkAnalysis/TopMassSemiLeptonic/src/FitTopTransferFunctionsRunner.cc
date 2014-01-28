@@ -76,6 +76,7 @@ FitTopTransferFunctionsRunner::FitTopTransferFunctionsRunner( const std::string&
   if ( configIOFullStats ) {
     gStyle->SetOptStat( 111111 );
     gStyle->SetOptFit( 1111 );
+    gStyle->SetStatW( 0.1 );
   }
   TH1D::SetDefaultSumw2();
   TH2D::SetDefaultSumw2();
@@ -188,9 +189,11 @@ int FitTopTransferFunctionsRunner::run()
       status_ += 0x200;
       return status_ ;
     }
-    if ( ! dependencyPerCategory( uCat ) ) {
-      status_ += 0x300;
-      return status_ ;
+    if ( fit1D_ ) {
+      if ( ! dependencyPerCategory( uCat ) ) {
+        status_ += 0x300;
+        return status_ ;
+      }
     }
     if ( ! transferPerCategory( uCat ) ) {
       status_ += 0x400;
@@ -776,13 +779,23 @@ void FitTopTransferFunctionsRunner::fitPerCategoryBin( const std::string& objCat
   histosVecDependency.push_back( histosDependency );
 
   // Plot
-  if ( fit1D_ && plot_ ) {
+  if ( plot_ ) {
     TCanvas canvas;
     histosDependency.histPtProb->Draw();
     const std::string entryHisto( "from " + titlePtT_ + " bins" );
     histosDependency.legPtProb->AddEntry( histosDependency.histPtProb, entryHisto.c_str(), "F" );
     histosDependency.legPtProb->Draw();
     for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosDependency.histPtProb->GetName() + "." + formatPlots_.at( uForm ) ).c_str() );
+    if ( ! fit1D_ ) { // done in dependencyPerCategoryBin(...) otherwise
+      const Int_t nParFit( fitFunction_->GetNpar() );
+      for ( Int_t uPar = 0; uPar < nParFit; ++uPar ) {
+        histosDependency.histVecPtPar.at( uPar )->Draw();
+        const std::string entryHisto( "from " + titlePtT_ + " bins" );
+        histosDependency.legVecPtPar.at( uPar )->AddEntry( histosDependency.histVecPtPar.at( uPar ), entryHisto.c_str(), "LEP" );
+        histosDependency.legVecPtPar.at( uPar )->Draw();
+        for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosDependency.histVecPtPar.at( uPar )->GetName() + "." + formatPlots_.at( uForm ) ).c_str() );
+      }
+    }
   }
 }
 
@@ -811,7 +824,7 @@ void FitTopTransferFunctionsRunner::fitPerCategoryFit( TransferFunction& transfe
           transfer.SetError( uPar, fitTrans->GetParError( uPar ) );
         }
       }
-      if ( fit1D_ && histosDependency != 0 && uPt >= 0 ) {
+      if ( histosDependency != 0 && uPt >= 0 ) {
         histosDependency->histPtProb->SetBinContent( uPt + 1, log10( fitTransResultPtr->Prob() ) );
         for ( Int_t uPar = 0; uPar < nParFit; ++uPar ) {
           histosDependency->histVecPtPar.at( uPar )->SetBinContent( uPt + 1, transfer.Parameter( uPar ) );
@@ -850,7 +863,7 @@ bool FitTopTransferFunctionsRunner::dependencyPerCategory( unsigned uCat )
               << "    Dependency fitting for object category " << objCat << std::endl;
   }
 
-  if ( fit1D_ ) dependencyPerCategoryLoop( objCat );
+    dependencyPerCategoryLoop( objCat );
 
   return true;
 

@@ -103,15 +103,15 @@ ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory*
     dataTree->GetEntry( iEntry );
     assert( iEta < ( Int_t )( nEtaBins() ) ); // has to fit (and be consistent)
     if ( iEta == -1 ) continue; // FIXME: eta out of range in analyzer; should be solved more consistently
-    sizeEta_.at( iEta ) += 1;
+    sizeEta_[ iEta ] += 1;
     Int_t pileUpEntry( ( objCat == "UdscJet" || objCat == "BJet" ) ? iEntry / 2 : iEntry );
-    weightData_.at( iEta ).push_back( data.pileUpWeights().at( pileUpEntry ) );
-    ptData_.at( iEta ).push_back( ptData );
-    ptGenData_.at( iEta ).push_back( ptGenData );
-    etaData_.at( iEta ).push_back( etaData );
-    etaGenData_.at( iEta ).push_back( etaGenData );
-    phiData_.at( iEta ).push_back( phiData );
-    phiGenData_.at( iEta ).push_back( phiGenData );
+    weightData_[ iEta ].push_back( data.pileUpWeights()[ pileUpEntry ] );
+    ptData_[ iEta ].push_back( ptData );
+    ptGenData_[ iEta ].push_back( ptGenData );
+    etaData_[ iEta ].push_back( etaData );
+    etaGenData_[ iEta ].push_back( etaGenData );
+    phiData_[ iEta ].push_back( phiData );
+    phiGenData_[ iEta ].push_back( phiGenData );
   }
 
   // Split data into pt bins per eta bin
@@ -132,25 +132,25 @@ ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory*
     DataTable phiEtaBin( nPtBins() );
     DataTable phiGenEtaBin( nPtBins() );
     std::vector< unsigned > sizePt( nPtBins() );
-    for ( unsigned uEntry = 0; uEntry < sizeEta_.at( uEta ); ++uEntry ) {
-      if ( ptData_.at( uEta ).at( uEntry ) == -9. || ptGenData_.at( uEta ).at( uEntry ) == -9. ) continue; // no match
-      Double_t ptVal( useNonT ? ptData_.at( uEta ).at( uEntry ) * std::cosh( etaData_.at( uEta ).at( uEntry ) ) : ptData_.at( uEta ).at( uEntry ) );
-      Double_t ptGenVal( useNonT ? ptGenData_.at( uEta ).at( uEntry ) * std::cosh( etaGenData_.at( uEta ).at( uEntry ) ) : ptGenData_.at( uEta ).at( uEntry ) );
+    for ( unsigned uEntry = 0; uEntry < sizeEta_[ uEta ]; ++uEntry ) {
+      if ( ptData_[ uEta ][ uEntry ] == -9. || ptGenData_[ uEta ][ uEntry ] == -9. ) continue; // no match
+      Double_t ptVal( useNonT ? ptData_[ uEta ][ uEntry ] * std::cosh( etaData_[ uEta ][ uEntry ] ) : ptData_[ uEta ][ uEntry ] );
+      Double_t ptGenVal( useNonT ? ptGenData_[ uEta ][ uEntry ] * std::cosh( etaGenData_[ uEta ][ uEntry ] ) : ptGenData_[ uEta ][ uEntry ] );
       Double_t ptRef( refGen ? ptGenVal : ptVal );
       for ( unsigned uPt = 0; uPt < nPtBins(); ++uPt ) {
-        if ( ptBins_.at( uPt ) <= ptRef && ptRef < ptBins_.at( uPt + 1 ) ) {
-          sizePt.at( uPt ) += 1;
-          weightEtaBin.at( uPt ).push_back( weightData_.at( uEta ).at( uEntry ) );
-          ptEtaBin.at( uPt ).push_back( ptVal );
-          ptGenEtaBin.at( uPt ).push_back( ptGenVal );
-          etaEtaBin.at( uPt ).push_back( etaData_.at( uEta ).at( uEntry ) );
-          etaGenEtaBin.at( uPt ).push_back( etaGenData_.at( uEta ).at( uEntry ) );
-          phiEtaBin.at( uPt ).push_back( phiData_.at( uEta ).at( uEntry ) );
-          phiGenEtaBin.at( uPt ).push_back( phiGenData_.at( uEta ).at( uEntry ) );
+        if ( ptBins_[ uPt ] <= ptRef && ptRef < ptBins_[ uPt + 1 ] ) {
+          sizePt[ uPt ] += 1;
+          weightEtaBin[ uPt ].push_back( weightData_[ uEta ][ uEntry ] );
+          ptEtaBin[ uPt ].push_back( ptVal );
+          ptGenEtaBin[ uPt ].push_back( ptGenVal );
+          etaEtaBin[ uPt ].push_back( etaData_[ uEta ][ uEntry ] );
+          etaGenEtaBin[ uPt ].push_back( etaGenData_[ uEta ][ uEntry ] );
+          phiEtaBin[ uPt ].push_back( phiData_[ uEta ][ uEntry ] );
+          phiGenEtaBin[ uPt ].push_back( phiGenData_[ uEta ][ uEntry ] );
           break;
         }
       } // loop: uPt < nPtBins()
-    } // loop: uEntry < sizeEta_.at( uEta )
+    } // loop: uEntry < sizeEta_[ uEta ]
     weightDataPt_.push_back( weightEtaBin );
     ptDataPt_.push_back( ptEtaBin );
     ptGenDataPt_.push_back( ptGenEtaBin );

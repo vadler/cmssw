@@ -164,7 +164,7 @@ FitTopTransferFunctionsRunner::~FitTopTransferFunctionsRunner()
 int FitTopTransferFunctionsRunner::run()
 {
 
-  if ( status != 0 ) return status_;
+  if ( status_ != 0 ) return status_;
 
   // Clear vectors
   dirsInObjCat_.clear();

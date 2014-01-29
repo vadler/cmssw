@@ -105,7 +105,7 @@ CompareTopTransferFunctionsRunner::~CompareTopTransferFunctionsRunner()
 int CompareTopTransferFunctionsRunner::run()
 {
 
-  if ( status != 0 ) return status_;
+  if ( status_ != 0 ) return status_;
   return status_;
 
 }

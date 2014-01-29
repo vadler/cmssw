@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 
+#include <TFile.h>
 #include <TF1.h>
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"

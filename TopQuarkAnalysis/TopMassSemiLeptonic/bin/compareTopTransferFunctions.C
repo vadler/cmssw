@@ -3,7 +3,7 @@
 
 #include "FWCore/PythonParameterSet/interface/MakeParameterSets.h"
 
-#include "TopQuarkAnalysis/TopMassSemiLeptonic/interface/FitTopTransferFunctionsRunner.h"
+#include "TopQuarkAnalysis/TopMassSemiLeptonic/interface/CompareTopTransferFunctionsRunner.h"
 
 
 int main( int argc, char * argv[] )
@@ -20,15 +20,15 @@ int main( int argc, char * argv[] )
     oStatus += 0x1;
     return oStatus;
   }
-  if ( ! edm::readPSetsFrom( argv[ 1 ] )->existsAs< edm::ParameterSet >( "fitTopTransferFunctions" ) ) {
+  if ( ! edm::readPSetsFrom( argv[ 1 ] )->existsAs< edm::ParameterSet >( "compareTopTransferFunctions" ) ) {
     std::cout << name << " --> ERROR:" << std::endl
-              << "    cms.PSet 'fitTopTransferFunctions' missing in " << argv[ 1 ] << std::endl;
+              << "    cms.PSet 'compareTopTransferFunctions' missing in " << argv[ 1 ] << std::endl;
     oStatus += 0x2;
     return oStatus;
   }
 
   // Run
-  my::FitTopTransferFunctionsRunner* runner( new my::FitTopTransferFunctionsRunner( name, edm::readPSetsFrom( argv[ 1 ] )->getParameter< edm::ParameterSet >( "fitTopTransferFunctions" ) ) );
+  my::CompareTopTransferFunctionsRunner* runner( new my::CompareTopTransferFunctionsRunner( name, edm::readPSetsFrom( argv[ 1 ] )->getParameter< edm::ParameterSet >( "compareTopTransferFunctions" ) ) );
   oStatus += runner->run();
   delete runner;
 

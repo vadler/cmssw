@@ -11,7 +11,6 @@
 #include <TROOT.h>
 #include <TStyle.h>
 #include <TObject.h>
-#include <TFile.h>
 #include <TCanvas.h>
 #include <TH1D.h>
 #include <TH2D.h>
@@ -164,6 +163,8 @@ FitTopTransferFunctionsRunner::~FitTopTransferFunctionsRunner()
 
 int FitTopTransferFunctionsRunner::run()
 {
+
+  if ( status != 0 ) return status_;
 
   // Clear vectors
   dirsInObjCat_.clear();

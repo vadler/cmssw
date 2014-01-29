@@ -195,7 +195,6 @@ fitTopTransferFunctions.io.outputFile = outputFile
 fitTopTransferFunctions.io.pathPlots  = pathPlots
 fitTopTransferFunctions.io.pathOut    = pathOut
 
-
 ### Messaging ###
 
 f = open( cfgFile, 'w' )
@@ -232,4 +231,3 @@ print '---------------------'
 print logFile
 print '================================================================================'
 print
-

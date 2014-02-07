@@ -11,14 +11,16 @@ runTest    = True
 reportTime = False
 
 # MC Input (only for 'runCrab' = True)
-#mc = 'Summer12_MadGraph'
-mc = 'Summer12_MCatNLO'
+mc = 'Summer12_MadGraph'
+#mc = 'Summer12_MCatNLO'
 
 # Trigger
-hltProcess                = 'HLT'
-triggerSelectionMuons     = 'HLT_IsoMu17_eta2p1_TriCentralPFNoPUJet50_40_30_v*'
-#triggerSelectionElectrons = 'HLT_Ele25_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_TriCentralPFNoPUJet50_40_30_v*' # tight
-triggerSelectionElectrons = 'HLT_Ele25_CaloIdVT_CaloIsoVL_TrkIdVL_TrkIsoT_TriCentralPFNoPUJet50_40_30_v*' # loose
+hltProcess                      = 'HLT'
+triggerSelectionSingleMuons     = 'HLT_IsoMu24_v*'
+triggerSelectionSingleElectrons = 'HLT_Ele27_WP80_v*'
+triggerSelectionXMuons          = 'HLT_IsoMu17_eta2p1_TriCentralPFNoPUJet50_40_30_v*'
+#triggerSelectionXElectrons      = 'HLT_Ele25_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_TriCentralPFNoPUJet50_40_30_v*' # tight
+triggerSelectionXElectrons      = 'HLT_Ele25_CaloIdVT_CaloIsoVL_TrkIdVL_TrkIsoT_TriCentralPFNoPUJet50_40_30_v*' # very loose
 
 # Vertices
 pvCollection = 'goodOfflinePrimaryVertices' #'offlinePrimaryVertices' or 'goodOfflinePrimaryVertices'
@@ -177,18 +179,22 @@ logFile = outputFile.replace( 'root', 'log' )
 ### Trigger
 
 # Trigger
-if triggerSelectionMuons == '' or triggerSelectionMuons == '*':
-  triggerSelectionMuons = 'HLT_*'
-if triggerSelectionElectrons == '' or triggerSelectionElectrons == '*':
-  triggerSelectionElectrons = 'HLT_*'
+if triggerSelectionXMuons == '' or triggerSelectionXMuons == '*':
+  triggerSelectionXMuons = 'HLT_*'
+if triggerSelectionXElectrons == '' or triggerSelectionXElectrons == '*':
+  triggerSelectionXElectrons = 'HLT_*'
 from HLTrigger.HLTfilters.triggerResultsFilter_cfi import triggerResultsFilter
-process.triggerResultsFilterMuons = triggerResultsFilter.clone( hltResults        = cms.InputTag( 'TriggerResults::%s'%( hltProcess ) )
-                                                              , l1tResults        = cms.InputTag( '' )
-                                                              , triggerConditions = [ triggerSelectionMuons ]
-                                                              , throw             = False
-                                                              )
-process.triggerResultsFilterElectrons = process.triggerResultsFilterMuons.clone( triggerConditions = [ triggerSelectionElectrons ]
-                                                                               )
+process.triggerResultsFilterSingleMuons = triggerResultsFilter.clone( hltResults        = cms.InputTag( 'TriggerResults::%s'%( hltProcess ) )
+                                                                    , l1tResults        = cms.InputTag( '' )
+                                                                    , triggerConditions = [ triggerSelectionSingleMuons ]
+                                                                    , throw             = False
+                                                                    )
+process.triggerResultsFilterSingleElectrons = process.triggerResultsFilterSingleMuons.clone( triggerConditions = [ triggerSelectionSingleElectrons ]
+                                                                                           )
+process.triggerResultsFilterXMuons          = process.triggerResultsFilterSingleMuons.clone( triggerConditions = [ triggerSelectionXMuons ]
+                                                                                           )
+process.triggerResultsFilterXElectrons      = process.triggerResultsFilterSingleMuons.clone( triggerConditions = [ triggerSelectionXElectrons ]
+                                                                                           )
 
 
 ### Cleaning
@@ -530,41 +536,89 @@ process.pf2PatSequence = cms.Sequence( process.eventCleaning
                                      * process.patPF2PATSequence
                                      * process.makeGenEvt
                                      )
-process.pf2PatPathMuons = cms.Path( process.triggerResultsFilterMuons
-                                  * process.pf2PatSequence
-                                  * process.countSelectedPatMuons
-                                  * process.countSelectedPatLeptons
+process.pf2PatSequenceMuons = cms.Sequence( process.pf2PatSequence
+                                          * process.countSelectedPatMuons
+                                          * process.countSelectedPatLeptons
+                                          )
+process.pf2PatSequenceElectrons = cms.Sequence( process.pf2PatSequence
+                                              * process.countSelectedPatElectrons
+                                              * process.countSelectedPatLeptons
+                                              )
+process.referenceSequenceMuons = cms.Sequence( process.pf2PatSequenceMuons
+                                             * process.patReferenceSequence
+                                             * process.countReferencePatMuons
+                                             )
+process.referenceSequenceElectrons = cms.Sequence( process.pf2PatSequenceElectrons
+                                                 * process.patReferenceSequence
+                                                 * process.countReferencePatElectrons
+                                                 )
+
+# Basic selections
+process.pf2PatPathMuons = cms.Path( process.pf2PatSequenceMuons
                                   * process.countSelectedPatJets
                                   * process.patHitFitSequence
                                   )
-process.pf2PatPathElectrons = cms.Path( process.triggerResultsFilterElectrons
-                                      * process.pf2PatSequence
-                                      * process.countSelectedPatElectrons
-                                      * process.countSelectedPatLeptons
+process.pf2PatPathElectrons = cms.Path( process.pf2PatSequenceElectrons
                                       * process.countSelectedPatJets
                                       * process.patHitFitSequence
                                       )
+process.pf2PatPathSingleMuons = cms.Path( process.triggerResultsFilterSingleMuons
+                                        * process.pf2PatSequenceMuons
+                                        * process.countSelectedPatJets
+                                        * process.patHitFitSequence
+                                        )
+process.pf2PatPathSingleElectrons = cms.Path( process.triggerResultsFilterSingleElectrons
+                                            * process.pf2PatSequenceElectrons
+                                            * process.countSelectedPatJets
+                                            * process.patHitFitSequence
+                                            )
+process.pf2PatPathXMuons = cms.Path( process.triggerResultsFilterXMuons
+                                   * process.pf2PatSequenceMuons
+                                   * process.countSelectedPatJets
+                                   * process.patHitFitSequence
+                                   )
+process.pf2PatPathXElectrons = cms.Path( process.triggerResultsFilterXElectrons
+                                       * process.pf2PatSequenceElectrons
+                                       * process.countSelectedPatJets
+                                       * process.patHitFitSequence
+                                       )
 
 # Reference selections
-process.referencePathMuons = cms.Path( process.triggerResultsFilterMuons
-                                     * process.pf2PatSequence
-                                     * process.countSelectedPatMuons
-                                     * process.countSelectedPatLeptons
-                                     * process.patReferenceSequence
-                                     * process.countReferencePatMuons
+process.referencePathMuons = cms.Path( process.referenceSequenceMuons
                                      * process.countReferencePatJets
                                      )
-process.referencePathElectrons = cms.Path( process.triggerResultsFilterElectrons
-                                         * process.pf2PatSequence
-                                         * process.countSelectedPatElectrons
-                                         * process.countSelectedPatLeptons
-                                         * process.patReferenceSequence
-                                         * process.countReferencePatElectrons
+process.referencePathElectrons = cms.Path( process.referenceSequenceElectrons
                                          * process.countReferencePatJets
                                          )
+process.referencePathSingleMuons = cms.Path( process.triggerResultsFilterSingleMuons
+                                           * process.referenceSequenceMuons
+                                           * process.countReferencePatJets
+                                           )
+process.referencePathSingleElectrons = cms.Path( process.triggerResultsFilterSingleElectrons
+                                               * process.referenceSequenceElectrons
+                                               * process.countReferencePatJets
+                                               )
+process.referencePathXMuons = cms.Path( process.triggerResultsFilterXMuons
+                                      * process.referenceSequenceMuons
+                                      * process.countReferencePatJets
+                                      )
+process.referencePathXElectrons = cms.Path( process.triggerResultsFilterXElectrons
+                                          * process.referenceSequenceElectrons
+                                          * process.countReferencePatJets
+                                          )
 
 process.out.SelectEvents.SelectEvents = [ 'pf2PatPathMuons'
                                         , 'pf2PatPathElectrons'
+                                        , 'pf2PatPathSingleMuons'
+                                        , 'pf2PatPathSingleElectrons'
+                                        , 'pf2PatPathXMuons'
+                                        , 'pf2PatPathXElectrons'
+                                        , 'referencePathMuons'
+                                        , 'referencePathElectrons'
+                                        , 'referencePathSingleMuons'
+                                        , 'referencePathSingleElectrons'
+                                        , 'referencePathXMuons'
+                                        , 'referencePathXElectrons'
                                         ]
 
 # Outpath
@@ -574,9 +628,17 @@ process.outPath = cms.EndPath(
 
 process.schedule = cms.Schedule(
   process.pf2PatPathMuons
-, process.referencePathMuons
 , process.pf2PatPathElectrons
+, process.pf2PatPathSingleMuons
+, process.pf2PatPathSingleElectrons
+, process.pf2PatPathXMuons
+, process.pf2PatPathXElectrons
+, process.referencePathMuons
 , process.referencePathElectrons
+, process.referencePathSingleMuons
+, process.referencePathSingleElectrons
+, process.referencePathXMuons
+, process.referencePathXElectrons
 , process.outPath
 )
 

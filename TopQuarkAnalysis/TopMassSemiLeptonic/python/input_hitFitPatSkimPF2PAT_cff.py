@@ -1,6 +1,6 @@
 files = {}
 
-files[ 'Summer12_MadGraph_test' ] = [ '/store/user/vadler/cms/Top/CMSSW_5_3_10_patch1/data/Summer12_MadGraph/test/skimHitFit_1_1_PZI.root'
+files[ 'Summer12_MadGraph_test' ] = [ '/store/user/vadler/cms/Top/CMSSW_5_3_13/data/Summer12_MadGraph/test/skimHitFit_1_1_LC6.root'
                                     ]
 
 files[ 'Summer12_MadGraph' ] = [ '/store/user/vadler/cms/Top/CMSSW_5_3_10_patch1/data/Summer12_MadGraph/skimHitFit_10_1_Ga1.root'
@@ -80,7 +80,7 @@ files[ 'Summer12_MadGraph_2' ] = files[ 'Summer12_MadGraph' ][ 18 : 36 ]
 files[ 'Summer12_MadGraph_3' ] = files[ 'Summer12_MadGraph' ][ 36 : 54 ]
 files[ 'Summer12_MadGraph_4' ] = files[ 'Summer12_MadGraph' ][ 54 : 71 ]
 
-files[ 'Summer12_MCatNLO_test' ] = [ '/store/user/vadler/cms/Top/CMSSW_5_3_10_patch1/data/Summer12_MCatNLO/test/skimHitFit_1_1_l1i.root'
+files[ 'Summer12_MCatNLO_test' ] = [ '/store/user/vadler/cms/Top/CMSSW_5_3_13/data/Summer12_MCatNLO/test/skimHitFit_1_1_ajM.root'
                                    ]
 
 files[ 'Summer12_MCatNLO' ] = [ '/store/user/vadler/cms/Top/CMSSW_5_3_10_patch1/data/Summer12_MCatNLO/skimHitFit_100_1_xnt.root'

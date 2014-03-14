@@ -965,7 +965,7 @@ process.MessageLogger = cms.Service("MessageLogger",
 
 
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('/afs/cern.ch/user/v/vadler/cms/Top/CMSSW_5_3_13/output/analyzeHitFit_fromSummer11-coarseEta_Summer12_MadGraph_L3_unambiguousOnly_xLeptonTriggers.root')
+    fileName = cms.string('/afs/cern.ch/user/v/vadler/work/cms/Top/CMSSW_5_3_13/output/analyzeHitFit_fromSummer11-coarseEta_Summer12_MadGraph_L3_unambiguousOnly_xLeptonTriggers.root')
 )
 
 

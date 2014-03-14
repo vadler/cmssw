@@ -123,35 +123,37 @@ class AnalyzeHitFit : public edm::EDAnalyzer {
     Double_t pileUpWeightObserved_;  // MC weight for observed pile-up
     std::vector< TTree * > catData_; // data per object category
     // reconstructed
-    Double_t pt_;                    // used momentum term, can be: E, p, E_t, p_t
+    Double_t pt_;
     Double_t eta_;
     Double_t phi_;
     Int_t    binEta_;                // eta bin number as determined by 'getEtaBin'
     Int_t    binEtaSymm_;            // symmetrised eta bin number as determined by 'getEtaBin'
     // reconstructed alternative
-    Double_t ptAlt_;                 // used momentum term, can be: E, p, E_t, p_t
+    Double_t ptAlt_;
     Double_t etaAlt_;
     Double_t phiAlt_;
     Int_t    binEtaAlt_;             // eta bin number as determined by 'getEtaBin'
     Int_t    binEtaSymmAlt_;         // symmetrised eta bin number as determined by 'getEtaBin'
     // recostructed from generated
-    Double_t ptGenJet_;              // used momentum term, can be: E, p, E_t, p_t
+    Double_t ptGenJet_;
     Double_t etaGenJet_;
     Double_t phiGenJet_;
     Int_t    binEtaGenJet_;          // eta bin number as determined by 'getEtaBin'
     Int_t    binEtaSymmGenJet_;      // symmetrised eta bin number as determined by 'getEtaBin'
     // recostructed alternative from generated
-    Double_t ptGenJetAlt_;           // used momentum term, can be: E, p, E_t, p_t
+    Double_t ptGenJetAlt_;
     Double_t etaGenJetAlt_;
     Double_t phiGenJetAlt_;
     Int_t    binEtaGenJetAlt_;       // eta bin number as determined by 'getEtaBin'
     Int_t    binEtaSymmGenJetAlt_;   // symmetrised eta bin number as determined by 'getEtaBin'
     // generated
-    Double_t ptGen_;                 // used momentum term, can be: E, p, E_t, p_t
+    Double_t ptGen_;
     Double_t etaGen_;
     Double_t phiGen_;
     Int_t    binEtaGen_;             // eta bin number as determined by 'getEtaBin'
     Int_t    binEtaSymmGen_;         // symmetrised eta bin number as determined by 'getEtaBin'
+    // additional
+    Double_t tagCSV_;                // CSV b-tag discriminator value
 
     /// Histograms
     // Pile-up weights
@@ -407,6 +409,9 @@ void AnalyzeHitFit::beginJob()
     catData_.back()->Branch( "PhiGen"       , &phiGen_       , "phiGen/D" );
     catData_.back()->Branch( "BinEtaGen"    , &binEtaGen_    , "binEtaGen/I" );
     catData_.back()->Branch( "BinEtaSymmGen", &binEtaSymmGen_, "binEtaSymmGen/I" );
+    if ( cat == "UdscJet" || cat == "BJet" ) {
+      catData_.back()->Branch( "TagCSV", &tagCSV_, "tagCSV/D" );
+    }
 
     for ( unsigned iProp = 0; iProp < kinProps_.size(); ++iProp ) {
       const std::string prop( kinProps_.at( iProp ) );
@@ -543,6 +548,7 @@ void AnalyzeHitFit::analyze( const edm::Event & iEvent, const edm::EventSetup & 
           phiGenJet_    = -9.;
           phiGenJetAlt_ = -9.;
           phiGen_       = -9.;
+          tagCSV_       = -9.;
           // Fill variables
           if ( objCats_.at( iCat ) == "Mu" ) {
             if ( ttGenEvent_->isSemiLeptonic( WDecay::kMuon ) ) {
@@ -600,6 +606,7 @@ void AnalyzeHitFit::analyze( const edm::Event & iEvent, const edm::EventSetup & 
             phiGenJet_    = -9.;
             phiGenJetAlt_ = -9.;
             phiGen_       = -9.;
+            tagCSV_       = -9.;
             if ( ttSemiLeptonicEventMuons_.isValid() && ttSemiLeptonicEventMuons_->isHypoValid( TtEvent::kGenMatch )  ) {
               fill( iCat, ttSemiLeptonicEventMuons_, true );
             }
@@ -638,6 +645,7 @@ void AnalyzeHitFit::analyze( const edm::Event & iEvent, const edm::EventSetup & 
             phiGenJet_    = -9.;
             phiGenJetAlt_ = -9.;
             phiGen_       = -9.;
+            tagCSV_       = -9.;
             if ( ttSemiLeptonicEventMuons_.isValid() && ttSemiLeptonicEventMuons_->isHypoValid( TtEvent::kGenMatch )  ) {
               fill( iCat, ttSemiLeptonicEventMuons_, false, true );
             }
@@ -672,6 +680,7 @@ void AnalyzeHitFit::analyze( const edm::Event & iEvent, const edm::EventSetup & 
             phiGenJet_    = -9.;
             phiGenJetAlt_ = -9.;
             phiGen_       = -9.;
+            tagCSV_       = -9.;
             if ( ttSemiLeptonicEventMuons_.isValid() && ttSemiLeptonicEventMuons_->isHypoValid( TtEvent::kGenMatch )  ) {
               fill( iCat, ttSemiLeptonicEventMuons_, true, true );
             }
@@ -869,7 +878,8 @@ void AnalyzeHitFit::fill( unsigned iCat, const edm::Handle< TtSemiLeptonicEvent 
     if ( repeat ) {
       const pat::Jet jet( patJets_->at( ( unsigned )jetLepCombi.at( TtSemiLepEvtPartons::LightQ ) ).correctedJet( jecLevel_, "uds" ) );
       pt_     = jet.pt();
-      ptAlt_  = jet.et();
+//       ptAlt_  = jet.et();
+      ptAlt_  = pt_;
       ptGen_  = ttGenEvent_->hadronicDecayQuark()->pt();
       eta_    = jet.eta();
       etaAlt_ = eta_;
@@ -881,15 +891,18 @@ void AnalyzeHitFit::fill( unsigned iCat, const edm::Handle< TtSemiLeptonicEvent 
         ptGenJet_  = jet.genJet()->pt();
         etaGenJet_ = jet.genJet()->eta();
         phiGenJet_ = jet.genJet()->phi();
-        ptGenJetAlt_  = jet.genJet()->et();
+//         ptGenJetAlt_  = jet.genJet()->et();
+        ptGenJetAlt_  = ptGenJet_;
         etaGenJetAlt_ = etaGenJet_;
         phiGenJetAlt_ = phiGenJet_;
       }
+      tagCSV_ = jet.bDiscriminator( "combinedSecondaryVertexBJetTags" );
     }
     else {
       const pat::Jet jetBar( patJets_->at( ( unsigned )jetLepCombi.at( TtSemiLepEvtPartons::LightQBar ) ).correctedJet( jecLevel_, "uds" ) );
       pt_     = jetBar.pt();
-      ptAlt_  = jetBar.et();
+//       ptAlt_  = jetBar.et();
+      ptAlt_  = pt_;
       ptGen_  = ttGenEvent_->hadronicDecayQuarkBar()->pt();
       eta_    = jetBar.eta();
       etaAlt_ = eta_;
@@ -901,17 +914,20 @@ void AnalyzeHitFit::fill( unsigned iCat, const edm::Handle< TtSemiLeptonicEvent 
         ptGenJet_  = jetBar.genJet()->pt();
         etaGenJet_ = jetBar.genJet()->eta();
         phiGenJet_ = jetBar.genJet()->phi();
-        ptGenJetAlt_  = jetBar.genJet()->et();
+//         ptGenJetAlt_  = jetBar.genJet()->et();
+        ptGenJetAlt_  = ptGenJet_;
         etaGenJetAlt_ = etaGenJet_;
         phiGenJetAlt_ = phiGenJet_;
       }
+      tagCSV_ = jetBar.bDiscriminator( "combinedSecondaryVertexBJetTags" );
     }
   }
   else if ( cat == "BJet" || ( cat == "Jet" && allJets ) ) {
     if ( repeat ) {
       const pat::Jet bJetLep( patJets_->at( ( unsigned )jetLepCombi.at( TtSemiLepEvtPartons::LepB ) ).correctedJet( jecLevel_, "bottom" ) );
       pt_     = bJetLep.pt();
-      ptAlt_  = bJetLep.et();
+//       ptAlt_  = bJetLep.et();
+      ptAlt_  = pt_;
       ptGen_  = ttGenEvent_->leptonicDecayB()->pt();
       eta_    = bJetLep.eta();
       etaAlt_ = eta_;
@@ -923,15 +939,18 @@ void AnalyzeHitFit::fill( unsigned iCat, const edm::Handle< TtSemiLeptonicEvent 
         ptGenJet_  = bJetLep.genJet()->pt();
         etaGenJet_ = bJetLep.genJet()->eta();
         phiGenJet_ = bJetLep.genJet()->phi();
-        ptGenJetAlt_  = bJetLep.genJet()->et();
+//         ptGenJetAlt_  = bJetLep.genJet()->et();
+        ptGenJetAlt_  = ptGenJet_;
         etaGenJetAlt_ = etaGenJet_;
         phiGenJetAlt_ = phiGenJet_;
       }
+      tagCSV_ = bJetLep.bDiscriminator( "combinedSecondaryVertexBJetTags" );
     }
     else {
       const pat::Jet bJetHad( patJets_->at( ( unsigned )jetLepCombi.at( TtSemiLepEvtPartons::HadB ) ).correctedJet( jecLevel_, "bottom" ) );
       pt_     = bJetHad.pt();
-      ptAlt_  = bJetHad.et();
+//       ptAlt_  = bJetHad.et();
+      ptAlt_  = pt_;
       ptGen_  = ttGenEvent_->hadronicDecayB()->pt();
       eta_    = bJetHad.eta();
       etaAlt_ = eta_;
@@ -943,10 +962,12 @@ void AnalyzeHitFit::fill( unsigned iCat, const edm::Handle< TtSemiLeptonicEvent 
         ptGenJet_  = bJetHad.genJet()->pt();
         etaGenJet_ = bJetHad.genJet()->eta();
         phiGenJet_ = bJetHad.genJet()->phi();
-        ptGenJetAlt_  = bJetHad.genJet()->et();
+//         ptGenJetAlt_  = bJetHad.genJet()->et();
+        ptGenJetAlt_  = ptGenJet_;
         etaGenJetAlt_ = etaGenJet_;
         phiGenJetAlt_ = phiGenJet_;
       }
+      tagCSV_ = bJetHad.bDiscriminator( "combinedSecondaryVertexBJetTags" );
     }
   }
   else if ( cat == "MET" ) {

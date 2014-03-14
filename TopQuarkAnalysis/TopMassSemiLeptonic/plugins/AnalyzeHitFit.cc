@@ -126,30 +126,35 @@ class AnalyzeHitFit : public edm::EDAnalyzer {
     Double_t pt_;
     Double_t eta_;
     Double_t phi_;
+    Double_t energy_;
     Int_t    binEta_;                // eta bin number as determined by 'getEtaBin'
     Int_t    binEtaSymm_;            // symmetrised eta bin number as determined by 'getEtaBin'
     // reconstructed alternative
     Double_t ptAlt_;
     Double_t etaAlt_;
     Double_t phiAlt_;
+    Double_t energyAlt_;
     Int_t    binEtaAlt_;             // eta bin number as determined by 'getEtaBin'
     Int_t    binEtaSymmAlt_;         // symmetrised eta bin number as determined by 'getEtaBin'
     // recostructed from generated
     Double_t ptGenJet_;
     Double_t etaGenJet_;
     Double_t phiGenJet_;
+    Double_t energyGenJet_;
     Int_t    binEtaGenJet_;          // eta bin number as determined by 'getEtaBin'
     Int_t    binEtaSymmGenJet_;      // symmetrised eta bin number as determined by 'getEtaBin'
     // recostructed alternative from generated
     Double_t ptGenJetAlt_;
     Double_t etaGenJetAlt_;
     Double_t phiGenJetAlt_;
+    Double_t energyGenJetAlt_;
     Int_t    binEtaGenJetAlt_;       // eta bin number as determined by 'getEtaBin'
     Int_t    binEtaSymmGenJetAlt_;   // symmetrised eta bin number as determined by 'getEtaBin'
     // generated
     Double_t ptGen_;
     Double_t etaGen_;
     Double_t phiGen_;
+    Double_t energyGen_;
     Int_t    binEtaGen_;             // eta bin number as determined by 'getEtaBin'
     Int_t    binEtaSymmGen_;         // symmetrised eta bin number as determined by 'getEtaBin'
     // additional
@@ -385,28 +390,33 @@ void AnalyzeHitFit::beginJob()
     catData_.back()->Branch( "Pt"        , &pt_        , "pt/D" );
     catData_.back()->Branch( "Eta"       , &eta_       , "eta/D" );
     catData_.back()->Branch( "Phi"       , &phi_       , "phi/D" );
+    catData_.back()->Branch( "Energy"    , &energy_    , "energy/D" );
     catData_.back()->Branch( "BinEta"    , &binEta_    , "binEta/I" );
     catData_.back()->Branch( "BinEtaSymm", &binEtaSymm_, "binEtaSymm/I" );
     catData_.back()->Branch( "PtAlt"        , &ptAlt_        , "ptAlt/D" );
     catData_.back()->Branch( "EtaAlt"       , &etaAlt_       , "etaAlt/D" );
     catData_.back()->Branch( "PhiAlt"       , &phiAlt_       , "phiAlt/D" );
+    catData_.back()->Branch( "EnergyAlt"    , &energyAlt_    , "energyAlt/D" );
     catData_.back()->Branch( "BinEtaAlt"    , &binEtaAlt_    , "binEtaAlt/I" );
     catData_.back()->Branch( "BinEtaSymmAlt", &binEtaSymmAlt_, "binEtaSymmAlt/I" );
     if ( cat == "UdscJet" || cat == "BJet" ) {
       catData_.back()->Branch( "PtGenJet"        , &ptGenJet_        , "ptGenJet/D" );
       catData_.back()->Branch( "EtaGenJet"       , &etaGenJet_       , "etaGenJet/D" );
       catData_.back()->Branch( "PhiGenJet"       , &phiGenJet_       , "phiGenJet/D" );
+      catData_.back()->Branch( "EnergyGenJet"    , &energyGenJet_    , "energyGenJet/D" );
       catData_.back()->Branch( "BinEtaGenJet"    , &binEtaGenJet_    , "binEtaGenJet/I" );
       catData_.back()->Branch( "BinEtaSymmGenJet", &binEtaSymmGenJet_, "binEtaSymmGenJet/I" );
       catData_.back()->Branch( "PtGenJetAlt"        , &ptGenJetAlt_        , "ptGenJetAlt/D" );
       catData_.back()->Branch( "EtaGenJetAlt"       , &etaGenJetAlt_       , "etaGenJetAlt/D" );
       catData_.back()->Branch( "PhiGenJetAlt"       , &phiGenJetAlt_       , "phiGenJetAlt/D" );
+      catData_.back()->Branch( "EnergyGenJetAlt"    , &energyGenJetAlt_    , "energyGenJetAlt/D" );
       catData_.back()->Branch( "BinEtaGenJetAlt"    , &binEtaGenJetAlt_    , "binEtaGenJetAlt/I" );
       catData_.back()->Branch( "BinEtaSymmGenJetAlt", &binEtaSymmGenJetAlt_, "binEtaSymmGenJetAlt/I" );
     }
     catData_.back()->Branch( "PtGen"        , &ptGen_        , "ptGen/D" );
     catData_.back()->Branch( "EtaGen"       , &etaGen_       , "etaGen/D" );
     catData_.back()->Branch( "PhiGen"       , &phiGen_       , "phiGen/D" );
+    catData_.back()->Branch( "EnergyGen"    , &energyGen_    , "energyGen/D" );
     catData_.back()->Branch( "BinEtaGen"    , &binEtaGen_    , "binEtaGen/I" );
     catData_.back()->Branch( "BinEtaSymmGen", &binEtaSymmGen_, "binEtaSymmGen/I" );
     if ( cat == "UdscJet" || cat == "BJet" ) {
@@ -548,6 +558,11 @@ void AnalyzeHitFit::analyze( const edm::Event & iEvent, const edm::EventSetup & 
           phiGenJet_    = -9.;
           phiGenJetAlt_ = -9.;
           phiGen_       = -9.;
+          energy_          = -9.;
+          energyAlt_       = -9.;
+          energyGenJet_    = -9.;
+          energyGenJetAlt_ = -9.;
+          energyGen_       = -9.;
           tagCSV_       = -9.;
           // Fill variables
           if ( objCats_.at( iCat ) == "Mu" ) {
@@ -606,6 +621,11 @@ void AnalyzeHitFit::analyze( const edm::Event & iEvent, const edm::EventSetup & 
             phiGenJet_    = -9.;
             phiGenJetAlt_ = -9.;
             phiGen_       = -9.;
+            energy_          = -9.;
+            energyAlt_       = -9.;
+            energyGenJet_    = -9.;
+            energyGenJetAlt_ = -9.;
+            energyGen_       = -9.;
             tagCSV_       = -9.;
             if ( ttSemiLeptonicEventMuons_.isValid() && ttSemiLeptonicEventMuons_->isHypoValid( TtEvent::kGenMatch )  ) {
               fill( iCat, ttSemiLeptonicEventMuons_, true );
@@ -645,6 +665,11 @@ void AnalyzeHitFit::analyze( const edm::Event & iEvent, const edm::EventSetup & 
             phiGenJet_    = -9.;
             phiGenJetAlt_ = -9.;
             phiGen_       = -9.;
+            energy_          = -9.;
+            energyAlt_       = -9.;
+            energyGenJet_    = -9.;
+            energyGenJetAlt_ = -9.;
+            energyGen_       = -9.;
             tagCSV_       = -9.;
             if ( ttSemiLeptonicEventMuons_.isValid() && ttSemiLeptonicEventMuons_->isHypoValid( TtEvent::kGenMatch )  ) {
               fill( iCat, ttSemiLeptonicEventMuons_, false, true );
@@ -680,6 +705,11 @@ void AnalyzeHitFit::analyze( const edm::Event & iEvent, const edm::EventSetup & 
             phiGenJet_    = -9.;
             phiGenJetAlt_ = -9.;
             phiGen_       = -9.;
+            energy_          = -9.;
+            energyAlt_       = -9.;
+            energyGenJet_    = -9.;
+            energyGenJetAlt_ = -9.;
+            energyGen_       = -9.;
             tagCSV_       = -9.;
             if ( ttSemiLeptonicEventMuons_.isValid() && ttSemiLeptonicEventMuons_->isHypoValid( TtEvent::kGenMatch )  ) {
               fill( iCat, ttSemiLeptonicEventMuons_, true, true );
@@ -746,6 +776,8 @@ void AnalyzeHitFit::endJob()
       c1.Print( std::string( pathPlots_ + cat + "_Eta.png" ).c_str() );
       catData_.at( iCat )->Draw( "Phi" );
       c1.Print( std::string( pathPlots_ + cat + "_Phi.png" ).c_str() );
+      catData_.at( iCat )->Draw( "Energy" );
+      c1.Print( std::string( pathPlots_ + cat + "_Energy.png" ).c_str() );
       catData_.at( iCat )->Draw( "BinEta" );
       c1.Print( std::string( pathPlots_ + cat + "_BinEta.png" ).c_str() );
       catData_.at( iCat )->Draw( "BinEtaSymm" );
@@ -756,6 +788,8 @@ void AnalyzeHitFit::endJob()
       c1.Print( std::string( pathPlots_ + cat + "_EtaAlt.png" ).c_str() );
       catData_.at( iCat )->Draw( "PhiAlt" );
       c1.Print( std::string( pathPlots_ + cat + "_PhiAlt.png" ).c_str() );
+      catData_.at( iCat )->Draw( "EnergyAlt" );
+      c1.Print( std::string( pathPlots_ + cat + "_EnergyAlt.png" ).c_str() );
       catData_.at( iCat )->Draw( "BinEtaAlt" );
       c1.Print( std::string( pathPlots_ + cat + "_BinEtaAlt.png" ).c_str() );
       catData_.at( iCat )->Draw( "BinEtaSymmAlt" );
@@ -767,6 +801,8 @@ void AnalyzeHitFit::endJob()
         c1.Print( std::string( pathPlots_ + cat + "_EtaGenJet.png" ).c_str() );
         catData_.at( iCat )->Draw( "PhiGenJet" );
         c1.Print( std::string( pathPlots_ + cat + "_PhiGenJet.png" ).c_str() );
+        catData_.at( iCat )->Draw( "EnergyGenJet" );
+        c1.Print( std::string( pathPlots_ + cat + "_EnergyGenJet.png" ).c_str() );
         catData_.at( iCat )->Draw( "BinEtaGenJet" );
         c1.Print( std::string( pathPlots_ + cat + "_BinEtaGenJet.png" ).c_str() );
         catData_.at( iCat )->Draw( "BinEtaSymmGenJet" );
@@ -777,6 +813,8 @@ void AnalyzeHitFit::endJob()
         c1.Print( std::string( pathPlots_ + cat + "_EtaGenJetAlt.png" ).c_str() );
         catData_.at( iCat )->Draw( "PhiGenJetAlt" );
         c1.Print( std::string( pathPlots_ + cat + "_PhiGenJetAlt.png" ).c_str() );
+        catData_.at( iCat )->Draw( "EnergyGenJetAlt" );
+        c1.Print( std::string( pathPlots_ + cat + "_EnergyGenJetAlt.png" ).c_str() );
         catData_.at( iCat )->Draw( "BinEtaGenJetAlt" );
         c1.Print( std::string( pathPlots_ + cat + "_BinEtaGenJetAlt.png" ).c_str() );
         catData_.at( iCat )->Draw( "BinEtaSymmGenJetAlt" );
@@ -788,6 +826,8 @@ void AnalyzeHitFit::endJob()
       c1.Print( std::string( pathPlots_ + cat + "_EtaGen.png" ).c_str() );
       catData_.at( iCat )->Draw( "PhiGen" );
       c1.Print( std::string( pathPlots_ + cat + "_PhiGen.png" ).c_str() );
+      catData_.at( iCat )->Draw( "EnergyGen" );
+      c1.Print( std::string( pathPlots_ + cat + "_EnergyGen.png" ).c_str() );
       catData_.at( iCat )->Draw( "BinEtaGen" );
       c1.Print( std::string( pathPlots_ + cat + "_BinEtaGen.png" ).c_str() );
       catData_.at( iCat )->Draw( "BinEtaSymmGen" );
@@ -854,6 +894,10 @@ void AnalyzeHitFit::fill( unsigned iCat, const edm::Handle< TtSemiLeptonicEvent 
 //     phiAlt_  = patMuons_->at( muonIndex ).globalTrack()->phi(); // no isTrackerMuon requirement in 2012 reference selection
     phiAlt_  = phi_;
     phiGen_  = ttGenEvent_->singleLepton()->phi();
+    energy_     = ttSemiLeptonicEvent->singleLepton( TtEvent::kGenMatch )->energy();
+//     energyAlt_  = patMuons_->at( muonIndex ).globalTrack()->energy(); // no isTrackerMuon requirement in 2012 reference selection
+    energyAlt_  = energy_;
+    energyGen_  = ttGenEvent_->singleLepton()->energy();
   }
   else if ( cat == "Elec" ) {
     if ( repeat ) {
@@ -873,12 +917,15 @@ void AnalyzeHitFit::fill( unsigned iCat, const edm::Handle< TtSemiLeptonicEvent 
 //     phiAlt_  = patElecs_->at( elecIndex ).closestCtfTrackRef()->phi(); // FIXME: or which one?
     phiAlt_  = phi_;
     phiGen_  = ttGenEvent_->singleLepton()->phi();
+    energy_     = ttSemiLeptonicEvent->singleLepton( TtEvent::kGenMatch )->energy();
+//     energyAlt_  = patElecs_->at( elecIndex ).closestCtfTrackRef()->energy(); // FIXME: or which one?
+    energyAlt_  = energy_;
+    energyGen_  = ttGenEvent_->singleLepton()->energy();
   }
   else if ( cat == "UdscJet" || ( cat == "Jet" && ! allJets ) ) {
     if ( repeat ) {
       const pat::Jet jet( patJets_->at( ( unsigned )jetLepCombi.at( TtSemiLepEvtPartons::LightQ ) ).correctedJet( jecLevel_, "uds" ) );
       pt_     = jet.pt();
-//       ptAlt_  = jet.et();
       ptAlt_  = pt_;
       ptGen_  = ttGenEvent_->hadronicDecayQuark()->pt();
       eta_    = jet.eta();
@@ -887,21 +934,24 @@ void AnalyzeHitFit::fill( unsigned iCat, const edm::Handle< TtSemiLeptonicEvent 
       phi_    = jet.phi();
       phiAlt_ = phi_;
       phiGen_ = ttGenEvent_->hadronicDecayQuark()->phi();
+      energy_    = jet.energy();
+      energyAlt_ = energy_;
+      energyGen_ = ttGenEvent_->hadronicDecayQuark()->energy();
       if ( jet.genJet() != 0 ) {
         ptGenJet_  = jet.genJet()->pt();
         etaGenJet_ = jet.genJet()->eta();
         phiGenJet_ = jet.genJet()->phi();
-//         ptGenJetAlt_  = jet.genJet()->et();
+        energyGenJet_ = jet.genJet()->energy();
         ptGenJetAlt_  = ptGenJet_;
         etaGenJetAlt_ = etaGenJet_;
         phiGenJetAlt_ = phiGenJet_;
+        energyGenJetAlt_ = energyGenJet_;
       }
       tagCSV_ = jet.bDiscriminator( "combinedSecondaryVertexBJetTags" );
     }
     else {
       const pat::Jet jetBar( patJets_->at( ( unsigned )jetLepCombi.at( TtSemiLepEvtPartons::LightQBar ) ).correctedJet( jecLevel_, "uds" ) );
       pt_     = jetBar.pt();
-//       ptAlt_  = jetBar.et();
       ptAlt_  = pt_;
       ptGen_  = ttGenEvent_->hadronicDecayQuarkBar()->pt();
       eta_    = jetBar.eta();
@@ -910,14 +960,18 @@ void AnalyzeHitFit::fill( unsigned iCat, const edm::Handle< TtSemiLeptonicEvent 
       phi_    = jetBar.phi();
       phiAlt_ = phi_;
       phiGen_ = ttGenEvent_->hadronicDecayQuarkBar()->phi();
+      energy_    = jetBar.energy();
+      energyAlt_ = energy_;
+      energyGen_ = ttGenEvent_->hadronicDecayQuarkBar()->energy();
       if ( jetBar.genJet() != 0 ) {
         ptGenJet_  = jetBar.genJet()->pt();
         etaGenJet_ = jetBar.genJet()->eta();
         phiGenJet_ = jetBar.genJet()->phi();
-//         ptGenJetAlt_  = jetBar.genJet()->et();
+        energyGenJet_ = jetBar.genJet()->energy();
         ptGenJetAlt_  = ptGenJet_;
         etaGenJetAlt_ = etaGenJet_;
         phiGenJetAlt_ = phiGenJet_;
+        energyGenJetAlt_ = energyGenJet_;
       }
       tagCSV_ = jetBar.bDiscriminator( "combinedSecondaryVertexBJetTags" );
     }
@@ -926,7 +980,6 @@ void AnalyzeHitFit::fill( unsigned iCat, const edm::Handle< TtSemiLeptonicEvent 
     if ( repeat ) {
       const pat::Jet bJetLep( patJets_->at( ( unsigned )jetLepCombi.at( TtSemiLepEvtPartons::LepB ) ).correctedJet( jecLevel_, "bottom" ) );
       pt_     = bJetLep.pt();
-//       ptAlt_  = bJetLep.et();
       ptAlt_  = pt_;
       ptGen_  = ttGenEvent_->leptonicDecayB()->pt();
       eta_    = bJetLep.eta();
@@ -935,21 +988,24 @@ void AnalyzeHitFit::fill( unsigned iCat, const edm::Handle< TtSemiLeptonicEvent 
       phi_    = bJetLep.phi();
       phiAlt_ = phi_;
       phiGen_ = ttGenEvent_->leptonicDecayB()->phi();
+      energy_    = bJetLep.energy();
+      energyAlt_ = energy_;
+      energyGen_ = ttGenEvent_->leptonicDecayB()->energy();
       if ( bJetLep.genJet() != 0 ) {
         ptGenJet_  = bJetLep.genJet()->pt();
         etaGenJet_ = bJetLep.genJet()->eta();
         phiGenJet_ = bJetLep.genJet()->phi();
-//         ptGenJetAlt_  = bJetLep.genJet()->et();
+        energyGenJet_ = bJetLep.genJet()->energy();
         ptGenJetAlt_  = ptGenJet_;
         etaGenJetAlt_ = etaGenJet_;
         phiGenJetAlt_ = phiGenJet_;
+        energyGenJetAlt_ = energyGenJet_;
       }
       tagCSV_ = bJetLep.bDiscriminator( "combinedSecondaryVertexBJetTags" );
     }
     else {
       const pat::Jet bJetHad( patJets_->at( ( unsigned )jetLepCombi.at( TtSemiLepEvtPartons::HadB ) ).correctedJet( jecLevel_, "bottom" ) );
       pt_     = bJetHad.pt();
-//       ptAlt_  = bJetHad.et();
       ptAlt_  = pt_;
       ptGen_  = ttGenEvent_->hadronicDecayB()->pt();
       eta_    = bJetHad.eta();
@@ -958,14 +1014,18 @@ void AnalyzeHitFit::fill( unsigned iCat, const edm::Handle< TtSemiLeptonicEvent 
       phi_    = bJetHad.phi();
       phiAlt_ = phi_;
       phiGen_ = ttGenEvent_->hadronicDecayB()->phi();
+      energy_    = bJetHad.energy();
+      energyAlt_ = energy_;
+      energyGen_ = ttGenEvent_->hadronicDecayB()->energy();
       if ( bJetHad.genJet() != 0 ) {
         ptGenJet_  = bJetHad.genJet()->pt();
         etaGenJet_ = bJetHad.genJet()->eta();
         phiGenJet_ = bJetHad.genJet()->phi();
-//         ptGenJetAlt_  = bJetHad.genJet()->et();
+        energyGenJet_ = bJetHad.genJet()->energy();
         ptGenJetAlt_  = ptGenJet_;
         etaGenJetAlt_ = etaGenJet_;
         phiGenJetAlt_ = phiGenJet_;
+        energyGenJetAlt_ = energyGenJet_;
       }
       tagCSV_ = bJetHad.bDiscriminator( "combinedSecondaryVertexBJetTags" );
     }
@@ -987,6 +1047,10 @@ void AnalyzeHitFit::fill( unsigned iCat, const edm::Handle< TtSemiLeptonicEvent 
     phi_    = patMETs_->at( 0 ).phi();
     phiAlt_ = phi_;
     phiGen_ = ttGenEvent_->singleNeutrino()->phi();
+//     energy_    = ttSemiLeptonicEvent->singleNeutrino( TtEvent::kGenMatch )->energy();
+    energy_    = patMETs_->at( 0 ).energy();
+    energyAlt_ = energy_;
+    energyGen_ = ttGenEvent_->singleNeutrino()->energy();
   }
   else {
     edm::LogWarning( "AnalyzeHitFit" ) << "Category missmatch: " << cat;

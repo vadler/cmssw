@@ -10,8 +10,8 @@ rfioInput = False
 
 # Origin of existing resolution functions
 era    = 'Summer11'
-#sample = 'Summer12_MadGraph'
-sample = 'Summer12_MCatNLO'
+sample = 'Summer12_MadGraph'
+#sample = 'Summer12_MCatNLO'
 
 # Correlation to input
 # FIXME: Update pile-up to 8TeV (but not used)

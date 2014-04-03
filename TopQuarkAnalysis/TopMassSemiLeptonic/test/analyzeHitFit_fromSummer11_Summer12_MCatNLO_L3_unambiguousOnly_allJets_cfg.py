@@ -257,8 +257,9 @@ process.source = cms.Source("PoolSource",
         '/store/user/vadler/cms/Top/CMSSW_5_3_13/data/Summer12_MCatNLO/skimHitFit_327_1_6Iv.root',
         '/store/user/vadler/cms/Top/CMSSW_5_3_13/data/Summer12_MCatNLO/skimHitFit_328_1_Aue.root',
         '/store/user/vadler/cms/Top/CMSSW_5_3_13/data/Summer12_MCatNLO/skimHitFit_329_1_zEM.root',
-        '/store/user/vadler/cms/Top/CMSSW_5_3_13/data/Summer12_MCatNLO/skimHitFit_32_1_R6t.root',
-        '/store/user/vadler/cms/Top/CMSSW_5_3_13/data/Summer12_MCatNLO/skimHitFit_330_1_71G.root',
+        '/store/user/vadler/cms/Top/CMSSW_5_3_13/data/Summer12_MCatNLO/skimHitFit_32_1_R6t.root')
+)
+process.source.fileNames.extend(['/store/user/vadler/cms/Top/CMSSW_5_3_13/data/Summer12_MCatNLO/skimHitFit_330_1_71G.root',
         '/store/user/vadler/cms/Top/CMSSW_5_3_13/data/Summer12_MCatNLO/skimHitFit_331_1_vsW.root',
         '/store/user/vadler/cms/Top/CMSSW_5_3_13/data/Summer12_MCatNLO/skimHitFit_332_1_mCj.root',
         '/store/user/vadler/cms/Top/CMSSW_5_3_13/data/Summer12_MCatNLO/skimHitFit_333_1_V6i.root',
@@ -335,8 +336,7 @@ process.source = cms.Source("PoolSource",
         '/store/user/vadler/cms/Top/CMSSW_5_3_13/data/Summer12_MCatNLO/skimHitFit_97_1_JlD.root',
         '/store/user/vadler/cms/Top/CMSSW_5_3_13/data/Summer12_MCatNLO/skimHitFit_98_1_My1.root',
         '/store/user/vadler/cms/Top/CMSSW_5_3_13/data/Summer12_MCatNLO/skimHitFit_99_1_Kox.root',
-        '/store/user/vadler/cms/Top/CMSSW_5_3_13/data/Summer12_MCatNLO/skimHitFit_9_1_iJN.root')
-)
+        '/store/user/vadler/cms/Top/CMSSW_5_3_13/data/Summer12_MCatNLO/skimHitFit_9_1_iJN.root'])
 
 
 process.findTtSemiLepJetCombGeom = cms.EDProducer("TtSemiLepJetCombGeom",

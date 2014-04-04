@@ -12,7 +12,7 @@
 
 #include "CommonTools/MyTools/interface/RootFunctions.h"
 #include "TopQuarkAnalysis/TopMassSemiLeptonic/interface/DataContainer.h"
-#include "TopQuarkAnalysis/TopMassSemiLeptonic/interface/ObjectDataContainer.h"
+#include "TopQuarkAnalysis/TopMassSemiLeptonic/interface/JetDataContainer.h"
 #include "TopQuarkAnalysis/TopMassSemiLeptonic/interface/FitTopTransferFunctionsHistos.h"
 #include "TopQuarkAnalysis/TopMassSemiLeptonic/interface/TransferFunction.h"
 
@@ -30,6 +30,7 @@ namespace my {
       bool                       useSymm_;
       bool                       useAlt_;
       bool                       useNonT_;
+      bool                       useNonP_;
       bool                       refGen_;
       bool                       writeFiles_;
       bool                       fit0D_;

@@ -17,7 +17,7 @@ namespace my {
 
   struct ObjectDataContainer {
 
-      explicit ObjectDataContainer( const std::string& objCat, TDirectory* dirInCat, Bool_t useSymm, Bool_t useAlt, Bool_t useNonT, Bool_t refGen, const my::DataContainer& data, Int_t maxEvents = -1 );
+      explicit ObjectDataContainer( const std::string& objCat, TDirectory* dirInCat, Bool_t useSymm, Bool_t useAlt, Bool_t useNonT, Bool_t useNonP, Bool_t refGen, const my::DataContainer& data, Int_t maxEvents = -1 );
       ~ObjectDataContainer() {};
 
       /// Get binning
@@ -37,6 +37,8 @@ namespace my {
       DataTable weight() const { return weightData_; };
       DataTable pt() const { return ptData_; };
       DataTable ptGen() const { return ptGenData_; };
+      DataTable energy() const { return energyData_; };
+      DataTable energyGen() const { return energyGenData_; };
       DataTable eta() const { return etaData_; };
       DataTable etaGen() const { return etaGenData_; };
       DataTable phi() const { return phiData_; };
@@ -45,6 +47,8 @@ namespace my {
       std::vector< Double_t > weight( unsigned uEta ) const { return weightData_.at( uEta ); };
       std::vector< Double_t > pt( unsigned uEta ) const { return ptData_.at( uEta ); };
       std::vector< Double_t > ptGen( unsigned uEta ) const { return ptGenData_.at( uEta ); };
+      std::vector< Double_t > energy( unsigned uEta ) const { return energyData_.at( uEta ); };
+      std::vector< Double_t > energyGen( unsigned uEta ) const { return energyGenData_.at( uEta ); };
       std::vector< Double_t > eta( unsigned uEta ) const { return etaData_.at( uEta ); };
       std::vector< Double_t > etaGen( unsigned uEta ) const { return etaGenData_.at( uEta ); };
       std::vector< Double_t > phi( unsigned uEta ) const { return phiData_.at( uEta ); };
@@ -68,6 +72,8 @@ namespace my {
 
     private:
 
+      friend class JetDataContainer;
+
       /// Binning
       std::vector< Double_t > etaBins_;
       std::vector< Double_t > ptBins_;
@@ -78,6 +84,8 @@ namespace my {
       DataTable weightData_;
       DataTable ptData_;
       DataTable ptGenData_;
+      DataTable energyData_;
+      DataTable energyGenData_;
       DataTable etaData_;
       DataTable etaGenData_;
       DataTable phiData_;

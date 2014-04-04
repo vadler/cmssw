@@ -36,8 +36,9 @@ fitTopTransferFunctions = cms.PSet(
   verbose   = cms.uint32( 3 )
 , maxEvents = cms.int32( -1 )
 , useSymm   = cms.bool( True )
-, useAlt    = cms.bool( True )
+, useAlt    = cms.bool( False )
 , useNonT   = cms.bool( True )
+, useNonP   = cms.bool( True )
 , refGen    = cms.bool( True )
 )
 

@@ -36,6 +36,7 @@ FitTopTransferFunctionsRunner::FitTopTransferFunctionsRunner( const std::string&
 , useSymm_( config_.getParameter< bool >( "useSymm" ) )
 , useAlt_( config_.getParameter< bool >( "useAlt" ) )
 , useNonT_( config_.getParameter< bool >( "useNonT" ) )
+, useNonP_( config_.getParameter< bool >( "useNonP" ) )
 , refGen_( config_.getParameter< bool >( "refGen" ) )
 , objCats_( config_.getParameter< edm::ParameterSet >( "objects" ).getParameterNamesForType< edm::ParameterSet >() )
 {
@@ -83,8 +84,8 @@ FitTopTransferFunctionsRunner::FitTopTransferFunctionsRunner( const std::string&
   // Set constants
   std::string evtSel( "analyzeHitFit" );
   if ( refSel_ ) evtSel.append( "Reference" );
-  const std::string baseTitlePtL( useAlt_ ? "E" : "p" );
-  const std::string baseTitlePtU( useAlt_ ? "E" : "P" );
+  const std::string baseTitlePtL( useNonP_ ? "E" : "p" );
+  const std::string baseTitlePtU( useNonP_ ? "E" : "P" );
   baseTitlePt_     = useNonT_ ? baseTitlePtU : baseTitlePtU + "t";
   titlePtT_        = useNonT_ ? baseTitlePtL : baseTitlePtL + "_{t}";
   titlePt_         = refGen_  ? titlePtT_ + "^{GEN} (GeV)" : titlePtT_ + " (GeV)";
@@ -260,7 +261,7 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
               << myName_ << " --> DEBUG:" << std::endl
               << "    Reading data... " << std::endl;
   }
-  ObjectDataContainer dataContainer( objCat, dirInObjCat, useSymm_, useAlt_, useNonT_, refGen_, data_, maxEvents_ );
+  JetDataContainer dataContainer( objCat, dirInObjCat, useSymm_, useAlt_, useNonT_, useNonP_, refGen_, data_, maxEvents_ );
 
   // Find requested subdirectories
   TDirectory* dirInPt( ( TDirectory* )( dirInObjCat->Get( "Pt" ) ) );

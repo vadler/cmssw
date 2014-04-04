@@ -10,7 +10,7 @@
 using namespace my;
 
 
-ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory* dirInCat, Bool_t useSymm, Bool_t useAlt, Bool_t useNonT, Bool_t refGen, const my::DataContainer& data, Int_t maxEvents )
+ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory* dirInCat, Bool_t useSymm, Bool_t useAlt, Bool_t useNonT, Bool_t useNonP, Bool_t refGen, const my::DataContainer& data, Int_t maxEvents )
 {
 
   // Get eta binning
@@ -45,6 +45,8 @@ ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory*
   weightData_.reserve( nEtaBins() );
   ptData_.reserve( nEtaBins() );
   ptGenData_.reserve( nEtaBins() );
+  energyData_.reserve( nEtaBins() );
+  energyGenData_.reserve( nEtaBins() );
   etaData_.reserve( nEtaBins() );
   etaGenData_.reserve( nEtaBins() );
   phiData_.reserve( nEtaBins() );
@@ -54,6 +56,8 @@ ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory*
     weightData_.push_back( std::vector< double >() );
     ptData_.push_back( std::vector< double >() );
     ptGenData_.push_back( std::vector< double >() );
+    energyData_.push_back( std::vector< double >() );
+    energyGenData_.push_back( std::vector< double >() );
     etaData_.push_back( std::vector< double >() );
     etaGenData_.push_back( std::vector< double >() );
     phiData_.push_back( std::vector< double >() );
@@ -61,6 +65,8 @@ ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory*
   }
   Double_t ptData;
   Double_t ptGenData;
+  Double_t energyData;
+  Double_t energyGenData;
   Double_t etaData;
   Double_t etaGenData;
   Double_t phiData;
@@ -69,15 +75,18 @@ ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory*
   TTree* dataTree( ( TTree* )( dirInCat->Get( std::string( objCat + "_data" ).c_str() ) ) );
   if ( useAlt ) {
     dataTree->SetBranchAddress( "PtAlt" , &ptData );
+    dataTree->SetBranchAddress( "EnergyAlt" , &energyData );
     dataTree->SetBranchAddress( "EtaAlt", &etaData );
     dataTree->SetBranchAddress( "PhiAlt", &phiData );
   }
   else {
     dataTree->SetBranchAddress( "Pt" , &ptData );
+    dataTree->SetBranchAddress( "Energy" , &energyData );
     dataTree->SetBranchAddress( "Eta", &etaData );
     dataTree->SetBranchAddress( "Phi", &phiData );
   }
   dataTree->SetBranchAddress( "PtGen" , &ptGenData );
+  dataTree->SetBranchAddress( "EnergyGen" , &energyGenData );
   dataTree->SetBranchAddress( "EtaGen", &etaGenData );
   dataTree->SetBranchAddress( "PhiGen", &phiGenData );
   if ( useSymm ) {
@@ -108,11 +117,14 @@ ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory*
     weightData_[ iEta ].push_back( data.pileUpWeights()[ pileUpEntry ] );
     ptData_[ iEta ].push_back( ptData );
     ptGenData_[ iEta ].push_back( ptGenData );
+    energyData_[ iEta ].push_back( ptData );
+    energyGenData_[ iEta ].push_back( ptGenData );
     etaData_[ iEta ].push_back( etaData );
     etaGenData_[ iEta ].push_back( etaGenData );
     phiData_[ iEta ].push_back( phiData );
     phiGenData_[ iEta ].push_back( phiGenData );
   }
+  dataTree->ResetBranchAddresses();
 
   // Split data into pt bins per eta bin
   sizePt_.reserve( nEtaBins() );
@@ -133,9 +145,20 @@ ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory*
     DataTable phiGenEtaBin( nPtBins() );
     std::vector< unsigned > sizePt( nPtBins() );
     for ( unsigned uEntry = 0; uEntry < sizeEta_[ uEta ]; ++uEntry ) {
-      if ( ptData_[ uEta ][ uEntry ] == -9. || ptGenData_[ uEta ][ uEntry ] == -9. ) continue; // no match
-      Double_t ptVal( useNonT ? ptData_[ uEta ][ uEntry ] * std::cosh( etaData_[ uEta ][ uEntry ] ) : ptData_[ uEta ][ uEntry ] );
-      Double_t ptGenVal( useNonT ? ptGenData_[ uEta ][ uEntry ] * std::cosh( etaGenData_[ uEta ][ uEntry ] ) : ptGenData_[ uEta ][ uEntry ] );
+//       if ( ptData_[ uEta ][ uEntry ] * std::cosh( etaData_[ uEta ][ uEntry ] ) > energyData_[ uEta ][ uEntry ] ) continue; // no match
+//       if ( ptGenData_[ uEta ][ uEntry ] * std::cosh( etaGenData_[ uEta ][ uEntry ] ) > energyGenData_[ uEta ][ uEntry ] ) continue; // no match
+      Double_t ptVal;
+      Double_t ptGenVal;
+      if ( useNonP ) {
+        if ( energyData_[ uEta ][ uEntry ] == -9. || energyGenData_[ uEta ][ uEntry ] == -9. ) continue; // no match
+        ptVal = useNonT ? energyData_[ uEta ][ uEntry ] : std::sqrt( std::pow( energyData_[ uEta ][ uEntry ], 2 ) + ( 1. - std::pow( std::cosh( etaData_[ uEta ][ uEntry ] ), 2 ) ) * std::pow( ptData_[ uEta ][ uEntry ], 2 ) );
+        ptGenVal = useNonT ? energyGenData_[ uEta ][ uEntry ] : std::sqrt( std::pow( energyGenData_[ uEta ][ uEntry ], 2 ) + ( 1. - std::pow( std::cosh( etaGenData_[ uEta ][ uEntry ] ), 2 ) ) * std::pow( ptGenData_[ uEta ][ uEntry ], 2 ) );
+      }
+      else {
+        if ( ptData_[ uEta ][ uEntry ] == -9. || ptGenData_[ uEta ][ uEntry ] == -9. ) continue; // no match
+        ptVal = useNonT ? ptData_[ uEta ][ uEntry ] * std::cosh( etaData_[ uEta ][ uEntry ] ) : ptData_[ uEta ][ uEntry ];
+        ptGenVal = useNonT ? ptGenData_[ uEta ][ uEntry ] * std::cosh( etaGenData_[ uEta ][ uEntry ] ) : ptGenData_[ uEta ][ uEntry ];
+      }
       Double_t ptRef( refGen ? ptGenVal : ptVal );
       for ( unsigned uPt = 0; uPt < nPtBins(); ++uPt ) {
         if ( ptBins_[ uPt ] <= ptRef && ptRef < ptBins_[ uPt + 1 ] ) {

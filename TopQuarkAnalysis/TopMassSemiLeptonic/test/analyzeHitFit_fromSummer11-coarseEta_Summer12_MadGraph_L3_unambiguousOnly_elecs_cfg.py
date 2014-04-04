@@ -274,7 +274,6 @@ process.ttSemiLepHypSelectionFilterElectronsReference = cms.EDFilter("TtSemiLepH
 
 process.analyzeHitFit = cms.EDAnalyzer("AnalyzeHitFit",
     patJets = cms.InputTag("selectedPatJetsHitFit"),
-    allJets = cms.bool(False),
     pileUpFileMCObserved = cms.FileInPath('CommonTools/MyTools/data/pileUpFileMC_Fall11inTime.root'),
     patElectrons = cms.InputTag("selectedPatElectronsHitFit"),
     patMETs = cms.InputTag("patMETs"),
@@ -318,7 +317,6 @@ process.analyzeHitFit = cms.EDAnalyzer("AnalyzeHitFit",
 
 process.analyzeHitFitReference = cms.EDAnalyzer("AnalyzeHitFit",
     patJets = cms.InputTag("referencePatJets"),
-    allJets = cms.bool(False),
     pileUpFileMCObserved = cms.FileInPath('CommonTools/MyTools/data/pileUpFileMC_Fall11inTime.root'),
     patElectrons = cms.InputTag("referencePatElectrons"),
     patMETs = cms.InputTag("patMETs"),

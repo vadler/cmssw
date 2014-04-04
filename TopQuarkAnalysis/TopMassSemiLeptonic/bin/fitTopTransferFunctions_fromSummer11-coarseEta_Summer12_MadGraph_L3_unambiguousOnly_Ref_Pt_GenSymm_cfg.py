@@ -6,6 +6,7 @@ fitTopTransferFunctions = cms.PSet(
     useAlt = cms.bool(False),
     maxEvents = cms.int32(-1),
     useNonT = cms.bool(False),
+    useNonP = cms.bool(False),
     io = cms.PSet(
         overwrite = cms.bool(True),
         plot = cms.bool(True),

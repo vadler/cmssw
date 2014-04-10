@@ -117,8 +117,8 @@ ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory*
     weightData_[ iEta ].push_back( data.pileUpWeights()[ pileUpEntry ] );
     ptData_[ iEta ].push_back( ptData );
     ptGenData_[ iEta ].push_back( ptGenData );
-    energyData_[ iEta ].push_back( ptData );
-    energyGenData_[ iEta ].push_back( ptGenData );
+    energyData_[ iEta ].push_back( energyData );
+    energyGenData_[ iEta ].push_back( energyGenData );
     etaData_[ iEta ].push_back( etaData );
     etaGenData_[ iEta ].push_back( etaGenData );
     phiData_[ iEta ].push_back( phiData );
@@ -145,8 +145,8 @@ ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory*
     DataTable phiGenEtaBin( nPtBins() );
     std::vector< unsigned > sizePt( nPtBins() );
     for ( unsigned uEntry = 0; uEntry < sizeEta_[ uEta ]; ++uEntry ) {
-//       if ( ptData_[ uEta ][ uEntry ] * std::cosh( etaData_[ uEta ][ uEntry ] ) > energyData_[ uEta ][ uEntry ] ) continue; // no match
-//       if ( ptGenData_[ uEta ][ uEntry ] * std::cosh( etaGenData_[ uEta ][ uEntry ] ) > energyGenData_[ uEta ][ uEntry ] ) continue; // no match
+      if ( ptData_[ uEta ][ uEntry ] * std::cosh( etaData_[ uEta ][ uEntry ] ) > energyData_[ uEta ][ uEntry ] * ( 1. + 1.e-15 ) ) continue; // no match
+      if ( ptGenData_[ uEta ][ uEntry ] * std::cosh( etaGenData_[ uEta ][ uEntry ] ) > energyGenData_[ uEta ][ uEntry ] * ( 1. + 1.e-15 ) ) continue; // no match
       Double_t ptVal;
       Double_t ptGenVal;
       if ( useNonP ) {

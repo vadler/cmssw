@@ -14,8 +14,7 @@ JetDataContainer::JetDataContainer( const std::string& objCat, TDirectory* dirIn
 : ObjectDataContainer( objCat, dirInCat, useSymm, useAlt, useNonT, useNonP, refGen, data, maxEvents )
 {
 
-//   if ( objCat == "UdscJet" || objCat == "BJet" ) {
-  if ( false ) {
+  if ( objCat == "UdscJet" || objCat == "BJet" ) {
 
     // Get data
     ptGenJetData_.reserve( nEtaBins() );
@@ -69,7 +68,7 @@ JetDataContainer::JetDataContainer( const std::string& objCat, TDirectory* dirIn
       assert( iEta < ( Int_t )( nEtaBins() ) ); // has to fit (and be consistent)
       if ( iEta == -1 ) continue; // FIXME: eta out of range in analyzer; should be solved more consistently
       ptGenJetData_[ iEta ].push_back( ptGenJetData );
-      energyGenJetData_[ iEta ].push_back( ptGenJetData );
+      energyGenJetData_[ iEta ].push_back( energyGenJetData );
       etaGenJetData_[ iEta ].push_back( etaGenJetData );
       phiGenJetData_[ iEta ].push_back( phiGenJetData );
       tagCSVData_[ iEta ].push_back( tagCSVData );
@@ -88,9 +87,9 @@ JetDataContainer::JetDataContainer( const std::string& objCat, TDirectory* dirIn
       DataTable tagCSVEtaBin( nPtBins() );
       std::vector< unsigned > sizePt( nPtBins() );
       for ( unsigned uEntry = 0; uEntry < sizeEta( uEta ); ++uEntry ) {
-//         if ( ptData_[ uEta ][ uEntry ] * std::cosh( etaData_[ uEta ][ uEntry ] ) > energyData_[ uEta ][ uEntry ] ) continue; // no match
-//         if ( ptGenData_[ uEta ][ uEntry ] * std::cosh( etaGenData_[ uEta ][ uEntry ] ) > energyGenData_[ uEta ][ uEntry ] ) continue; // no match
-//         if ( ptGenJetData_[ uEta ][ uEntry ] * std::cosh( etaGenJetData_[ uEta ][ uEntry ] ) > energyGenJetData_[ uEta ][ uEntry ] ) continue; // no match
+        if ( ptData_[ uEta ][ uEntry ] * std::cosh( etaData_[ uEta ][ uEntry ] ) > energyData_[ uEta ][ uEntry ] * ( 1. + 1.e-15 ) ) continue; // no match
+        if ( ptGenData_[ uEta ][ uEntry ] * std::cosh( etaGenData_[ uEta ][ uEntry ] ) > energyGenData_[ uEta ][ uEntry ] * ( 1. + 1.e-15 ) ) continue; // no match
+        if ( ptGenJetData_[ uEta ][ uEntry ] * std::cosh( etaGenJetData_[ uEta ][ uEntry ] ) > energyGenJetData_[ uEta ][ uEntry ] * ( 1. + 1.e-15 ) ) continue; // no match
         Double_t ptVal;
         Double_t ptGenVal;
         if ( useNonP ) {

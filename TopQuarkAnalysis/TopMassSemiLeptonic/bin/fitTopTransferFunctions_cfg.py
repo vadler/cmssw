@@ -58,7 +58,7 @@ fitTopTransferFunctions.io = cms.PSet(
 , fit2D        = cms.bool( False )
 , histAddEdges = cms.bool( True )
 , pathOut      = cms.string( '' ) # defined below
-, plot         = cms.bool( True )
+, plot         = cms.bool( False )
 , pathPlots    = cms.string( '' ) # defined below
 , formatPlots  = cms.vstring( 'png'
                             #, 'pdf'
@@ -77,6 +77,8 @@ fitTopTransferFunctions.objects = cms.PSet(
   , minPt              = cms.double( 0.0 )
   , maxEta             = cms.double( 999999. )
   , maxDR              = cms.double( 0.1 )
+  , minCSV             = cms.double( 0.0 )
+  , maxCSV             = cms.double( 0.679 ) # CSVM
   , fitFunction        = cms.string( dGauss )
   , dependencyFunction = cms.string( squared )
   , resolutionFunction = cms.string( squared )
@@ -95,6 +97,8 @@ fitTopTransferFunctions.objects = cms.PSet(
   #, minPt              = cms.double( 0.0 )
   #, maxEta             = cms.double( 999999. )
   #, maxDR              = cms.double( 0.1 )
+  #, minCSV             = cms.double( 0.898 ) # CSVT
+  #, maxCSV             = cms.double( 1.0 )
   #, fitFunction        = cms.string( dGauss )
   #, dependencyFunction = cms.string( squared )
   #, resolutionFunction = cms.string( resolution )
@@ -162,12 +166,12 @@ if fitTopTransferFunctions.io.usePileUp.value() is True:
 if fitTopTransferFunctions.io.refSel.value() is True:
   logFile = logFile.replace( '.', '_Ref.', 1 )
 if fitTopTransferFunctions.useNonT.value() is True:
-  if fitTopTransferFunctions.useAlt.value() is True:
+  if fitTopTransferFunctions.useNonP.value() is True:
     logFile = logFile.replace( '.', '_E_.', 1 )
   else:
     logFile = logFile.replace( '.', '_P_.', 1 )
 else:
-  if fitTopTransferFunctions.useAlt.value() is True:
+  if fitTopTransferFunctions.useNonP.value() is True:
     logFile = logFile.replace( '.', '_Et_.', 1 )
   else:
     logFile = logFile.replace( '.', '_Pt_.', 1 )

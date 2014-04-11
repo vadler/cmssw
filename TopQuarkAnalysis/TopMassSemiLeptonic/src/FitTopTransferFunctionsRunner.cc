@@ -235,6 +235,12 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
   const double   configObjMinPt( configObj.getParameter< double >( "minPt" ) );
   const double   configObjMaxEta( configObj.getParameter< double >( "maxEta" ) );
   const double   configObjMaxDR( configObj.getParameter< double >( "maxDR" ) );
+  double configObjMinCSV( 0. );
+  double configObjMaxCSV( 1. );
+  if ( objCat == "UdscJet" || objCat == "BJet" ) {
+    if ( configObj.existsAs< double >( "minCSV" ) ) configObjMinCSV = configObj.getParameter< double >( "minCSV" );
+    if ( configObj.existsAs< double >( "maxCSV" ) ) configObjMaxCSV = configObj.getParameter< double >( "maxCSV" );
+  }
   const double   configObjWidthFactor( configObj.getParameter< double >( "widthFactor" ) );
 
   // Open ROOT file directories
@@ -312,7 +318,12 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
     const std::string nameEta( name + "_" + binEta );
     HistosTransEta histosTransEta( objCat, nameEta, configObjDeltaPtBins, configObjDeltaPtMax, nPtBins, dataContainer.ptBins(), titleTrans_, baseTitlePt_, titlePtT_, titlePt_, titleEta_ );
     // Fill
-    fillPerCategoryBin( uEta, histosTrans, histosTransEta, configObjMinPt, configObjMaxEta, configObjMaxDR );
+    if ( objCat == "UdscJet" || objCat == "BJet" ) {
+      fillPerCategoryBin( uEta, histosTrans, histosTransEta, configObjMinPt, configObjMaxEta, configObjMaxDR, configObjMinCSV, configObjMaxCSV );
+    }
+    else {
+      fillPerCategoryBin( uEta, histosTrans, histosTransEta, configObjMinPt, configObjMaxEta, configObjMaxCSV );
+    }
     histosVecTransEta.push_back( histosTransEta );
   } // loop:uEta < nEtaBins
   if ( plot_ ) plotFillPerCategoryBin( histosTrans );
@@ -387,7 +398,12 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
       const std::string nameEtaRebin( nameRebin + "_" + binEta );
       HistosTransEta histosRebinTransEta( objCat, nameEtaRebin, configObjDeltaPtBins, configObjDeltaPtMax, nPtBins, dataContainer.ptBins(), titleTrans_, baseTitlePt_, titlePtT_, titlePt_, titleEta_, histosVecTransEta.at( uEta), configObjWidthFactor );
       // Fill
-      fillPerCategoryBin( uEta, histosRebinTrans, histosRebinTransEta, configObjMinPt, configObjMaxEta, configObjMaxDR, true );
+      if ( objCat == "UdscJet" || objCat == "BJet" ) {
+        fillPerCategoryBin( uEta, histosRebinTrans, histosRebinTransEta, configObjMinPt, configObjMaxEta, configObjMaxDR, configObjMinCSV, configObjMaxCSV, true );
+      }
+      else {
+        fillPerCategoryBin( uEta, histosRebinTrans, histosRebinTransEta, configObjMinPt, configObjMaxEta, configObjMaxCSV, true );
+      }
       histosRebinVecTransEta.push_back( histosRebinTransEta );
     } // loop:uEta < nEtaBins
     histosVecRebinTrans_.push_back( histosRebinTrans );
@@ -453,6 +469,44 @@ void FitTopTransferFunctionsRunner::fillPerCategoryBin( unsigned uEta, HistosTra
           histosTrans.histVecPtTransMapEta.at( uPt )->Fill( etaRef, value, weight);
           histosTrans.histTransMapPt->Fill( ptRef, value, weight );
           histosTrans.histTransMapEta->Fill( etaRef, value, weight );
+        }
+      }
+    } // loop: uEntry < objectData_.back().sizePt( uEta, uPt )
+  } // loop:uPt < nPtBins
+  if ( plot_ && ( ! rebin ) && fitEtaBins_ ) {
+    histosTransEta.histTransMapPt->Draw( "ColZ" );
+    for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosTransEta.histTransMapPt->GetName() + "." + formatPlots_.at( uForm )  ).c_str() );
+  }
+}
+
+
+void FitTopTransferFunctionsRunner::fillPerCategoryBin( unsigned uEta, HistosTrans& histosTrans, HistosTransEta& histosTransEta, double minPt, double maxEta, double maxDR, double minCSV, double maxCSV, bool rebin )
+{
+  TCanvas canvas;
+  // Loop over pt bins
+  for ( unsigned uPt = 0; uPt < objectData_.back().nPtBins(); ++uPt ) {
+    if ( objectData_.back().sizePt( uEta, uPt ) == 0 ) continue;
+    // Loop over entries
+    for ( unsigned uEntry = 0; uEntry < objectData_.back().sizePt( uEta, uPt ); ++uEntry ) {
+      const Double_t ptRef( refGen_ ? objectData_.back().ptGenPt( uEta, uPt ).at( uEntry ) : objectData_.back().ptPt( uEta, uPt ).at( uEntry ) );
+      const Double_t etaRef( refGen_ ? objectData_.back().etaGenPt( uEta, uPt ).at( uEntry ) : objectData_.back().etaPt( uEta, uPt ).at( uEntry ) );
+      if ( ptRef >= minPt && std::fabs( etaRef ) < maxEta && reco::deltaR( objectData_.back().etaGenPt( uEta, uPt ).at( uEntry ), objectData_.back().phiGenPt( uEta, uPt ).at( uEntry ), objectData_.back().etaPt( uEta, uPt ).at( uEntry ), objectData_.back().phiPt( uEta, uPt ).at( uEntry ) ) <= maxDR ) {
+        if ( minCSV < objectData_.back().tagCSVPt( uEta, uPt ).at( uEntry ) && objectData_.back().tagCSVPt( uEta, uPt ).at( uEntry ) <= maxCSV ) {
+          const Double_t value( refGen_ ? objectData_.back().ptGenPt( uEta, uPt ).at( uEntry ) - objectData_.back().ptPt( uEta, uPt ).at( uEntry ) : objectData_.back().ptPt( uEta, uPt ).at( uEntry ) - objectData_.back().ptGenPt( uEta, uPt ).at( uEntry ) );
+          const Double_t weight( objectData_.back().weightPt( uEta, uPt ).at( uEntry ) );
+          if ( fitEtaBins_ ) histosTransEta.histVecPtTrans.at( uPt )->Fill( value, weight );
+          histosTrans.histVecPtTrans.at( uPt )->Fill( value, weight );
+          if ( fitEtaBins_ ) histosTransEta.histTrans->Fill( value, weight );
+          histosTrans.histTrans->Fill( value, weight );
+          if ( ! rebin ) {
+            const Double_t etaGenSymm( useSymm_ ? std::fabs( objectData_.back().etaGenPt( uEta, uPt ).at( uEntry ) ) : objectData_.back().etaGenPt( uEta, uPt ).at( uEntry ) );
+            const Double_t etaSymm( useSymm_ ? std::fabs( objectData_.back().etaPt( uEta, uPt ).at( uEntry ) ) : objectData_.back().etaPt( uEta, uPt ).at( uEntry ) );
+            const Double_t etaRef( refGen_ ? etaGenSymm : etaSymm );
+            if ( fitEtaBins_ ) histosTransEta.histTransMapPt->Fill( ptRef, value, weight );
+            histosTrans.histVecPtTransMapEta.at( uPt )->Fill( etaRef, value, weight);
+            histosTrans.histTransMapPt->Fill( ptRef, value, weight );
+            histosTrans.histTransMapEta->Fill( etaRef, value, weight );
+          }
         }
       }
     } // loop: uEntry < objectData_.back().sizePt( uEta, uPt )

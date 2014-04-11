@@ -61,7 +61,7 @@ namespace my {
       std::vector< TDirectory* >               dirsInObjCat_;
       std::vector< TDirectory* >               dirsInObjCatSubFit_;
       my::DataContainer                        data_;
-      std::vector< my::ObjectDataContainer >   objectData_;
+      std::vector< my::JetDataContainer >      objectData_;
       // Output
       TFile*                                    fileOut_;
       TDirectory*                               dirOutSel_;
@@ -156,6 +156,7 @@ namespace my {
       /// - run only once;
       /// - run only during first loop over categories due to the usage of std::vector::back().
       void fillPerCategoryBin( unsigned uEta, HistosTrans& histosTrans, HistosTransEta& histosTransEta, double minPt, double maxEta, double maxDR, bool rebin = false );
+      void fillPerCategoryBin( unsigned uEta, HistosTrans& histosTrans, HistosTransEta& histosTransEta, double minPt, double maxEta, double maxDR, double minCSV, double maxCSV, bool rebin = false );
       void plotFillPerCategoryBin( HistosTrans& histosTrans );
       void fitPerCategoryLoop( const std::string& objCat );
       void fitPerCategoryBin( const std::string& objCat, TDirectory* dirOut, TransferFunction& transfer, TransferFunctionCollection& transferColl, HistosTransEta& histosTransEta, std::vector< HistosDependency >& histosVecDependency );

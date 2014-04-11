@@ -145,8 +145,6 @@ ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory*
     DataTable phiGenEtaBin( nPtBins() );
     std::vector< unsigned > sizePt( nPtBins() );
     for ( unsigned uEntry = 0; uEntry < sizeEta_[ uEta ]; ++uEntry ) {
-      if ( ptData_[ uEta ][ uEntry ] * std::cosh( etaData_[ uEta ][ uEntry ] ) > energyData_[ uEta ][ uEntry ] * ( 1. + 1.e-15 ) ) continue; // no match
-      if ( ptGenData_[ uEta ][ uEntry ] * std::cosh( etaGenData_[ uEta ][ uEntry ] ) > energyGenData_[ uEta ][ uEntry ] * ( 1. + 1.e-15 ) ) continue; // no match
       Double_t ptVal;
       Double_t ptGenVal;
       if ( useNonP ) {

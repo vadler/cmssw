@@ -1,0 +1,24 @@
+
+FitFunction       : 	[0]*(exp(-0.5*((x-[1])/[2])**2)+[3]*exp(-0.5*((x-[4])/[5])**2))/(([2]+[3]*[5])*sqrt(2*pi))	(constructed from C++ class)
+DependencyFunction: 	[0]+[1]*x+[2]*x**2	(constructed from C++ class) 	on E_parton
+ResolutionFunction: 	[0]+[1]*x+[2]*x**2	(constructed from C++ class) 	on E_parton
+Comment           : 	E_parton <= 999999, E_parton >= 0, DeltaR(parton, reco) <= 0.1, minEntries / bins: 5
+
+Parameters 1D:
+[0]: 	NAN
+[1]: 	NAN
+[2]: 	NAN
+[3]: 	NAN
+[4]: 	NAN
+[5]: 	NAN
+[all]: 	(NAN)*(exp(-0.5*((x-(NAN))/(NAN))**2)+(NAN)*exp(-0.5*((x-(NAN))/(NAN))**2))/(((NAN)+(NAN)*(NAN))*sqrt(2*pi))
+
+Parameters 2D:
+[0]: 	(0.994411+(2.41905e-05*E_parton))+(4.38227e-08*sq(E_parton))
+[1]: 	(-1.48068+(0.00271403*E_parton))+(-0.000100687*sq(E_parton))
+[2]: 	(-1.2047+(0.167208*E_parton))+(-0.000264536*sq(E_parton))
+[3]: 	(0.15288+(-0.000897433*E_parton))+(4.50074e-06*sq(E_parton))
+[4]: 	(-12.335+(0.0492815*E_parton))+(-0.000113716*sq(E_parton))
+[5]: 	(-2.9522+(0.294262*E_parton))+(-0.000448706*sq(E_parton))
+[all]: 	((0.994411+(2.41905e-05*E_parton))+(4.38227e-08*sq(E_parton)))*(exp(-0.5*((x-((-1.48068+(0.00271403*E_parton))+(-0.000100687*sq(E_parton))))/((-1.2047+(0.167208*E_parton))+(-0.000264536*sq(E_parton))))**2)+((0.15288+(-0.000897433*E_parton))+(4.50074e-06*sq(E_parton)))*exp(-0.5*((x-((-12.335+(0.0492815*E_parton))+(-0.000113716*sq(E_parton))))/((-2.9522+(0.294262*E_parton))+(-0.000448706*sq(E_parton))))**2))/((((-1.2047+(0.167208*E_parton))+(-0.000264536*sq(E_parton)))+((0.15288+(-0.000897433*E_parton))+(4.50074e-06*sq(E_parton)))*((-2.9522+(0.294262*E_parton))+(-0.000448706*sq(E_parton))))*sqrt(2*pi))
+

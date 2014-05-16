@@ -881,21 +881,21 @@ void AnalyzeHitFit::fill( unsigned iCat, const edm::Handle< TtSemiLeptonicEvent 
       edm::LogWarning( "AnalyzeHitFit" ) << "Category repeated: " << cat;
       return;
     }
-//     const int muonIndex( ttSemiLeptonicEvent->jetLeptonCombination( TtEvent::kGenMatch ).at( TtSemiLepEvtPartons::Lepton ) );
+    const int muonIndex( ttSemiLeptonicEvent->jetLeptonCombination( TtEvent::kGenMatch ).at( TtSemiLepEvtPartons::Lepton ) );
     pt_      = ttSemiLeptonicEvent->singleLepton( TtEvent::kGenMatch )->pt();
-//     ptAlt_   = patMuons_->at( muonIndex ).globalTrack()->pt(); // no isTrackerMuon requirement in 2012 reference selection
+    ptAlt_   = patMuons_->at( muonIndex ).bestTrack()->pt();
     ptAlt_   = pt_;
     ptGen_   = ttGenEvent_->singleLepton()->pt();
     eta_     = ttSemiLeptonicEvent->singleLepton( TtEvent::kGenMatch )->eta();
-//     etaAlt_  = patMuons_->at( muonIndex ).globalTrack()->eta(); // no isTrackerMuon requirement in 2012 reference selection
+    etaAlt_  = patMuons_->at( muonIndex ).bestTrack()->eta();
     etaAlt_  = eta_;
     etaGen_  = ttGenEvent_->singleLepton()->eta();
     phi_     = ttSemiLeptonicEvent->singleLepton( TtEvent::kGenMatch )->phi();
-//     phiAlt_  = patMuons_->at( muonIndex ).globalTrack()->phi(); // no isTrackerMuon requirement in 2012 reference selection
+    phiAlt_  = patMuons_->at( muonIndex ).bestTrack()->phi();
     phiAlt_  = phi_;
     phiGen_  = ttGenEvent_->singleLepton()->phi();
     energy_     = ttSemiLeptonicEvent->singleLepton( TtEvent::kGenMatch )->energy();
-//     energyAlt_  = patMuons_->at( muonIndex ).globalTrack()->energy(); // no isTrackerMuon requirement in 2012 reference selection
+    energyAlt_  = patMuons_->at( muonIndex ).bestTrack()->p();
     energyAlt_  = energy_;
     energyGen_  = ttGenEvent_->singleLepton()->energy();
   }
@@ -904,21 +904,20 @@ void AnalyzeHitFit::fill( unsigned iCat, const edm::Handle< TtSemiLeptonicEvent 
       edm::LogWarning( "AnalyzeHitFit" ) << "Category repeated: " << cat;
       return;
     }
-//     const int elecIndex( ttSemiLeptonicEvent->jetLeptonCombination( TtEvent::kGenMatch ).at( TtSemiLepEvtPartons::Lepton ) );
+    const int elecIndex( ttSemiLeptonicEvent->jetLeptonCombination( TtEvent::kGenMatch ).at( TtSemiLepEvtPartons::Lepton ) );
     pt_      = ttSemiLeptonicEvent->singleLepton( TtEvent::kGenMatch )->pt();
-//     ptAlt_   = patElecs_->at( elecIndex ).closestCtfTrackRef()->pt(); // FIXME: or which one?
-    ptAlt_   = pt_;
+    ptAlt_   = patElecs_->at( elecIndex ).ecalDrivenMomentum().pt();
     ptGen_   = ttGenEvent_->singleLepton()->pt();
     eta_     = ttSemiLeptonicEvent->singleLepton( TtEvent::kGenMatch )->eta();
-//     etaAlt_  = patElecs_->at( elecIndex ).closestCtfTrackRef()->eta(); // FIXME: or which one?
+    etaAlt_  = patElecs_->at( elecIndex ).ecalDrivenMomentum().eta();
     etaAlt_  = eta_;
     etaGen_  = ttGenEvent_->singleLepton()->eta();
     phi_     = ttSemiLeptonicEvent->singleLepton( TtEvent::kGenMatch )->phi();
-//     phiAlt_  = patElecs_->at( elecIndex ).closestCtfTrackRef()->phi(); // FIXME: or which one?
+    phiAlt_  = patElecs_->at( elecIndex ).ecalDrivenMomentum().phi();
     phiAlt_  = phi_;
     phiGen_  = ttGenEvent_->singleLepton()->phi();
     energy_     = ttSemiLeptonicEvent->singleLepton( TtEvent::kGenMatch )->energy();
-//     energyAlt_  = patElecs_->at( elecIndex ).closestCtfTrackRef()->energy(); // FIXME: or which one?
+    energyAlt_  = patElecs_->at( elecIndex ).ecalDrivenMomentum().energy();
     energyAlt_  = energy_;
     energyGen_  = ttGenEvent_->singleLepton()->energy();
   }

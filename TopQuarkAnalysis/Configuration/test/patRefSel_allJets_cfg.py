@@ -161,6 +161,7 @@ if runOnMC:
     cms.PSet(record = cms.string("BTagTrackProbability3DRcd"),
        tag = cms.string("TrackProbabilityCalibration_3D_MC53X_v2"),
        connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU"))
+  )
 else:
   process.GlobalTag.globaltag = globalTagData
 

@@ -152,6 +152,15 @@ process.MessageLogger.cerr.FwkReport.reportEvery = fwkReportEvery
 process.options.wantSummary = wantSummary
 if runOnMC:
   process.GlobalTag.globaltag = globalTagMC
+  # According to https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagJetProbabilityCalibration#Calibration_in_53x_Data_and_MC
+  # and since this is not in the GT:
+  process.GlobalTag.toGet = cms.VPSet(
+    cms.PSet(record = cms.string("BTagTrackProbability2DRcd"),
+       tag = cms.string("TrackProbabilityCalibration_2D_MC53X_v2"),
+       connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU")),
+    cms.PSet(record = cms.string("BTagTrackProbability3DRcd"),
+       tag = cms.string("TrackProbabilityCalibration_3D_MC53X_v2"),
+       connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU"))
 else:
   process.GlobalTag.globaltag = globalTagData
 

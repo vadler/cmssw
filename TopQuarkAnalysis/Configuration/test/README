@@ -2,9 +2,9 @@
 Environment:
 ============
 
-ssh lxplus5.cern.ch
-cmsrel CMSSW_5_3_16_patch1
-cd CMSSW_5_3_16_patch1/src
+ssh lxplus.cern.ch
+cmsrel CMSSW_5_3_18
+cd CMSSW_5_3_18/src
 cmsenv
 git cms-addpkg TopQuarkAnalysis/Configuration
 git cms-addpkg EgammaAnalysis/ElectronTools
@@ -15,8 +15,8 @@ git cms-merge-topic vadler:Gent-53X-updateTopRefSel
 scram b -j 20
 
 The feature branch 'vadler/Gent-53X-updateTopRefSel' incorporates also
-- cms-analysis-tools/5_3_16_patch1-updateTopRefSel
-S. https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideTopRefEventSel#CMSSW_5_3_16_patch1
+- cms-analysis-tools/5_3_18-updateTopRefSel
+S. https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideTopRefEventSel#CMSSW_5_3_18
 
 
 Steering:

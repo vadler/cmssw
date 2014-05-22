@@ -60,11 +60,11 @@ FitTopTransferFunctionsRunner::FitTopTransferFunctionsRunner( const std::string&
   const std::string& configIOOutFile( configIO.getParameter< std::string >( "outputFile" ) );
   overwrite_    = configIO.getParameter< bool >( "overwrite" ) ? TObject::kOverwrite : 0;
   writeFiles_   = configIO.getParameter< bool >( "writeFiles" );
-  fit0D_        = configIO.getParameter< bool >( "fit0D" );
-  fit1D_        = configIO.getParameter< bool >( "fit1D" );
-  fit2D_        = configIO.getParameter< bool >( "fit2D" );
+  fit0D_        = configIO.getParameter< bool >( "fit0D" ); // fit in bins pt
+  fit1D_        = configIO.getParameter< bool >( "fit1D" ); // fit pt dependence
+  fit2D_        = configIO.getParameter< bool >( "fit2D" ); // fit for whole pt range
   histAddEdges_ = configIO.getParameter< bool >( "histAddEdges" );
-  fitEtaBins_   = configIO.getParameter< bool >( "fitEtaBins" );
+  fitEtaBins_   = configIO.getParameter< bool >( "fitEtaBins" ); // fit eta bins separately
   sample_       = configIO.getParameter< std::string >( "sample" );
   pathOut_      = configIO.getParameter< std::string >( "pathOut" );
   plot_         = configIO.getParameter< bool >( "plot" );

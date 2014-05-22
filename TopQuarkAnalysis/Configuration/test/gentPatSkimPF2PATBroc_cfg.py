@@ -510,14 +510,14 @@ if not createNTuples:
   if runOnMC:
     process.out.outputCommands += [ 'keep *_addPileupInfo_*_*'
                                   ]
-  if not runMatch:
-    process.out.outputCommands += [ 'keep recoGenParticles_*_*_*'
-                                  ]
-  if addGenEvt:
-    process.out.outputCommands += [ 'keep *_decaySubset_*_*'
-                                  , 'keep *_initSubset_*_*'
-                                  , 'keep *_genEvt_*_*'
-                                  ]
+    if not runMatch:
+      process.out.outputCommands += [ 'keep recoGenParticles_*_*_*'
+                                    ]
+    if addGenEvt:
+      process.out.outputCommands += [ 'keep *_decaySubset_*_*'
+                                    , 'keep *_initSubset_*_*'
+                                    , 'keep *_genEvt_*_*'
+                                    ]
   process.out.outputCommands += [ 'keep double_kt6PFJets_*_*' ]
 
 # Muons

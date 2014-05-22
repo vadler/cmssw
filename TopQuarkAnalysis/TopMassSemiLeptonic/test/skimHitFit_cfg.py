@@ -130,9 +130,9 @@ process.load( "Configuration.StandardSequences.MagneticField_cff" )
 process.load( "Configuration.StandardSequences.FrontierConditions_GlobalTag_cff" )
 # from Configuration.AlCa.autoCond import autoCond
 # process.GlobalTag.globaltag = autoCond[ 'startup' ]
-process.GlobalTag.globaltag = 'START53_V21::All'
+process.GlobalTag.globaltag = 'START53_V27::All'
 if mc == 'Summer12_MadGraph' or mc == 'Summer12_MCatNLO':
-  process.GlobalTag.globaltag = 'START53_V21::All'
+  process.GlobalTag.globaltag = 'START53_V27::All'
 
 
 ### Input

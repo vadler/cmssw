@@ -142,9 +142,9 @@ process.load( "Configuration.StandardSequences.MagneticField_cff" )
 process.load( "Configuration.StandardSequences.FrontierConditions_GlobalTag_cff" )
 # from Configuration.AlCa.autoCond import autoCond
 # process.GlobalTag.globaltag = autoCond[ 'startup' ]
-process.GlobalTag.globaltag = 'START53_V21::All'
+process.GlobalTag.globaltag = 'START53_V27::All'
 if mc == 'Summer12_MadGraph' or mc == 'Summer12_MCatNLO':
-  process.GlobalTag.globaltag = 'START53_V21::All'
+  process.GlobalTag.globaltag = 'START53_V27::All'
 
 
 ### Input
@@ -170,7 +170,7 @@ if not runCrab:
 ### Output
 
 process.out = cms.OutputModule( "PoolOutputModule"
-, fileName       = cms.untracked.string( 'skimHitFit.root' )
+, fileName       = cms.untracked.string( 'skimHitFitUnbiased.root' )
 , SelectEvents   = cms.untracked.PSet(
     SelectEvents = cms.vstring(
                               )
@@ -583,19 +583,19 @@ process.out.outputCommands.append( 'drop *_kt6PFJets_*_*' )
 
 ### TQAF
 
+process.load( "TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff" )
+process.out.outputCommands.append( 'keep *_genEvt*_*_*' )
+process.out.outputCommands.append( 'keep *_initSubset*_*_*' )
+process.out.outputCommands.append( 'keep *_decaySubset*_*_*' )
+
 #process.load( "TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff" )
 #if not runCrab:
   #process.ttSemiLepEvent.verbosity = 1
-process.load( "TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff" )
 #process.ttSemiLepJetPartonMatch.maxNJets = 6
 #process.ttSemiLepJetPartonMatch.maxNComb = 1 # no knobs to turn to get several solutions
 #if runTest and not runCrab:
   #process.ttSemiLepJetPartonMatch.verbosity = 1
 #process.ttSemiLepHypGenMatch.jetCorrectionLevel = jecLevels[ -1 ]
-
-process.out.outputCommands.append( 'keep *_genEvt*_*_*' )
-process.out.outputCommands.append( 'keep *_initSubset*_*_*' )
-process.out.outputCommands.append( 'keep *_decaySubset*_*_*' )
 
 
 ### Paths

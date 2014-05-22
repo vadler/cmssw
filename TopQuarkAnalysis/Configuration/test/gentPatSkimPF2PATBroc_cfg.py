@@ -162,7 +162,7 @@ if runOnMC:
        connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU"))
   )
 else:
-  process.GlobalTag.globaltag = 'FT_53_V21A_AN6::All'
+  process.GlobalTag.globaltag = 'FT53_V21A_AN6::All'
 
 if gc:
 	runOnMC   = eval('@MC@')

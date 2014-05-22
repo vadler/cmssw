@@ -884,19 +884,15 @@ void AnalyzeHitFit::fill( unsigned iCat, const edm::Handle< TtSemiLeptonicEvent 
     const int muonIndex( ttSemiLeptonicEvent->jetLeptonCombination( TtEvent::kGenMatch ).at( TtSemiLepEvtPartons::Lepton ) );
     pt_      = ttSemiLeptonicEvent->singleLepton( TtEvent::kGenMatch )->pt();
     ptAlt_   = patMuons_->at( muonIndex ).bestTrack()->pt();
-    ptAlt_   = pt_;
     ptGen_   = ttGenEvent_->singleLepton()->pt();
     eta_     = ttSemiLeptonicEvent->singleLepton( TtEvent::kGenMatch )->eta();
     etaAlt_  = patMuons_->at( muonIndex ).bestTrack()->eta();
-    etaAlt_  = eta_;
     etaGen_  = ttGenEvent_->singleLepton()->eta();
     phi_     = ttSemiLeptonicEvent->singleLepton( TtEvent::kGenMatch )->phi();
     phiAlt_  = patMuons_->at( muonIndex ).bestTrack()->phi();
-    phiAlt_  = phi_;
     phiGen_  = ttGenEvent_->singleLepton()->phi();
     energy_     = ttSemiLeptonicEvent->singleLepton( TtEvent::kGenMatch )->energy();
     energyAlt_  = patMuons_->at( muonIndex ).bestTrack()->p();
-    energyAlt_  = energy_;
     energyGen_  = ttGenEvent_->singleLepton()->energy();
   }
   else if ( cat == "Elec" ) {
@@ -910,15 +906,12 @@ void AnalyzeHitFit::fill( unsigned iCat, const edm::Handle< TtSemiLeptonicEvent 
     ptGen_   = ttGenEvent_->singleLepton()->pt();
     eta_     = ttSemiLeptonicEvent->singleLepton( TtEvent::kGenMatch )->eta();
     etaAlt_  = patElecs_->at( elecIndex ).ecalDrivenMomentum().eta();
-    etaAlt_  = eta_;
     etaGen_  = ttGenEvent_->singleLepton()->eta();
     phi_     = ttSemiLeptonicEvent->singleLepton( TtEvent::kGenMatch )->phi();
     phiAlt_  = patElecs_->at( elecIndex ).ecalDrivenMomentum().phi();
-    phiAlt_  = phi_;
     phiGen_  = ttGenEvent_->singleLepton()->phi();
     energy_     = ttSemiLeptonicEvent->singleLepton( TtEvent::kGenMatch )->energy();
     energyAlt_  = patElecs_->at( elecIndex ).ecalDrivenMomentum().energy();
-    energyAlt_  = energy_;
     energyGen_  = ttGenEvent_->singleLepton()->energy();
   }
   else if ( cat == "UdscJet" || ( cat == "Jet" && ! allJets ) ) {

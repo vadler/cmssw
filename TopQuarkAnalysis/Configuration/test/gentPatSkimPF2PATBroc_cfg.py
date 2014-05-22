@@ -1,3 +1,4 @@
+import sys
 #import os
 #lxplusTest = ( os.uname()[ 1 ].split( '.' )[ 0 ][ :6 ] == 'lxplus' )
 import socket
@@ -5,17 +6,25 @@ lxplusTest = ( socket.getfqdn().split( '.' )[ 0 ][ :6 ] == 'lxplus' )
 
 import FWCore.ParameterSet.Config as cms
 
+### Command line option parsing
+
+from FWCore.ParameterSet.VarParsing import VarParsing
+options = VarParsing('standard')
+options.register('runOnMC', True, VarParsing.multiplicity.singleton, VarParsing.varType.bool, "decide if run on MC or data")
+options.register('outputFile', 'gentPatSkimPF2PATBroc.root', VarParsing.multiplicity.singleton, VarParsing.varType.string, "name of output file")
+if( hasattr(sys, "argv") ):
+  options.parseArguments()
+
 ### Steering
 
-runOnMC       = True
+runOnMC       = options.runOnMC
 runOnRelVal   = True # If 'False', define input files in l. 228ff.
-maxEvents     = -1
+maxEvents     = options.maxEvents
 gc            = True
 createNTuples = True
 if lxplusTest:
   gc            = False
   createNTuples = False
-  maxEvents     = 1000
 else:
   runOnRelVal = False # If 'False', define input files in l. 228ff.
 
@@ -278,7 +287,7 @@ outputModules = []
 if not createNTuples:
   from PhysicsTools.PatAlgos.patEventContent_cff import patEventContentNoCleaning
   process.out = cms.OutputModule( "PoolOutputModule"
-  , fileName       = cms.untracked.string( 'gentPatSkimPF2PATBroc.root' )
+  , fileName       = cms.untracked.string( options.outputFile )
   , SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring( 'p' ) )
   , outputCommands = cms.untracked.vstring( 'drop *', *patEventContentNoCleaning )
   , dropMetaData   = cms.untracked.string( 'ALL' )

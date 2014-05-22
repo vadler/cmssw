@@ -19,7 +19,6 @@ if( hasattr(sys, "argv") ):
 
 runOnMC       = options.runOnMC
 runOnRelVal   = True # If 'False', define input files in l. 228ff.
-maxEvents     = options.maxEvents
 gc            = True
 createNTuples = True
 if lxplusTest:
@@ -33,6 +32,10 @@ runMatch  = True
 runMVA    = True
 runCiC    = False
 runEwk    = False
+if createNTuples:
+  runMVA    = True
+  runCiC    = True
+  runEwk    = True
 addGenEvt = False
 writePdfWeights      = False    # corresponding actions to be updated, s. https://hypernews.cern.ch/HyperNews/CMS/get/top/1499.html ff.
 writeNonIsoMuons     = True
@@ -278,7 +281,7 @@ else:
                  #]
 process.source.fileNames = cms.untracked.vstring( inputFiles )
 process.maxEvents = cms.untracked.PSet(
-  input = cms.untracked.int32( maxEvents )
+  input = cms.untracked.int32( options.maxEvents )
 )
 
 ### Output

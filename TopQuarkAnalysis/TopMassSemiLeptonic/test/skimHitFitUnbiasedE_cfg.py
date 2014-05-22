@@ -35,10 +35,10 @@ muonsSelectIsoPf      = 0.5
 muonSelectPf          = 'pt > 5.'
 # muon object selection
 muonUsePV             = True
-muonSelectBase        = '(isGlobalMuon || isTrackerMuon) && pt > 10. && (chargedHadronIso+max(0.,neutralHadronIso+photonIso-0.5*puChargedHadronIso))/pt < 0.2 && abs(eta) < 3.0'
+muonSelectBase        = '(isGlobalMuon || isTrackerMuon) && p > 10. && (chargedHadronIso+max(0.,neutralHadronIso+photonIso-0.5*puChargedHadronIso))/pt < 0.2 && abs(eta) < 3.0'
 muonSelectHitFit      = muonSelectBase + ' && abs(eta) < 2.4'
 muonSelect            = muonSelectBase + ' && abs(eta) < 2.5'
-muonSelectSignal      = 'isGlobalMuon && pt > 26. && abs(eta) < 2.1 && globalTrack.normalizedChi2 < 10. && track.hitPattern.trackerLayersWithMeasurement > 5 && globalTrack.hitPattern.numberOfValidMuonHits > 0 && abs(dB) < 0.2 && innerTrack.hitPattern.numberOfValidPixelHits > 0 && numberOfMatches > 1 && (chargedHadronIso+max(0.,neutralHadronIso+photonIso-0.5*puChargedHadronIso))/pt < 0.12'
+muonSelectSignal      = 'isGlobalMuon && p > 26. && abs(eta) < 2.1 && globalTrack.normalizedChi2 < 10. && track.hitPattern.trackerLayersWithMeasurement > 5 && globalTrack.hitPattern.numberOfValidMuonHits > 0 && abs(dB) < 0.2 && innerTrack.hitPattern.numberOfValidPixelHits > 0 && numberOfMatches > 1 && (chargedHadronIso+max(0.,neutralHadronIso+photonIso-0.5*puChargedHadronIso))/pt < 0.12'
 muonSelectUnbiasedBase        = '(isGlobalMuon || isTrackerMuon) && (chargedHadronIso+max(0.,neutralHadronIso+photonIso-0.5*puChargedHadronIso))/pt < 0.2 && abs(eta) < 3.0'
 muonSelectUnbiasedHitFit      = muonSelectUnbiasedBase + ' && abs(eta) < 2.4'
 muonSelectUnbiased            = muonSelectUnbiasedBase + ' && abs(eta) < 2.5'
@@ -59,10 +59,10 @@ electronsSelectIsoPf = 0.5
 electronSelectPf     = 'pt > 5. && gsfTrackRef.isNonnull && gsfTrackRef.trackerExpectedHitsInner.numberOfLostHits < 2'
 # electron object selection
 electronUsePV        = False
-electronSelectBase   = 'et > 20. && (chargedHadronIso+max(0.,neutralHadronIso+photonIso-1.*userIsolation("User1Iso")))/pt < 0.15 && abs(eta) < 3.0 && (1. >= electronID("mvaTrigV0") && electronID("mvaTrigV0") >= 0.)'
+electronSelectBase   = 'e > 20. && (chargedHadronIso+max(0.,neutralHadronIso+photonIso-1.*userIsolation("User1Iso")))/pt < 0.15 && abs(eta) < 3.0 && (1. >= electronID("mvaTrigV0") && electronID("mvaTrigV0") >= 0.)'
 electronSelectHitFit = electronSelectBase + ' && abs(eta) < 2.5 && passConversionVeto'
 electronSelect       = electronSelectBase + ' && abs(eta) < 2.5'
-electronSelectSignal = 'et > 30. && abs(eta) < 2.5 && !(1.4442 < abs(superCluster.eta) && abs(superCluster.eta) < 1.5660) && abs(dB) < 0.02 && electronID("mvaTrigV0") > 0.5 && (chargedHadronIso+max(0.,neutralHadronIso+photonIso-1.0*userIsolation("User1Iso")))/pt < 0.1 && passConversionVeto && gsfTrack.trackerExpectedHitsInner.numberOfHits <= 0'
+electronSelectSignal = 'e > 30. && abs(eta) < 2.5 && !(1.4442 < abs(superCluster.eta) && abs(superCluster.eta) < 1.5660) && abs(dB) < 0.02 && electronID("mvaTrigV0") > 0.5 && (chargedHadronIso+max(0.,neutralHadronIso+photonIso-1.0*userIsolation("User1Iso")))/pt < 0.1 && passConversionVeto && gsfTrack.trackerExpectedHitsInner.numberOfHits <= 0'
 electronSelectUnbiasedBase   = '(chargedHadronIso+max(0.,neutralHadronIso+photonIso-1.*userIsolation("User1Iso")))/pt < 0.15 && abs(eta) < 3.0 && (1. >= electronID("mvaTrigV0") && electronID("mvaTrigV0") >= 0.)'
 electronSelectUnbiasedHitFit = electronSelectUnbiasedBase + ' && abs(eta) < 2.5 && passConversionVeto'
 electronSelectUnbiased       = electronSelectUnbiasedBase + ' && abs(eta) < 2.5'
@@ -87,7 +87,7 @@ jecLevels = [ 'L1FastJet'
             , 'L3Absolute'
             ]
 # jet object selection
-jetSelectBase   = 'pt > 30. && numberOfDaughters > 1 && chargedEmEnergyFraction < 0.99 && neutralHadronEnergyFraction < 0.99 && neutralEmEnergyFraction < 0.99 && (chargedHadronEnergyFraction > 0. || abs(eta) >= 2.4) && (chargedMultiplicity > 0 || abs(eta) >= 2.4) && abs(eta) < 3.0'
+jetSelectBase   = 'p > 30. && numberOfDaughters > 1 && chargedEmEnergyFraction < 0.99 && neutralHadronEnergyFraction < 0.99 && neutralEmEnergyFraction < 0.99 && (chargedHadronEnergyFraction > 0. || abs(eta) >= 2.4) && (chargedMultiplicity > 0 || abs(eta) >= 2.4) && abs(eta) < 3.0'
 jetSelectHitFit = jetSelectBase + ' && abs(eta) < 2.5'
 jetSelect       = jetSelectBase + ' && abs(eta) < 2.5'
 jetSelectSignal = ''
@@ -170,7 +170,7 @@ if not runCrab:
 ### Output
 
 process.out = cms.OutputModule( "PoolOutputModule"
-, fileName       = cms.untracked.string( 'skimHitFitUnbiased.root' )
+, fileName       = cms.untracked.string( 'skimHitFitUnbiasedE.root' )
 , SelectEvents   = cms.untracked.PSet(
     SelectEvents = cms.vstring(
                               )

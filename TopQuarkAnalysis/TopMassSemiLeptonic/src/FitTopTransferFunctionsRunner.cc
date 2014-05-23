@@ -359,7 +359,7 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
     }
     // Plot
     if ( plot_ ) {
-//       plotFillPerCategoryBin( histosScaleTrans );
+      plotFillPerCategoryBin( histosScaleTrans );
       TCanvas canvas;
       histosVecScaleTrans_.back().histTransScaleMapPt->Draw( "ColZ" );
       for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosVecScaleTrans_.back().histTransScaleMapPt->GetName() + "." + formatPlots_.at( uForm )  ).c_str() );
@@ -1070,9 +1070,13 @@ void FitTopTransferFunctionsRunner::transferPerCategoryBin( const std::string& o
   dirOut->cd();
   if ( verbose_ > 2 ) gDirectory->pwd();
   const std::string name( histosTransEta.histTrans->GetName() );
+  const std::string nameTransferFunction( name + "_TransferFunction" );
+
+  const std::string entryTransfer( "projected 2-D transfer function at " + titlePtT_ + " bin centre" );
+  const std::string entryTransferLow( "projected 2-D transfer function at " + titlePtT_ + " low bin edge" );
+  const std::string entryTransferHigh( "projected 2-D transfer function at " + titlePtT_ + " high bin edge" );
 
   if ( fit1D_ ) {
-    const std::string nameTransferFunction( name + "_TransferFunction" );
     TF2* transferFunction( new TF2( ( ( TF2& )( *( transfer.Function( 0 ).Clone( nameTransferFunction.c_str() ) ) ) ) ) ); // hard-coded norm index 0
     transferFunction->SetRange( -2. * configObjWidthFactor * configObjDeltaPtMax, 0., 2. * configObjWidthFactor * configObjDeltaPtMax, 2. * objectData_.back().ptBins().back() );
     transferFunction->SetNpx();
@@ -1094,10 +1098,30 @@ void FitTopTransferFunctionsRunner::transferPerCategoryBin( const std::string& o
       for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosTransEta.histTrans->GetName() + "." + formatPlots_.at( uForm ) ).c_str() );
     }
   }
+  if ( plot_ ) {
+    TCanvas canvas;
+//     histosTransEta.histVecPtTrans.at( uPt )->Draw();
+    histosTransEta.histTrans->Draw();
+    TLegend* legend( histosTransEta.legTrans );
+    std::string header( legend->GetHeader() );
+    header += ", scaled";
+    const TList* funcList( histosTransEta.histTrans->GetListOfFunctions() );
+    legend->SetHeader( header.c_str() );
+    legend->AddEntry( histosTransEta.histTrans, "MC", "LEP" );
+    legend->AddEntry( funcList->First(), "fitted 1-D transfer function", "L" );
+    if ( fit1D_ ) {
+      legend->AddEntry( funcList->FindObject( nameTransferFunction.c_str() ), entryTransfer.c_str(), "L" );
+      if ( histAddEdges_ ) {
+        const std::string nameTransferFunctionLow( nameTransferFunction + "Low" );
+        legend->AddEntry( funcList->FindObject( nameTransferFunctionLow.c_str() ), entryTransferLow.c_str(), "L" );
+        const std::string nameTransferFunctionHigh( nameTransferFunction + "High" );
+        legend->AddEntry( funcList->FindObject( nameTransferFunctionHigh.c_str() ), entryTransferHigh.c_str(), "L" );
+      }
+    }
+    legend->Draw();
+    for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosTransEta.histTrans->GetName() + "." + formatPlots_.at( uForm ) ).c_str() );
+  }
 
-  const std::string entryTransfer( "projected 2-D transfer function at " + titlePtT_ + " bin centre" );
-  const std::string entryTransferLow( "projected 2-D transfer function at " + titlePtT_ + " low bin edge" );
-  const std::string entryTransferHigh( "projected 2-D transfer function at " + titlePtT_ + " high bin edge" );
   for ( unsigned uPt = 0; uPt < histosTransEta.histVecPtTrans.size(); ++uPt ) {
     const std::string binPt( boost::lexical_cast< std::string >( uPt ) );
     const std::string namePt( name + "_" + baseTitlePt_ + binPt );
@@ -1154,16 +1178,9 @@ void FitTopTransferFunctionsRunner::transferPerCategoryFit( const std::string& o
 
   const std::string nameHist( histosTransEta.histTransScaleMapPt->GetName() );
   const std::string nameHistFit( nameHist + "_fit" );
-std::cout << "DEBUG NAME --> " << nameHist << std::endl;
-std::cout << "DEBUG TransferFunctionString: " << transfer.TransferFunctionString() << std::endl;
   TF2* fitFunc( new TF2( nameHistFit.c_str(), transfer.TransferFunctionString().c_str(), histosTransEta.histTransScaleMapPt->GetXaxis()->GetXmin(), histosTransEta.histTransScaleMapPt->GetXaxis()->GetXmax(), histosTransEta.histTransScaleMapPt->GetYaxis()->GetXmin(), histosTransEta.histTransScaleMapPt->GetYaxis()->GetXmax() ) );
   initialiseTransferParameters( fitFunc, histosTransEta.histTransScaleMapPt, fitFuncID_, depFuncID_, resFuncID_ );
-TCanvas canvas;
-fitFunc->Draw("Surf3Z");
-canvas.Print(std::string(pathPlots_ + "test.png").c_str());
   TFitResultPtr fitResultPtr( histosTransEta.histTransScaleMapPt->Fit( fitFunc, fitOptions_.c_str() ) );
-for ( unsigned uPar = 0; uPar < transfer.NParTransfer() - transfer.NParDependency(); ++uPar ) std::cout << "DEBUG par " << uPar << ": " << fitFunc->GetParameter( uPar ) << std::endl;
-std::cout << "DEBUG fitResultPtr: " << fitResultPtr << std::endl;
   if ( fitResultPtr >= 0 ) {
     if ( fitResultPtr->Status() == 0 && fitResultPtr->Ndf() != 0. ) {
       unsigned count( 0 );

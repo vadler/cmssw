@@ -59,10 +59,10 @@ electronsSelectIsoPf = 0.5
 electronSelectPf     = 'pt > 5. && gsfTrackRef.isNonnull && gsfTrackRef.trackerExpectedHitsInner.numberOfLostHits < 2'
 # electron object selection
 electronUsePV        = False
-electronSelectBase   = 'e > 20. && (chargedHadronIso+max(0.,neutralHadronIso+photonIso-1.*userIsolation("User1Iso")))/pt < 0.15 && abs(eta) < 3.0 && (1. >= electronID("mvaTrigV0") && electronID("mvaTrigV0") >= 0.)'
+electronSelectBase   = 'energy > 20. && (chargedHadronIso+max(0.,neutralHadronIso+photonIso-1.*userIsolation("User1Iso")))/pt < 0.15 && abs(eta) < 3.0 && (1. >= electronID("mvaTrigV0") && electronID("mvaTrigV0") >= 0.)'
 electronSelectHitFit = electronSelectBase + ' && abs(eta) < 2.5 && passConversionVeto'
 electronSelect       = electronSelectBase + ' && abs(eta) < 2.5'
-electronSelectSignal = 'e > 30. && abs(eta) < 2.5 && !(1.4442 < abs(superCluster.eta) && abs(superCluster.eta) < 1.5660) && abs(dB) < 0.02 && electronID("mvaTrigV0") > 0.5 && (chargedHadronIso+max(0.,neutralHadronIso+photonIso-1.0*userIsolation("User1Iso")))/pt < 0.1 && passConversionVeto && gsfTrack.trackerExpectedHitsInner.numberOfHits <= 0'
+electronSelectSignal = 'energy > 30. && abs(eta) < 2.5 && !(1.4442 < abs(superCluster.eta) && abs(superCluster.eta) < 1.5660) && abs(dB) < 0.02 && electronID("mvaTrigV0") > 0.5 && (chargedHadronIso+max(0.,neutralHadronIso+photonIso-1.0*userIsolation("User1Iso")))/pt < 0.1 && passConversionVeto && gsfTrack.trackerExpectedHitsInner.numberOfHits <= 0'
 electronSelectUnbiasedBase   = '(chargedHadronIso+max(0.,neutralHadronIso+photonIso-1.*userIsolation("User1Iso")))/pt < 0.15 && abs(eta) < 3.0 && (1. >= electronID("mvaTrigV0") && electronID("mvaTrigV0") >= 0.)'
 electronSelectUnbiasedHitFit = electronSelectUnbiasedBase + ' && abs(eta) < 2.5 && passConversionVeto'
 electronSelectUnbiased       = electronSelectUnbiasedBase + ' && abs(eta) < 2.5'
@@ -179,7 +179,7 @@ process.out = cms.OutputModule( "PoolOutputModule"
 , dropMetaData   = cms.untracked.string( 'ALL' )
 )
 
-outputFile = '%s/output/skimHitFitUnbiased_%s.root'%( os.getenv( "CMSSW_BASE" ), mc )
+outputFile = '%s/output/skimHitFitUnbiasedE_%s.root'%( os.getenv( "CMSSW_BASE" ), mc )
 if runTest:
   outputFile = outputFile.replace( 'root', 'test.root' )
 if not runCrab:

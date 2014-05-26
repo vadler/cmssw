@@ -81,9 +81,8 @@ class AnalyzeHitFit : public edm::EDAnalyzer {
     // Pile-up
     edm::Handle< std::vector< PileupSummaryInfo > > pileUp_;
     // Pile-up input files
-    edm::FileInPath pileUpFileMCTrue_;
+    edm::FileInPath pileUpFileMC_;
     edm::FileInPath pileUpFileDataTrue_;
-    edm::FileInPath pileUpFileMCObserved_;
     edm::FileInPath pileUpFileDataObserved_;
     // Lumi weights
     edm::LumiReWeighting lumiWeightTrue_;
@@ -214,9 +213,8 @@ AnalyzeHitFit::AnalyzeHitFit( const edm::ParameterSet & iConfig )
 , patJets_()
 , patMETs_()
 , pileUp_()
-, pileUpFileMCTrue_( iConfig.getParameter< edm::FileInPath >( "pileUpFileMCTrue" ) )
+, pileUpFileMC_( iConfig.getParameter< edm::FileInPath >( "pileUpFileMC" ) )
 , pileUpFileDataTrue_( iConfig.getParameter< edm::FileInPath >( "pileUpFileDataTrue" ) )
-, pileUpFileMCObserved_( iConfig.getParameter< edm::FileInPath >( "pileUpFileMCObserved" ) )
 , pileUpFileDataObserved_( iConfig.getParameter< edm::FileInPath >( "pileUpFileDataObserved" ) )
 , ttSemiLeptonicEventMuonsTag_( iConfig.getParameter< edm::InputTag >( "ttSemiLeptonicEventMuons" ) )
 , ttSemiLeptonicEventElecsTag_( iConfig.getParameter< edm::InputTag >( "ttSemiLeptonicEventElectrons" ) )
@@ -232,8 +230,8 @@ AnalyzeHitFit::AnalyzeHitFit( const edm::ParameterSet & iConfig )
 , filledEvents_( 0 )
 {
 
-  lumiWeightTrue_     = edm::LumiReWeighting( pileUpFileMCTrue_.fullPath()    , pileUpFileDataTrue_.fullPath()    , "pileup", "pileup" );
-  lumiWeightObserved_ = edm::LumiReWeighting( pileUpFileMCObserved_.fullPath(), pileUpFileDataObserved_.fullPath(), "pileup", "pileup" );
+  lumiWeightTrue_     = edm::LumiReWeighting( pileUpFileMC_.fullPath(), pileUpFileDataTrue_.fullPath()    , "pileup", "pileup" );
+  lumiWeightObserved_ = edm::LumiReWeighting( pileUpFileMC_.fullPath(), pileUpFileDataObserved_.fullPath(), "pileup", "pileup" );
 
   // Constants
 
@@ -335,12 +333,9 @@ AnalyzeHitFit::AnalyzeHitFit( const edm::ParameterSet & iConfig )
 void AnalyzeHitFit::beginJob()
 {
 
-  boost::shared_ptr< TFile > fileMCTrue_( new TFile( pileUpFileMCTrue_.fullPath().c_str() ) );
-  boost::shared_ptr< TH1 >   histoMCTrue_( ( static_cast< TH1 * >( fileMCTrue_->Get( "pileup" )->Clone() ) ) );
-  const int nBinsMCTrue( histoMCTrue_->GetNbinsX() );
-  boost::shared_ptr< TFile > fileMCObserved_( new TFile( pileUpFileMCObserved_.fullPath().c_str() ) );
-  boost::shared_ptr< TH1 >   histoMCObserved_( ( static_cast< TH1 * >( fileMCObserved_->Get( "pileup" )->Clone() ) ) );
-  const int nBinsMCObserved( histoMCObserved_->GetNbinsX() );
+  boost::shared_ptr< TFile > fileMC_( new TFile( pileUpFileMC_.fullPath().c_str() ) );
+  boost::shared_ptr< TH1 >   histoMC_( ( static_cast< TH1 * >( fileMC_->Get( "pileup" )->Clone() ) ) );
+  const int nBinsMC( histoMC_->GetNbinsX() );
 
   edm::Service< TFileService > fileService;
 
@@ -350,16 +345,16 @@ void AnalyzeHitFit::beginJob()
   data_->Branch( "PileUpWeightTrue"    , &pileUpWeightTrue_    , "pileUpWeightTrue/D" );
   data_->Branch( "PileUpWeightObserved", &pileUpWeightObserved_, "pileUpWeightObserved/D" );
 
-  histo_pileUpWeightTrue_ = fileService->make< TH1D >( "pileUpWeightTrue", "True pile-up weights", nBinsMCTrue, 0., double( nBinsMCTrue ) );
-  histo_pileUpWeightTrue_->SetXTitle( "number of true interactions" );
-  histo_pileUpWeightTrue_->SetYTitle( "weight (#frac{data}{MC})" );
-  for ( int iBin = 1; iBin < nBinsMCTrue + 1; ++iBin ) {
+  histo_pileUpWeightTrue_ = fileService->make< TH1D >( "pileUpWeightTrue", "True pile-up weights", nBinsMC, 0., double( nBinsMC ) );
+  histo_pileUpWeightTrue_->SetXTitle( "true number of interactions" );
+  histo_pileUpWeightTrue_->SetYTitle( "weight #left(#frac{data_{true}}{MC}#right)" );
+  for ( int iBin = 1; iBin < nBinsMC + 1; ++iBin ) {
     histo_pileUpWeightTrue_->Fill( iBin, lumiWeightTrue_.weight( iBin ) );
   }
-  histo_pileUpWeightObserved_ = fileService->make< TH1D >( "pileUpWeightObserved", "Observed pile-up weights", nBinsMCObserved, 0., double( nBinsMCObserved ) );
-  histo_pileUpWeightObserved_->SetXTitle( "number of observed interactions" );
-  histo_pileUpWeightObserved_->SetYTitle( "weight (#frac{data}{MC})" );
-  for ( int iBin = 1; iBin < nBinsMCObserved + 1; ++iBin ) {
+  histo_pileUpWeightObserved_ = fileService->make< TH1D >( "pileUpWeightObserved", "Observed pile-up weights", nBinsMC, 0., double( nBinsMC ) );
+  histo_pileUpWeightObserved_->SetXTitle( "true number of interactions" );
+  histo_pileUpWeightObserved_->SetYTitle( "weight #left(#frac{data_{observed}}{MC}#right)" );
+  for ( int iBin = 1; iBin < nBinsMC + 1; ++iBin ) {
     histo_pileUpWeightObserved_->Fill( iBin, lumiWeightObserved_.weight( iBin ) );
   }
 
@@ -864,7 +859,8 @@ void AnalyzeHitFit::fill()
       nPVObserved_ = iPileUp->getPU_NumInteractions();
       // Pile-up weight
       pileUpWeightTrue_     = lumiWeightTrue_.weight( nPVTrue_ );
-      pileUpWeightObserved_ = lumiWeightObserved_.weight( nPVObserved_ );
+      pileUpWeightObserved_ = lumiWeightObserved_.weight( nPVObserved_ ); // FIXME: Is this the corrrect approach?
+      break;
     }
   }
 

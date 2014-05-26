@@ -15,12 +15,9 @@ sample = 'Summer12_MadGraph'
 
 # Correlation to input
 # FIXME: Update pile-up to 8TeV (but not used)
-pileUpFileMCTrue       = 'CommonTools/MyTools/data/pileUpFileMC_Fall11.root'
-pileUpFileMCObserved   = 'CommonTools/MyTools/data/pileUpFileMC_Fall11inTime.root'
-pileUpFileDataTrue     = 'CommonTools/MyTools/data/pileUpFileData_2011truePixel.root'
-pileUpFileDataObserved = 'CommonTools/MyTools/data/pileUpFileData_2011observedPixel.root'
-#pileUpFileDataTrue     = 'CommonTools/MyTools/data/pileUpFileData_2011true.root'
-#pileUpFileDataObserve = 'CommonTools/MyTools/data/pileUpFileData_2011observed.root'
+pileUpFileMC           = 'CommonTools/MyTools/data/pileUpFileMC_Summer12_S10.root'
+pileUpFileDataTrue     = 'CommonTools/MyTools/data/pileUpFileData_2012truePixel.root'
+pileUpFileDataObserved = 'CommonTools/MyTools/data/pileUpFileData_2012observedPixel.root'
 ttSemiLeptonicEventMuons     = 'ttSemiLepEventHitFitMuons'
 ttSemiLeptonicEventElectrons = 'ttSemiLepEventHitFitElectrons'
 ttSemiLepEvtMuons     = 'ttSemiLepEventMCMatchMuons'
@@ -302,8 +299,7 @@ process.matcherSequenceReference = cms.Sequence(
 ### Analyzer
 
 process.load( "TopQuarkAnalysis.TopMassSemiLeptonic.analyzeHitFit_cfi" )
-process.analyzeHitFit.pileUpFileMCTrue       = pileUpFileMCTrue
-process.analyzeHitFit.pileUpFileMCObserved   = pileUpFileMCObserved
+process.analyzeHitFit.pileUpFileMC           = pileUpFileMC
 process.analyzeHitFit.pileUpFileDataTrue     = pileUpFileDataTrue
 process.analyzeHitFit.pileUpFileDataObserved = pileUpFileDataObserved
 process.analyzeHitFit.ttSemiLeptonicEventMuons     = ttSemiLeptonicEventMuons

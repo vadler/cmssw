@@ -8,10 +8,9 @@ analyzeHitFit = cms.EDAnalyzer(
   ### Input ###
 
   # Pile-up distributions
-, pileUpFileMCTrue       = cms.FileInPath( 'CommonTools/MyTools/data/pileUpFileMC_Fall11.root' )
-, pileUpFileMCObserved   = cms.FileInPath( 'CommonTools/MyTools/data/pileUpFileMC_Fall11inTime.root' )
-, pileUpFileDataTrue     = cms.FileInPath( 'CommonTools/MyTools/data/pileUpFileData_2011truePixel.root' )
-, pileUpFileDataObserved = cms.FileInPath( 'CommonTools/MyTools/data/pileUpFileData_2011observedPixel.root' )
+, pileUpFileMC           = cms.FileInPath( 'CommonTools/MyTools/data/pileUpFileMC_Summer12_S10.root' )
+, pileUpFileDataTrue     = cms.FileInPath( 'CommonTools/MyTools/data/pileUpFileData_2012truePixel.root' )
+, pileUpFileDataObserved = cms.FileInPath( 'CommonTools/MyTools/data/pileUpFileData_2012observedPixel.root' )
 
   # TQAF semi-leptonic event
 , ttSemiLeptonicEventMuons     = cms.InputTag( 'ttSemiLepEventHitFitMuons' )

@@ -114,13 +114,12 @@ class AnalyzeHitFit : public edm::EDAnalyzer {
 
     /// Data
     unsigned filledEvents_;
-    TTree * data_;                   // event data
+    std::vector< TTree * > catData_; // data per object category
     // pile-up
     Float_t  nPVTrue_;               // mean number of primery vertices' distribution
     Int_t    nPVObserved_;           // observed number of primery vertices
     Double_t pileUpWeightTrue_;      // MC weight for true pile-up
     Double_t pileUpWeightObserved_;  // MC weight for observed pile-up
-    std::vector< TTree * > catData_; // data per object category
     // reconstructed
     Double_t pt_;
     Double_t eta_;
@@ -172,7 +171,6 @@ class AnalyzeHitFit : public edm::EDAnalyzer {
     unsigned getEtaBin( unsigned iCat, double eta, bool symm = false );
 
     // Fill n-tuples
-    void fill();
     void fill( unsigned iCat, const edm::Handle< TtSemiLeptonicEvent > & ttSemiLeptonicEvent, bool repeat = false, bool allJets = false );
 
 };
@@ -339,19 +337,13 @@ void AnalyzeHitFit::beginJob()
 
   edm::Service< TFileService > fileService;
 
-  data_ = fileService->make< TTree >( "Data", "Event data" );
-  data_->Branch( "NPVTrue"             , &nPVTrue_             , "nPVTrue/F" );
-  data_->Branch( "NPVObserved"         , &nPVObserved_         , "nPVObserved/I" );
-  data_->Branch( "PileUpWeightTrue"    , &pileUpWeightTrue_    , "pileUpWeightTrue/D" );
-  data_->Branch( "PileUpWeightObserved", &pileUpWeightObserved_, "pileUpWeightObserved/D" );
-
-  histo_pileUpWeightTrue_ = fileService->make< TH1D >( "pileUpWeightTrue", "True pile-up weights", nBinsMC, 0., double( nBinsMC ) );
+  histo_pileUpWeightTrue_ = fileService->make< TH1D >( "PileUpWeightTrue", "True pile-up weights", nBinsMC, 0., double( nBinsMC ) );
   histo_pileUpWeightTrue_->SetXTitle( "true number of interactions" );
   histo_pileUpWeightTrue_->SetYTitle( "weight #left(#frac{data_{true}}{MC}#right)" );
   for ( int iBin = 1; iBin < nBinsMC + 1; ++iBin ) {
     histo_pileUpWeightTrue_->Fill( iBin, lumiWeightTrue_.weight( iBin ) );
   }
-  histo_pileUpWeightObserved_ = fileService->make< TH1D >( "pileUpWeightObserved", "Observed pile-up weights", nBinsMC, 0., double( nBinsMC ) );
+  histo_pileUpWeightObserved_ = fileService->make< TH1D >( "PileUpWeightObserved", "Observed pile-up weights", nBinsMC, 0., double( nBinsMC ) );
   histo_pileUpWeightObserved_->SetXTitle( "true number of interactions" );
   histo_pileUpWeightObserved_->SetYTitle( "weight #left(#frac{data_{observed}}{MC}#right)" );
   for ( int iBin = 1; iBin < nBinsMC + 1; ++iBin ) {
@@ -382,6 +374,10 @@ void AnalyzeHitFit::beginJob()
 
     // N-tuple
     catData_.push_back( dir.make< TTree >( std::string( cat + "_data" ).c_str(), std::string( cat + " data" ).c_str() ) );
+    catData_.back()->Branch( "NPVTrue"             , &nPVTrue_             , "nPVTrue/F" );
+    catData_.back()->Branch( "NPVObserved"         , &nPVObserved_         , "nPVObserved/I" );
+    catData_.back()->Branch( "PileUpWeightTrue"    , &pileUpWeightTrue_    , "pileUpWeightTrue/D" );
+    catData_.back()->Branch( "PileUpWeightObserved", &pileUpWeightObserved_, "pileUpWeightObserved/D" );
     catData_.back()->Branch( "Pt"        , &pt_        , "pt/D" );
     catData_.back()->Branch( "Eta"       , &eta_       , "eta/D" );
     catData_.back()->Branch( "Phi"       , &phi_       , "phi/D" );
@@ -519,15 +515,14 @@ void AnalyzeHitFit::analyze( const edm::Event & iEvent, const edm::EventSetup & 
       if (  ( ttSemiLeptonicEventMuons_.isValid() && ttSemiLeptonicEventMuons_->isHypoValid( TtEvent::kGenMatch ) )
          || ( ttSemiLeptonicEventElecs_.isValid() && ttSemiLeptonicEventElecs_->isHypoValid( TtEvent::kGenMatch ) )
          ) {
-        // Initialise variables
-        nPVTrue_              = -1.;
-        nPVObserved_          = -1;
-        pileUpWeightTrue_     =  0.;
-        pileUpWeightObserved_ =  0.;
 
         for ( unsigned iCat = 0; iCat < objCats_.size(); ++iCat ) {
           const std::string cat( objCats_.at( iCat ) );
           // Initialise variables
+          nPVTrue_              = -1.;
+          nPVObserved_          = -1;
+          pileUpWeightTrue_     =  0.;
+          pileUpWeightObserved_ =  0.;
           binEta_              = -1;
           binEtaAlt_           = -1;
           binEtaGenJet_        = -1;
@@ -591,6 +586,10 @@ void AnalyzeHitFit::analyze( const edm::Event & iEvent, const edm::EventSetup & 
           // Do it again for jets
           if ( cat == "UdscJet" || cat == "BJet" || cat == "Jet" ) {
             // Do it again
+            nPVTrue_              = -1.;
+            nPVObserved_          = -1;
+            pileUpWeightTrue_     =  0.;
+            pileUpWeightObserved_ =  0.;
             binEta_              = -1;
             binEtaAlt_           = -1;
             binEtaGenJet_        = -1;
@@ -635,6 +634,10 @@ void AnalyzeHitFit::analyze( const edm::Event & iEvent, const edm::EventSetup & 
           // Do it again for all jets
           if ( cat == "Jet" ) {
             // Do it again
+            nPVTrue_              = -1.;
+            nPVObserved_          = -1;
+            pileUpWeightTrue_     =  0.;
+            pileUpWeightObserved_ =  0.;
             binEta_              = -1;
             binEtaAlt_           = -1;
             binEtaGenJet_        = -1;
@@ -675,6 +678,10 @@ void AnalyzeHitFit::analyze( const edm::Event & iEvent, const edm::EventSetup & 
             else edm::LogInfo( "AnalyzeHitFit" ) << "...no valid MC match in both channel";
             catData_.at( iCat )->Fill();
             // ...and again
+            nPVTrue_              = -1.;
+            nPVObserved_          = -1;
+            pileUpWeightTrue_     =  0.;
+            pileUpWeightObserved_ =  0.;
             binEta_              = -1;
             binEtaAlt_           = -1;
             binEtaGenJet_        = -1;
@@ -716,8 +723,6 @@ void AnalyzeHitFit::analyze( const edm::Event & iEvent, const edm::EventSetup & 
             catData_.at( iCat )->Fill();
           }
         }
-        fill();
-        data_->Fill();
         ++filledEvents_;
 
       } // Valid full TTbar MC matching
@@ -749,17 +754,17 @@ void AnalyzeHitFit::endJob()
     histo_pileUpWeightObserved_->Draw();
     c1.Print( std::string( pathPlots_ + histo_pileUpWeightObserved_->GetName() + ".png" ).c_str() );
 
-    data_->Draw( "NPVTrue" );
-    c1.Print( std::string( pathPlots_ + "NPVTrue.png" ).c_str() );
-    data_->Draw( "NPVObserved" );
-    c1.Print( std::string( pathPlots_ + "NPVObserved.png" ).c_str() );
-    data_->Draw( "PileUpWeightTrue" );
-    c1.Print( std::string( pathPlots_ + "PileUpWeightTrue.png" ).c_str() );
-    data_->Draw( "PileUpWeightObserved" );
-    c1.Print( std::string( pathPlots_ + "PileUpWeightObserved.png" ).c_str() );
-
     for ( unsigned iCat = 0; iCat < objCats_.size(); ++iCat ) {
       const std::string cat( objCats_.at( iCat ) );
+
+      catData_.at( iCat )->Draw( "NPVTrue", "NPVTrue>-1." );
+      c1.Print( std::string( pathPlots_ + cat + "_NPVTrue.png" ).c_str() );
+      catData_.at( iCat )->Draw( "NPVObserved", "NPVObserved>-1" );
+      c1.Print( std::string( pathPlots_ + cat + "_NPVObserved.png" ).c_str() );
+      catData_.at( iCat )->Draw( "PileUpWeightTrue", "PileUpWeightTrue>0." );
+      c1.Print( std::string( pathPlots_ + cat + "_PileUpWeightTrue.png" ).c_str() );
+      catData_.at( iCat )->Draw( "PileUpWeightObserved", "PileUpWeightObserved>0." );
+      c1.Print( std::string( pathPlots_ + cat + "_PileUpWeightObserved.png" ).c_str() );
 
       histos_EtaBins_.at( iCat )->Draw();
       c1.Print( std::string( pathPlots_ + histos_EtaBins_.at( iCat )->GetName() + ".png" ).c_str() );
@@ -767,66 +772,146 @@ void AnalyzeHitFit::endJob()
       c1.Print( std::string( pathPlots_ + histos_PtBins_.at( iCat )->GetName() + ".png" ).c_str() );
       catData_.at( iCat )->Draw( "Pt", "Pt>-9." );
       c1.Print( std::string( pathPlots_ + cat + "_Pt.png" ).c_str() );
+      catData_.at( iCat )->Draw( "Pt:NPVTrue", "Pt>-9.", "ColZ" );
+      c1.Print( std::string( pathPlots_ + cat + "_Pt-NPVTrue.png" ).c_str() );
+      catData_.at( iCat )->Draw( "Pt:Eta", "Pt>-9.&&Eta>-9.", "ColZ" );
+      c1.Print( std::string( pathPlots_ + cat + "_Pt-Eta.png" ).c_str() );
       catData_.at( iCat )->Draw( "Eta", "Eta>-9." );
       c1.Print( std::string( pathPlots_ + cat + "_Eta.png" ).c_str() );
+      catData_.at( iCat )->Draw( "Eta:NPVTrue", "Eta>-9.", "ColZ" );
+      c1.Print( std::string( pathPlots_ + cat + "_Eta-NPVTrue.png" ).c_str() );
       catData_.at( iCat )->Draw( "Phi", "Phi>-9." );
       c1.Print( std::string( pathPlots_ + cat + "_Phi.png" ).c_str() );
+      catData_.at( iCat )->Draw( "Phi:NPVTrue", "Phi>-9.", "ColZ" );
+      c1.Print( std::string( pathPlots_ + cat + "_Phi-NPVTrue.png" ).c_str() );
       catData_.at( iCat )->Draw( "Energy", "Energy>-9." );
       c1.Print( std::string( pathPlots_ + cat + "_Energy.png" ).c_str() );
+      catData_.at( iCat )->Draw( "Energy:Eta", "Energy>-9.&&Eta>-9.", "ColZ" );
+      c1.Print( std::string( pathPlots_ + cat + "_Energy-Eta.png" ).c_str() );
+      catData_.at( iCat )->Draw( "Energy:NPVTrue", "Energy>-9.", "ColZ" );
+      c1.Print( std::string( pathPlots_ + cat + "_Energy-NPVTrue.png" ).c_str() );
       catData_.at( iCat )->Draw( "BinEta", "BinEta>-1" );
       c1.Print( std::string( pathPlots_ + cat + "_BinEta.png" ).c_str() );
+      catData_.at( iCat )->Draw( "BinEta:NPVTrue", "BinEta>-1", "ColZ" );
+      c1.Print( std::string( pathPlots_ + cat + "_BinEta-NPVTrue.png" ).c_str() );
       catData_.at( iCat )->Draw( "BinEtaSymm", "BinEtaSymm>-1" );
       c1.Print( std::string( pathPlots_ + cat + "_BinEtaSymm.png" ).c_str() );
+      catData_.at( iCat )->Draw( "BinEtaSymm:NPVTrue", "BinEtaSymm>-1", "ColZ" );
+      c1.Print( std::string( pathPlots_ + cat + "_BinEtaSymm-NPVTrue.png" ).c_str() );
       catData_.at( iCat )->Draw( "PtAlt", "PtAlt>-9." );
       c1.Print( std::string( pathPlots_ + cat + "_PtAlt.png" ).c_str() );
+      catData_.at( iCat )->Draw( "PtAlt:EtaAlt", "PtAlt>-9.&&EtaAlt>-9.", "ColZ" );
+      c1.Print( std::string( pathPlots_ + cat + "_PtAlt-EtaAlt.png" ).c_str() );
+      catData_.at( iCat )->Draw( "PtAlt:NPVTrue", "PtAlt>-9.", "ColZ" );
+      c1.Print( std::string( pathPlots_ + cat + "_PtAlt-NPVTrue.png" ).c_str() );
       catData_.at( iCat )->Draw( "EtaAlt", "EtaAlt>-9." );
       c1.Print( std::string( pathPlots_ + cat + "_EtaAlt.png" ).c_str() );
+      catData_.at( iCat )->Draw( "EtaAlt:NPVTrue", "EtaAlt>-9.", "ColZ" );
+      c1.Print( std::string( pathPlots_ + cat + "_EtaAlt-NPVTrue.png" ).c_str() );
       catData_.at( iCat )->Draw( "PhiAlt", "PhiAlt>-9." );
       c1.Print( std::string( pathPlots_ + cat + "_PhiAlt.png" ).c_str() );
+      catData_.at( iCat )->Draw( "PhiAlt:NPVTrue", "PhiAlt>-9.", "ColZ" );
+      c1.Print( std::string( pathPlots_ + cat + "_PhiAlt-NPVTrue.png" ).c_str() );
       catData_.at( iCat )->Draw( "EnergyAlt", "EnergyAlt>-9." );
       c1.Print( std::string( pathPlots_ + cat + "_EnergyAlt.png" ).c_str() );
+      catData_.at( iCat )->Draw( "EnergyAlt:EtaAlt", "EnergyAlt>-9.&&EtaAlt>-9.", "ColZ" );
+      c1.Print( std::string( pathPlots_ + cat + "_EnergyAlt-EtaAlt.png" ).c_str() );
+      catData_.at( iCat )->Draw( "EnergyAlt:NPVTrue", "EnergyAlt>-9.", "ColZ" );
+      c1.Print( std::string( pathPlots_ + cat + "_EnergyAlt-NPVTrue.png" ).c_str() );
       catData_.at( iCat )->Draw( "BinEtaAlt", "BinEtaAlt>-1" );
       c1.Print( std::string( pathPlots_ + cat + "_BinEtaAlt.png" ).c_str() );
+      catData_.at( iCat )->Draw( "BinEtaAlt:NPVTrue", "BinEtaAlt>-1", "ColZ" );
+      c1.Print( std::string( pathPlots_ + cat + "_BinEtaAlt-NPVTrue.png" ).c_str() );
       catData_.at( iCat )->Draw( "BinEtaSymmAlt", "BinEtaSymmAlt>-1" );
       c1.Print( std::string( pathPlots_ + cat + "_BinEtaSymmAlt.png" ).c_str() );
+      catData_.at( iCat )->Draw( "BinEtaSymmAlt:NPVTrue", "BinEtaSymmAlt>-1", "ColZ" );
+      c1.Print( std::string( pathPlots_ + cat + "_BinEtaSymmAlt-NPVTrue.png" ).c_str() );
       if ( cat == "UdscJet" || cat == "BJet" ) {
         catData_.at( iCat )->Draw( "PtGenJet", "PtGenJet>-9." );
         c1.Print( std::string( pathPlots_ + cat + "_PtGenJet.png" ).c_str() );
+        catData_.at( iCat )->Draw( "PtGenJet:EtaGenJet", "PtGenJet>-9.&&EtaGenJet>-9.", "ColZ" );
+        c1.Print( std::string( pathPlots_ + cat + "_PtGenJet-EtaGenJet.png" ).c_str() );
+        catData_.at( iCat )->Draw( "PtGenJet:NPVTrue", "PtGenJet>-9.", "ColZ" );
+        c1.Print( std::string( pathPlots_ + cat + "_PtGenJet-NPVTrue.png" ).c_str() );
         catData_.at( iCat )->Draw( "EtaGenJet", "EtaGenJet>-9." );
         c1.Print( std::string( pathPlots_ + cat + "_EtaGenJet.png" ).c_str() );
+        catData_.at( iCat )->Draw( "EtaGenJet:NPVTrue", "EtaGenJet>-9.", "ColZ" );
+        c1.Print( std::string( pathPlots_ + cat + "_EtaGenJet-NPVTrue.png" ).c_str() );
         catData_.at( iCat )->Draw( "PhiGenJet", "PhiGenJet>-9." );
         c1.Print( std::string( pathPlots_ + cat + "_PhiGenJet.png" ).c_str() );
+        catData_.at( iCat )->Draw( "PhiGenJet:NPVTrue", "PhiGenJet>-9.", "ColZ" );
+        c1.Print( std::string( pathPlots_ + cat + "_PhiGenJet-NPVTrue.png" ).c_str() );
         catData_.at( iCat )->Draw( "EnergyGenJet", "EnergyGenJet>-9." );
         c1.Print( std::string( pathPlots_ + cat + "_EnergyGenJet.png" ).c_str() );
+        catData_.at( iCat )->Draw( "EnergyGenJet:EtaGenJet", "EnergyGenJet>-9.&&EtaGenJet>-9.", "ColZ" );
+        c1.Print( std::string( pathPlots_ + cat + "_EnergyGenJet-EtaGenJet.png" ).c_str() );
+        catData_.at( iCat )->Draw( "EnergyGenJet:NPVTrue", "EnergyGenJet>-9.", "ColZ" );
+        c1.Print( std::string( pathPlots_ + cat + "_EnergyGenJet-NPVTrue.png" ).c_str() );
         catData_.at( iCat )->Draw( "BinEtaGenJet", "BinEtaGenJet>-1" );
         c1.Print( std::string( pathPlots_ + cat + "_BinEtaGenJet.png" ).c_str() );
+        catData_.at( iCat )->Draw( "BinEtaGenJet:NPVTrue", "BinEtaGenJet>-1", "ColZ" );
+        c1.Print( std::string( pathPlots_ + cat + "_BinEtaGenJet-NPVTrue.png" ).c_str() );
         catData_.at( iCat )->Draw( "BinEtaSymmGenJet", "BinEtaSymmGenJet>-1" );
         c1.Print( std::string( pathPlots_ + cat + "_BinEtaSymmGenJet.png" ).c_str() );
+        catData_.at( iCat )->Draw( "BinEtaSymmGenJet:NPVTrue", "BinEtaSymmGenJet>-1", "ColZ" );
+        c1.Print( std::string( pathPlots_ + cat + "_BinEtaSymmGenJet-NPVTrue.png" ).c_str() );
         catData_.at( iCat )->Draw( "PtGenJetAlt", "PtGenJetAlt>-9." );
         c1.Print( std::string( pathPlots_ + cat + "_PtGenJetAlt.png" ).c_str() );
+        catData_.at( iCat )->Draw( "PtGenJetAlt:EtaGenJet", "PtGenJetAlt>-9.&&EtaGenJet>-9.", "ColZ" );
+        c1.Print( std::string( pathPlots_ + cat + "_PtGenJetAlt-EtaGenJet.png" ).c_str() );
+        catData_.at( iCat )->Draw( "PtGenJetAlt:NPVTrue", "PtGenJetAlt>-9.", "ColZ" );
+        c1.Print( std::string( pathPlots_ + cat + "_PtGenJetAlt-NPVTrue.png" ).c_str() );
         catData_.at( iCat )->Draw( "EtaGenJetAlt", "EtaGenJetAlt>-9." );
         c1.Print( std::string( pathPlots_ + cat + "_EtaGenJetAlt.png" ).c_str() );
+        catData_.at( iCat )->Draw( "EtaGenJetAlt:NPVTrue", "EtaGenJetAlt>-9.", "ColZ" );
+        c1.Print( std::string( pathPlots_ + cat + "_EtaGenJetAlt-NPVTrue.png" ).c_str() );
         catData_.at( iCat )->Draw( "PhiGenJetAlt", "PhiGenJetAlt>-9." );
         c1.Print( std::string( pathPlots_ + cat + "_PhiGenJetAlt.png" ).c_str() );
+        catData_.at( iCat )->Draw( "PhiGenJetAlt:NPVTrue", "PhiGenJetAlt>-9.", "ColZ" );
+        c1.Print( std::string( pathPlots_ + cat + "_PhiGenJetAlt-NPVTrue.png" ).c_str() );
         catData_.at( iCat )->Draw( "EnergyGenJetAlt", "EnergyGenJetAlt>-9." );
         c1.Print( std::string( pathPlots_ + cat + "_EnergyGenJetAlt.png" ).c_str() );
+        catData_.at( iCat )->Draw( "EnergyGenJetAlt:EtaGenJetAlt", "EnergyGenJetAlt>-9.&&EtaGenJetAlt>-9.", "ColZ" );
+        c1.Print( std::string( pathPlots_ + cat + "_EnergyGenJetAlt-EtaGenJetAlt.png" ).c_str() );
+        catData_.at( iCat )->Draw( "EnergyGenJetAlt:NPVTrue", "EnergyGenJetAlt>-9.", "ColZ" );
+        c1.Print( std::string( pathPlots_ + cat + "_EnergyGenJetAlt-NPVTrue.png" ).c_str() );
         catData_.at( iCat )->Draw( "BinEtaGenJetAlt", "BinEtaGenJetAlt>-1" );
         c1.Print( std::string( pathPlots_ + cat + "_BinEtaGenJetAlt.png" ).c_str() );
+        catData_.at( iCat )->Draw( "BinEtaGenJetAlt:NPVTrue", "BinEtaGenJetAlt>-1", "ColZ" );
+        c1.Print( std::string( pathPlots_ + cat + "_BinEtaGenJetAlt-NPVTrue.png" ).c_str() );
         catData_.at( iCat )->Draw( "BinEtaSymmGenJetAlt", "BinEtaSymmGenJetAlt>-1" );
         c1.Print( std::string( pathPlots_ + cat + "_BinEtaSymmGenJetAlt.png" ).c_str() );
+        catData_.at( iCat )->Draw( "BinEtaSymmGenJetAlt:NPVTrue", "BinEtaSymmGenJetAlt>-1", "ColZ" );
+        c1.Print( std::string( pathPlots_ + cat + "_BinEtaSymmGenJetAlt-NPVTrue.png" ).c_str() );
       }
       catData_.at( iCat )->Draw( "PtGen", "PtGen>-9." );
       c1.Print( std::string( pathPlots_ + cat + "_PtGen.png" ).c_str() );
+      catData_.at( iCat )->Draw( "PtGen:EtaGen", "PtGen>-9.&&NPVTrue>-9.", "ColZ" );
+      c1.Print( std::string( pathPlots_ + cat + "_PtGen-EtaGen.png" ).c_str() );
+      catData_.at( iCat )->Draw( "PtGen:NPVTrue", "PtGen>-9.", "ColZ" );
+      c1.Print( std::string( pathPlots_ + cat + "_PtGen-NPVTrue.png" ).c_str() );
       catData_.at( iCat )->Draw( "EtaGen", "EtaGen>-9." );
       c1.Print( std::string( pathPlots_ + cat + "_EtaGen.png" ).c_str() );
+      catData_.at( iCat )->Draw( "EtaGen:NPVTrue", "EtaGen>-9.", "ColZ" );
+      c1.Print( std::string( pathPlots_ + cat + "_EtaGen-NPVTrue.png" ).c_str() );
       catData_.at( iCat )->Draw( "PhiGen", "PhiGen>-9." );
       c1.Print( std::string( pathPlots_ + cat + "_PhiGen.png" ).c_str() );
+      catData_.at( iCat )->Draw( "PhiGen:NPVTrue", "PhiGen>-9.", "ColZ" );
+      c1.Print( std::string( pathPlots_ + cat + "_PhiGen-NPVTrue.png" ).c_str() );
       catData_.at( iCat )->Draw( "EnergyGen", "EnergyGen>-9." );
       c1.Print( std::string( pathPlots_ + cat + "_EnergyGen.png" ).c_str() );
+      catData_.at( iCat )->Draw( "EnergyGen:EtaGen", "EnergyGen>-9.&&NPVTrue>-9.", "ColZ" );
+      c1.Print( std::string( pathPlots_ + cat + "_EnergyGen-EtaGen.png" ).c_str() );
+      catData_.at( iCat )->Draw( "EnergyGen:NPVTrue", "EnergyGen>-9.", "ColZ" );
+      c1.Print( std::string( pathPlots_ + cat + "_EnergyGen-NPVTrue.png" ).c_str() );
       catData_.at( iCat )->Draw( "BinEtaGen", "BinEtaGen>-1" );
       c1.Print( std::string( pathPlots_ + cat + "_BinEtaGen.png" ).c_str() );
+      catData_.at( iCat )->Draw( "BinEtaGen:NPVTrue", "BinEtaGen>-1", "ColZ" );
+      c1.Print( std::string( pathPlots_ + cat + "_BinEtaGen-NPVTrue.png" ).c_str() );
       catData_.at( iCat )->Draw( "BinEtaSymmGen", "BinEtaSymmGen>-1" );
       c1.Print( std::string( pathPlots_ + cat + "_BinEtaSymmGen.png" ).c_str() );
+      catData_.at( iCat )->Draw( "BinEtaSymmGen:NPVTrue", "BinEtaSymmGen>-1", "ColZ" );
+      c1.Print( std::string( pathPlots_ + cat + "_BinEtaSymmGen-NPVTrue.png" ).c_str() );
 
     }
 
@@ -849,7 +934,7 @@ unsigned AnalyzeHitFit::getEtaBin( unsigned iCat, double eta, bool symm )
 }
 
 
-void AnalyzeHitFit::fill()
+void AnalyzeHitFit::fill( unsigned iCat, const edm::Handle< TtSemiLeptonicEvent > & ttSemiLeptonicEvent, bool repeat, bool allJets )
 {
 
   // Vertices
@@ -863,12 +948,6 @@ void AnalyzeHitFit::fill()
       break;
     }
   }
-
-}
-
-
-void AnalyzeHitFit::fill( unsigned iCat, const edm::Handle< TtSemiLeptonicEvent > & ttSemiLeptonicEvent, bool repeat, bool allJets )
-{
 
   const std::string cat( objCats_.at( iCat ) );
   const std::vector< int > jetLepCombi( ttSemiLeptonicEvent->jetLeptonCombination( TtEvent::kGenMatch ) );

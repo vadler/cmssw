@@ -314,12 +314,12 @@ process.analyzeHitFit.electronResolutions = 'TopQuarkAnalysis/TopHitFit/data/res
 process.analyzeHitFit.udscJetResolutions  = 'TopQuarkAnalysis/TopHitFit/data/resolution/tqafUdscJetResolution_%s.txt'%( era )
 process.analyzeHitFit.bJetResolutions     = 'TopQuarkAnalysis/TopHitFit/data/resolution/tqafBJetResolution_%s.txt'%( era )
 process.analyzeHitFit.metResolutions      = 'TopQuarkAnalysis/TopHitFit/data/resolution/tqafKtResolution_%s.txt'%( era )
-#if runTest:
-  #pathPlots = pathPlots.replace( 'analyzeHitFit_from', 'analyzeHitFitTest_from', 1 )
-#else:
-  #process.analyzeHitFit.pathPlots = pathPlots
 if runTest:
-  pathPlots = ''
+  pathPlots = pathPlots.replace( 'analyzeHitFit_from', 'test-analyzeHitFit_from', 1 )
+else:
+  process.analyzeHitFit.pathPlots = pathPlots
+#if runTest:
+  #pathPlots = ''
 process.analyzeHitFit.pathPlots = pathPlots
 # process.analyzeHitFit_L5Flavor = process.analyzeHitFit.clone( jecLevel = 'L5Flavor'
 #                                                                                            )

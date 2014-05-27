@@ -11,7 +11,6 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "CommonTools/MyTools/interface/RootFunctions.h"
-#include "TopQuarkAnalysis/TopMassSemiLeptonic/interface/DataContainer.h"
 #include "TopQuarkAnalysis/TopMassSemiLeptonic/interface/JetDataContainer.h"
 #include "TopQuarkAnalysis/TopMassSemiLeptonic/interface/FitTopTransferFunctionsHistos.h"
 #include "TopQuarkAnalysis/TopMassSemiLeptonic/interface/TransferFunction.h"
@@ -40,6 +39,7 @@ namespace my {
       bool                       fitEtaBins_;
       bool                       refSel_;
       bool                       usePileup_;
+      std::string                pileUp_;
       int                        overwrite_;
       std::string                sample_;
       std::string                pathOut_;
@@ -60,7 +60,6 @@ namespace my {
       TDirectory*                              dirInSel_;
       std::vector< TDirectory* >               dirsInObjCat_;
       std::vector< TDirectory* >               dirsInObjCatSubFit_;
-      my::DataContainer                        data_;
       std::vector< my::JetDataContainer >      objectData_;
       // Output
       TFile*                                    fileOut_;

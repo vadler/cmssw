@@ -8,7 +8,7 @@ namespace my {
 
   struct JetDataContainer : public ObjectDataContainer {
 
-      explicit JetDataContainer( const std::string& objCat, TDirectory* dirInCat, Bool_t useSymm, Bool_t useAlt, Bool_t useNonT, Bool_t useNonP, Bool_t refGen, const my::DataContainer& data, Int_t maxEvents = -1 );
+      explicit JetDataContainer( const std::string& objCat, TDirectory* dirInCat, Bool_t useSymm, Bool_t useAlt, Bool_t useNonT, Bool_t useNonP, Bool_t refGen, Bool_t usePileUp, const std::string& pileUp, Int_t maxEvents = -1 );
       ~JetDataContainer() {};
 
       /// Get data

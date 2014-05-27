@@ -56,7 +56,7 @@ FitTopTransferFunctionsRunner::FitTopTransferFunctionsRunner( const std::string&
   const std::string& configIOInFile( configIO.getParameter< std::string >( "inputFile" ) );
   refSel_       = configIO.getParameter< bool >( "refSel" );
   usePileup_    = configIO.getParameter< bool >( "usePileUp" );
-  const std::string& configIOPileUp( configIO.getParameter< std::string >( "pileUp" ) );
+  pileUp_       = configIO.getParameter< std::string >( "pileUp" );
   const std::string& configIOOutFile( configIO.getParameter< std::string >( "outputFile" ) );
   overwrite_    = configIO.getParameter< bool >( "overwrite" ) ? TObject::kOverwrite : 0;
   writeFiles_   = configIO.getParameter< bool >( "writeFiles" );
@@ -113,9 +113,6 @@ FitTopTransferFunctionsRunner::FitTopTransferFunctionsRunner( const std::string&
               << "    selection '" << evtSel << "' does not exist in input file" << std::endl;
     status_ += 0x20;
   }
-
-  // Load pile-up data
-  data_.loadPileUpWeights( usePileup_, configIOPileUp, dirInSel_, maxEvents_ );
 
   // Open output file
   fileOut_ = TFile::Open( configIOOutFile.c_str(), "UPDATE" );
@@ -267,7 +264,7 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
               << myName_ << " --> DEBUG:" << std::endl
               << "    Reading data... " << std::endl;
   }
-  JetDataContainer dataContainer( objCat, dirInObjCat, useSymm_, useAlt_, useNonT_, useNonP_, refGen_, data_, maxEvents_ );
+  JetDataContainer dataContainer( objCat, dirInObjCat, useSymm_, useAlt_, useNonT_, useNonP_, refGen_, usePileup_, pileUp_, maxEvents_ );
 
   // Find requested subdirectories
   TDirectory* dirInPt( ( TDirectory* )( dirInObjCat->Get( "Pt" ) ) );

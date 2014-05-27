@@ -10,8 +10,8 @@
 using namespace my;
 
 
-JetDataContainer::JetDataContainer( const std::string& objCat, TDirectory* dirInCat, Bool_t useSymm, Bool_t useAlt, Bool_t useNonT, Bool_t useNonP, Bool_t refGen, const my::DataContainer& data, Int_t maxEvents )
-: ObjectDataContainer( objCat, dirInCat, useSymm, useAlt, useNonT, useNonP, refGen, data, maxEvents )
+JetDataContainer::JetDataContainer( const std::string& objCat, TDirectory* dirInCat, Bool_t useSymm, Bool_t useAlt, Bool_t useNonT, Bool_t useNonP, Bool_t refGen, Bool_t usePileUp, const std::string& pileUp, Int_t maxEvents )
+: ObjectDataContainer( objCat, dirInCat, useSymm, useAlt, useNonT, useNonP, refGen, usePileUp, pileUp, maxEvents )
 {
 
   if ( objCat == "UdscJet" || objCat == "BJet" ) {

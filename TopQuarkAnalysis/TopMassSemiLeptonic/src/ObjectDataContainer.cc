@@ -10,7 +10,7 @@
 using namespace my;
 
 
-ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory* dirInCat, Bool_t useSymm, Bool_t useAlt, Bool_t useNonT, Bool_t useNonP, Bool_t refGen, const my::DataContainer& data, Int_t maxEvents )
+ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory* dirInCat, Bool_t useSymm, Bool_t useAlt, Bool_t useNonT, Bool_t useNonP, Bool_t refGen, Bool_t usePileUp, const std::string& pileUp, Int_t maxEvents )
 {
 
   // Get eta binning
@@ -63,6 +63,7 @@ ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory*
     phiData_.push_back( std::vector< double >() );
     phiGenData_.push_back( std::vector< double >() );
   }
+  Double_t pileUpWeight;
   Double_t ptData;
   Double_t ptGenData;
   Double_t energyData;
@@ -73,6 +74,7 @@ ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory*
   Double_t phiGenData;
   Int_t    iEta;
   TTree* dataTree( ( TTree* )( dirInCat->Get( std::string( objCat + "_data" ).c_str() ) ) );
+  dataTree->SetBranchAddress( pileUp.c_str(), &pileUpWeight );
   if ( useAlt ) {
     dataTree->SetBranchAddress( "PtAlt" , &ptData );
     dataTree->SetBranchAddress( "EnergyAlt" , &energyData );
@@ -113,8 +115,8 @@ ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory*
     assert( iEta < ( Int_t )( nEtaBins() ) ); // has to fit (and be consistent)
     if ( iEta == -1 ) continue; // FIXME: eta out of range in analyzer; should be solved more consistently
     sizeEta_[ iEta ] += 1;
-    Int_t pileUpEntry( ( objCat == "UdscJet" || objCat == "BJet" ) ? iEntry / 2 : iEntry );
-    weightData_[ iEta ].push_back( data.pileUpWeights()[ pileUpEntry ] );
+    if ( usePileUp ) weightData_[ iEta ].push_back( pileUpWeight );
+    else             weightData_[ iEta ].push_back( 1. );
     ptData_[ iEta ].push_back( ptData );
     ptGenData_[ iEta ].push_back( ptGenData );
     energyData_[ iEta ].push_back( energyData );

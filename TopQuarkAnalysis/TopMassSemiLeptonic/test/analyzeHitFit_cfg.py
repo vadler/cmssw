@@ -18,7 +18,6 @@ useEtaCoarseBins = False
 usePtCoarseBins  = False
 
 # Correlation to input
-# FIXME: Update pile-up to 8TeV (but not used)
 pileUpFileMC           = 'CommonTools/MyTools/data/pileUpFileMC_Summer12_S10.root'
 pileUpFileDataTrue     = 'CommonTools/MyTools/data/pileUpFileData_2012truePixel.root'
 pileUpFileDataObserved = 'CommonTools/MyTools/data/pileUpFileData_2012observedPixel.root'

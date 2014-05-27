@@ -13,6 +13,10 @@ era    = 'Summer11'
 sample = 'Summer12_MadGraph'
 #sample = 'Summer12_MCatNLO'
 
+# Binning
+useEtaCoarseBins = False
+usePtCoarseBins  = False
+
 # Correlation to input
 # FIXME: Update pile-up to 8TeV (but not used)
 pileUpFileMC           = 'CommonTools/MyTools/data/pileUpFileMC_Summer12_S10.root'
@@ -100,7 +104,14 @@ process.maxEvents = cms.untracked.PSet(
 
 ### Output
 
-outputFile = '%s/output/analyzeHitFit_from%s_%s_%s_%s.root'%( os.getenv( "CMSSW_BASE" ), era, sample, jecLevel, matchAlgorithm )
+etaBins = ''
+if useEtaCoarseBins:
+  etaBins = '-coarseEta'
+ptBins = ''
+if usePtCoarseBins:
+  ptBins = '-coarsePt'
+
+outputFile = '%s/output/analyzeHitFit_from%s%s%s_%s_%s_%s.root'%( os.getenv( "CMSSW_BASE" ), era, etaBins, ptBins, sample, jecLevel, matchAlgorithm )
 
 if runTest:
   outputFile = outputFile.replace( 'root', 'test.root' )
@@ -112,7 +123,7 @@ process.TFileService = cms.Service(
 )
 logFile = outputFile.replace( 'root', 'log' )
 cfgFile = logFile.replace( '.log', '_cfg.py' )
-pathPlots = '%s/output/plots/analyzeHitFit/analyzeHitFit_from%s_%s_%s_%s_'%( os.getenv( "CMSSW_BASE" ), era, sample, jecLevel, matchAlgorithm )
+pathPlots = '%s/output/plots/analyzeHitFit/analyzeHitFit_from%s%s%s_%s_%s_%s_'%( os.getenv( "CMSSW_BASE" ), era, etaBins, ptBins, sample, jecLevel, matchAlgorithm )
 
 
 ### Event selection
@@ -314,10 +325,39 @@ process.analyzeHitFit.electronResolutions = 'TopQuarkAnalysis/TopHitFit/data/res
 process.analyzeHitFit.udscJetResolutions  = 'TopQuarkAnalysis/TopHitFit/data/resolution/tqafUdscJetResolution_%s.txt'%( era )
 process.analyzeHitFit.bJetResolutions     = 'TopQuarkAnalysis/TopHitFit/data/resolution/tqafBJetResolution_%s.txt'%( era )
 process.analyzeHitFit.metResolutions      = 'TopQuarkAnalysis/TopHitFit/data/resolution/tqafKtResolution_%s.txt'%( era )
+from TopQuarkAnalysis.TopMassSemiLeptonic.bins_cff import *
+if useEtaCoarseBins:
+  process.analyzeHitFit.muonEtaBins     = muonEtaCoarseBins
+  process.analyzeHitFit.electronEtaBins = electronEtaCoarseBins
+  process.analyzeHitFit.udscJetEtaBins  = udscJetEtaCoarseBins
+  process.analyzeHitFit.bJetEtaBins     = bJetEtaCoarseBins
+  process.analyzeHitFit.jetEtaBins      = jetEtaCoarseBins
+  process.analyzeHitFit.metEtaBins      = metEtaCoarseBins
+else:
+  process.analyzeHitFit.muonEtaBins     = muonEtaBins
+  process.analyzeHitFit.electronEtaBins = electronEtaBins
+  process.analyzeHitFit.udscJetEtaBins  = udscJetEtaBins
+  process.analyzeHitFit.bJetEtaBins     = bJetEtaBins
+  process.analyzeHitFit.jetEtaBins      = jetEtaBins
+  process.analyzeHitFit.metEtaBins      = metEtaBins
+if usePtCoarseBins:
+  process.analyzeHitFit.muonPtBins     = muonPtCoarseBins
+  process.analyzeHitFit.electronPtBins = electronPtCoarseBins
+  process.analyzeHitFit.udscJetPtBins  = udscJetPtCoarseBins
+  process.analyzeHitFit.bJetPtBins     = bJetPtCoarseBins
+  process.analyzeHitFit.jetPtBins      = jetPtCoarseBins
+  process.analyzeHitFit.metPtBins      = metPtCoarseBins
+else:
+  process.analyzeHitFit.muonPtBins     = muonPtBins
+  process.analyzeHitFit.electronPtBins = electronPtBins
+  process.analyzeHitFit.udscJetPtBins  = udscJetPtBins
+  process.analyzeHitFit.bJetPtBins     = bJetPtBins
+  process.analyzeHitFit.jetPtBins      = jetPtBins
+  process.analyzeHitFit.metPtBins      = metPtBins
 if runTest:
   pathPlots = pathPlots.replace( 'analyzeHitFit_from', 'test-analyzeHitFit_from', 1 )
-else:
-  process.analyzeHitFit.pathPlots = pathPlots
+if not rfioInput:
+  pathPlots = pathPlots.replace( 'analyzeHitFit_from', 'local-analyzeHitFit_from', 1 )
 #if runTest:
   #pathPlots = ''
 process.analyzeHitFit.pathPlots = pathPlots

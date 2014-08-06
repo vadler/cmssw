@@ -42,6 +42,8 @@ ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory*
 
   // Get data
   sizeEta_.reserve( nEtaBins() );
+  NPVTrueData_.reserve( nEtaBins() );
+  NPVObservedData_.reserve( nEtaBins() );
   weightData_.reserve( nEtaBins() );
   ptData_.reserve( nEtaBins() );
   ptGenData_.reserve( nEtaBins() );
@@ -53,6 +55,8 @@ ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory*
   phiGenData_.reserve( nEtaBins() );
   for ( unsigned uEta = 0; uEta < nEtaBins(); ++uEta ) {
     sizeEta_.push_back( 0 );
+    NPVTrueData_.push_back( std::vector< float >() );
+    NPVObservedData_.push_back( std::vector< int >() );
     weightData_.push_back( std::vector< double >() );
     ptData_.push_back( std::vector< double >() );
     ptGenData_.push_back( std::vector< double >() );
@@ -63,6 +67,8 @@ ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory*
     phiData_.push_back( std::vector< double >() );
     phiGenData_.push_back( std::vector< double >() );
   }
+  Float_t  NPVTrueData;
+  Int_t    NPVObservedData;
   Double_t pileUpWeight;
   Double_t ptData;
   Double_t ptGenData;
@@ -74,23 +80,25 @@ ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory*
   Double_t phiGenData;
   Int_t    iEta;
   TTree* dataTree( ( TTree* )( dirInCat->Get( std::string( objCat + "_data" ).c_str() ) ) );
+  dataTree->SetBranchAddress( "NPVTrue"     , &NPVTrueData );
+  dataTree->SetBranchAddress( "NPVObserved" , &NPVObservedData );
   dataTree->SetBranchAddress( pileUp.c_str(), &pileUpWeight );
   if ( useAlt ) {
-    dataTree->SetBranchAddress( "PtAlt" , &ptData );
-    dataTree->SetBranchAddress( "EnergyAlt" , &energyData );
-    dataTree->SetBranchAddress( "EtaAlt", &etaData );
-    dataTree->SetBranchAddress( "PhiAlt", &phiData );
+    dataTree->SetBranchAddress( "PtAlt"    , &ptData );
+    dataTree->SetBranchAddress( "EnergyAlt", &energyData );
+    dataTree->SetBranchAddress( "EtaAlt"   , &etaData );
+    dataTree->SetBranchAddress( "PhiAlt"   , &phiData );
   }
   else {
-    dataTree->SetBranchAddress( "Pt" , &ptData );
-    dataTree->SetBranchAddress( "Energy" , &energyData );
-    dataTree->SetBranchAddress( "Eta", &etaData );
-    dataTree->SetBranchAddress( "Phi", &phiData );
+    dataTree->SetBranchAddress( "Pt"    , &ptData );
+    dataTree->SetBranchAddress( "Energy", &energyData );
+    dataTree->SetBranchAddress( "Eta"   , &etaData );
+    dataTree->SetBranchAddress( "Phi"   , &phiData );
   }
-  dataTree->SetBranchAddress( "PtGen" , &ptGenData );
-  dataTree->SetBranchAddress( "EnergyGen" , &energyGenData );
-  dataTree->SetBranchAddress( "EtaGen", &etaGenData );
-  dataTree->SetBranchAddress( "PhiGen", &phiGenData );
+  dataTree->SetBranchAddress( "PtGen"    , &ptGenData );
+  dataTree->SetBranchAddress( "EnergyGen", &energyGenData );
+  dataTree->SetBranchAddress( "EtaGen"   , &etaGenData );
+  dataTree->SetBranchAddress( "PhiGen"   , &phiGenData );
   if ( useSymm ) {
     if      ( refGen ) dataTree->SetBranchAddress( "BinEtaSymmGen", &iEta );
     else if ( useAlt ) dataTree->SetBranchAddress( "BinEtaSymmAlt", &iEta );
@@ -115,6 +123,8 @@ ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory*
     assert( iEta < ( Int_t )( nEtaBins() ) ); // has to fit (and be consistent)
     if ( iEta == -1 ) continue; // FIXME: eta out of range in analyzer; should be solved more consistently
     sizeEta_[ iEta ] += 1;
+    NPVTrueData_[ iEta ].push_back( NPVTrueData );
+    NPVObservedData_[ iEta ].push_back( NPVObservedData );
     if ( usePileUp ) weightData_[ iEta ].push_back( pileUpWeight );
     else             weightData_[ iEta ].push_back( 1. );
     ptData_[ iEta ].push_back( ptData );
@@ -130,6 +140,8 @@ ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory*
 
   // Split data into pt bins per eta bin
   sizePt_.reserve( nEtaBins() );
+  NPVTrueDataPt_.reserve( nEtaBins() );
+  NPVObservedDataPt_.reserve( nEtaBins() );
   weightDataPt_.reserve( nEtaBins() );
   ptDataPt_.reserve( nEtaBins() );
   ptGenDataPt_.reserve( nEtaBins() );
@@ -138,6 +150,8 @@ ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory*
   phiDataPt_.reserve( nEtaBins() );
   phiGenDataPt_.reserve( nEtaBins() );
   for ( unsigned uEta = 0; uEta < nEtaBins(); ++uEta ) {
+    std::vector< std::vector< Float_t > > NPVTrueEtaBin( nPtBins() );
+    std::vector< std::vector< Int_t   > > NPVObservedEtaBin( nPtBins() );
     DataTable weightEtaBin( nPtBins() );
     DataTable ptEtaBin( nPtBins() );
     DataTable ptGenEtaBin( nPtBins() );
@@ -163,6 +177,8 @@ ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory*
       for ( unsigned uPt = 0; uPt < nPtBins(); ++uPt ) {
         if ( ptBins_[ uPt ] <= ptRef && ptRef < ptBins_[ uPt + 1 ] ) {
           sizePt[ uPt ] += 1;
+          NPVTrueEtaBin[ uPt ].push_back( NPVTrueData_[ uEta ][ uEntry ] );
+          NPVObservedEtaBin[ uPt ].push_back( NPVObservedData_[ uEta ][ uEntry ] );
           weightEtaBin[ uPt ].push_back( weightData_[ uEta ][ uEntry ] );
           ptEtaBin[ uPt ].push_back( ptVal );
           ptGenEtaBin[ uPt ].push_back( ptGenVal );
@@ -174,6 +190,8 @@ ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory*
         }
       } // loop: uPt < nPtBins()
     } // loop: uEntry < sizeEta_[ uEta ]
+    NPVTrueDataPt_.push_back( NPVTrueEtaBin );
+    NPVObservedDataPt_.push_back( NPVObservedEtaBin );
     weightDataPt_.push_back( weightEtaBin );
     ptDataPt_.push_back( ptEtaBin );
     ptGenDataPt_.push_back( ptGenEtaBin );

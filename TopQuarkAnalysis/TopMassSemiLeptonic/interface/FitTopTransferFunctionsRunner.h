@@ -55,6 +55,8 @@ namespace my {
       unsigned                   minEntriesFactor_;
       std::vector< unsigned >    excludeVec_;
       double                     fitMaxPt_;
+      bool                       npvBinning_;
+      std::vector< int >         npvBins_;
       // Input
       TFile*                                   fileIn_;
       TDirectory*                              dirInSel_;
@@ -82,14 +84,20 @@ namespace my {
       TF1* dependencyFunction_;
       TF1* resolutionFunction_;
       // Histograms
-      std::vector< HistosTrans >                   histosVecScaleTrans_;
-      std::vector< std::vector< HistosTransEta > > histosVecScaleVecTransEta_;
-      std::vector< HistosTrans >                   histosVecRebinTrans_;
-      std::vector< std::vector< HistosTransEta > > histosVecRebinVecTransEta_;
-      std::vector< HistosTrans >                   histosVecRebinScaleTrans_;
-      std::vector< std::vector< HistosTransEta > > histosVecRebinScaleVecTransEta_;
+      std::vector< HistosTrans >                                  histosVecScaleTrans_;
+      std::vector< std::vector< HistosTrans > >                   histosVecScaleTransVecNpv_;
+      std::vector< std::vector< HistosTransEta > >                histosVecScaleTransVecEta_;
+      std::vector< std::vector< std::vector< HistosTransEta > > > histosVecScaleTransVecEtaVecNpv_;
+      std::vector< HistosTrans >                                  histosVecRebinTrans_;
+      std::vector< std::vector< HistosTrans > >                   histosVecRebinTransVecNpv_;
+      std::vector< std::vector< HistosTransEta > >                histosVecRebinTransVecEta_;
+      std::vector< std::vector< std::vector< HistosTransEta > > > histosVecRebinTransVecEtaVecNpv_;
+      std::vector< HistosTrans >                                  histosVecRebinScaleTrans_;
+      std::vector< std::vector< HistosTrans > >                   histosVecRebinScaleTransVecNpv_;
+      std::vector< std::vector< HistosTransEta > >                histosVecRebinScaleTransVecEta_;
+      std::vector< std::vector< std::vector< HistosTransEta > > > histosVecRebinScaleTransVecEtaVecNpv_;
       std::vector< HistosDependency >                histosVecRebinScaleDependency_;
-      std::vector< std::vector< HistosDependency > > histosVecRebinScaleVecDependencyEta_;
+      std::vector< std::vector< HistosDependency > > histosVecRebinScaleDependencyVecEta_;
       // Transfer functions
       std::vector< TransferFunction >                          transferVecScale_;
       std::vector< TransferFunctionCollection >                transferVecScaleVecEta_;
@@ -154,12 +162,14 @@ namespace my {
       /// These functions are private, since their use underlies certain restrictions, like e.g.:
       /// - run only once;
       /// - run only during first loop over categories due to the usage of std::vector::back().
-      void fillPerCategoryBin( unsigned uEta, HistosTrans& histosTrans, HistosTransEta& histosTransEta, double minPt, double maxEta, double maxDR, bool rebin = false );
-      void fillPerCategoryBin( unsigned uEta, HistosTrans& histosTrans, HistosTransEta& histosTransEta, double minPt, double maxEta, double maxDR, double minCSV, double maxCSV, bool rebin = false );
+      void fillPerCategoryBin( unsigned uEta, unsigned uNpv, HistosTrans& histosTrans, HistosTransEta& histosTransEta, double minPt, double maxEta, double maxDR, bool rebin = false );
+      void fillPerCategoryBin( unsigned uEta, unsigned uNpv, HistosTrans& histosTrans, HistosTransEta& histosTransEta, double minPt, double maxEta, double maxDR, double minCSV, double maxCSV, bool rebin = false );
       void plotFillPerCategoryBin( HistosTrans& histosTrans );
       void fitPerCategoryLoop( const std::string& objCat );
       void fitPerCategoryBin( const std::string& objCat, TDirectory* dirOut, TransferFunction& transfer, TransferFunctionCollection& transferColl, HistosTransEta& histosTransEta, std::vector< HistosDependency >& histosVecDependency );
+      void fitPerCategoryBin( const std::string& objCat, HistosTransEta& histosTransEta );
       void fitPerCategoryFit( TransferFunction& transfer, TH1D* histoTrans, HistosDependency* histosDependency, int uPt );
+      void fitPerCategoryFit( TH1D* histoTrans, int uPt );
       void dependencyPerCategoryLoop( const std::string& objCat );
       void dependencyPerCategoryBin( const std::string& objCat, TDirectory* dirOut, TransferFunction& transfer, HistosDependency& histosDependency );
       void transferPerCategoryLoop( const std::string& objCat );

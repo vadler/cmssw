@@ -239,6 +239,12 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
     if ( configObj.existsAs< double >( "maxCSV" ) ) configObjMaxCSV = configObj.getParameter< double >( "maxCSV" );
   }
   const double   configObjWidthFactor( configObj.getParameter< double >( "widthFactor" ) );
+  npvBinning_ = false;
+  npvBins_.clear();
+  if ( configObj.existsAs< std::vector< int > >( "npvBins" ) ) {
+    npvBinning_ = true;
+    npvBins_    = configObj.getParameter< std::vector< int > >( "npvBins" );
+  }
 
   // Open ROOT file directories
   TDirectory* dirInObjCat( ( TDirectory* )( dirInSel_->Get( objCat.c_str() ) ) );
@@ -290,6 +296,9 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
   const unsigned nPtBins( dataContainer.nPtBins() );
   assert( dataContainer.nEtaBins() == dirsOutObjCatSubFitEta_.back().size() );
   const unsigned nEtaBins( dirsOutObjCatSubFitEta_.back().size() );
+  unsigned nNpvBins( npvBins_.size() );
+  if ( nNpvBins > 0 ) --nNpvBins;
+  if ( nNpvBins == 0 ) npvBinning_ = false; // FIXME: Add warning; move to config reading
 
   const std::string name( objCat + "_" + baseTitlePt_ + "_" + subFit );
 
@@ -304,9 +313,19 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
   dirsOutObjCatSubFit_.back()->cd();
   if ( verbose_ > 2 ) gDirectory->pwd();
   HistosTrans histosTrans( objCat, name, configObjDeltaPtBins, configObjDeltaPtMax, nPtBins, dataContainer.ptBins(), nEtaBins, dataContainer.etaBins(), titleTrans_, baseTitlePt_, titlePtT_, titlePt_, titleEta_ );
+  std::vector< HistosTrans > histosVecTransNpv;
+  if ( npvBinning_ ) {
+    for ( unsigned uNpv = 0; uNpv < nNpvBins; ++uNpv ) {
+      const std::string binNpv( boost::lexical_cast< std::string >( uNpv ) );
+      const std::string nameNpv( name + "_NPV" + binNpv );
+      HistosTrans histosTransNpv( histosTrans, nameNpv, baseTitlePt_ );
+      histosVecTransNpv.push_back( histosTransNpv );
+    }
+  }
 
   // Loop over eta bins
   std::vector< HistosTransEta > histosVecTransEta;
+  std::vector< std::vector< HistosTransEta > > histosVecVecTransEtaNpv;
   for ( unsigned uEta = 0; uEta < nEtaBins; ++uEta ) {
     // Create histograms
     dirsOutObjCatSubFitEta_.back().at( uEta )->cd();
@@ -314,16 +333,43 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
     const std::string binEta( gDirectory->GetName() );
     const std::string nameEta( name + "_" + binEta );
     HistosTransEta histosTransEta( objCat, nameEta, configObjDeltaPtBins, configObjDeltaPtMax, nPtBins, dataContainer.ptBins(), titleTrans_, baseTitlePt_, titlePtT_, titlePt_, titleEta_ );
+    std::vector< HistosTransEta > histosVecTransEtaNpv;
+    if ( npvBinning_ ) {
+      for ( unsigned uNpv = 0; uNpv < nNpvBins; ++uNpv ) {
+        const std::string binNpv( boost::lexical_cast< std::string >( uNpv ) );
+        const std::string nameEtaNpv( nameEta + "_NPV" + binNpv );
+        HistosTransEta histosTransEtaNpv( histosTransEta, nameEtaNpv, baseTitlePt_ );
+        histosVecTransEtaNpv.push_back( histosTransEtaNpv );
+      }
+    }
     // Fill
     if ( objCat == "UdscJet" || objCat == "BJet" ) {
-      fillPerCategoryBin( uEta, histosTrans, histosTransEta, configObjMinPt, configObjMaxEta, configObjMaxDR, configObjMinCSV, configObjMaxCSV );
+      fillPerCategoryBin( uEta, npvBins_.size(), histosTrans, histosTransEta, configObjMinPt, configObjMaxEta, configObjMaxDR, configObjMinCSV, configObjMaxCSV );
     }
     else {
-      fillPerCategoryBin( uEta, histosTrans, histosTransEta, configObjMinPt, configObjMaxEta, configObjMaxCSV );
+      fillPerCategoryBin( uEta, npvBins_.size(), histosTrans, histosTransEta, configObjMinPt, configObjMaxEta, configObjMaxCSV );
     }
     histosVecTransEta.push_back( histosTransEta );
+    if ( npvBinning_ ) {
+      for ( unsigned uNpv = 0; uNpv < nNpvBins; ++uNpv ) {
+        if ( objCat == "UdscJet" || objCat == "BJet" ) {
+          fillPerCategoryBin( uEta, uNpv, histosVecTransNpv.at( uNpv ), histosVecTransEtaNpv.at( uNpv ), configObjMinPt, configObjMaxEta, configObjMaxDR, configObjMinCSV, configObjMaxCSV );
+        }
+        else {
+          fillPerCategoryBin( uEta, uNpv, histosVecTransNpv.at( uNpv ), histosVecTransEtaNpv.at( uNpv ), configObjMinPt, configObjMaxEta, configObjMaxCSV );
+        }
+      }
+    }
+    histosVecVecTransEtaNpv.push_back( histosVecTransEtaNpv );
   } // loop:uEta < nEtaBins
-  if ( plot_ ) plotFillPerCategoryBin( histosTrans );
+  if ( plot_ ) {
+    plotFillPerCategoryBin( histosTrans );
+    if ( npvBinning_ ) {
+      for ( unsigned uNpv = 0; uNpv < nNpvBins; ++uNpv ) {
+        plotFillPerCategoryBin( histosVecTransNpv.at( uNpv ) );
+      }
+    }
+  }
 
   // Add scaled histograms
   if ( fit2D_ ) {
@@ -338,32 +384,66 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
     if ( verbose_ > 2 ) gDirectory->pwd();
     std::string nameScale( name + "_Scale" );
     HistosTrans histosScaleTrans( histosTrans, nameScale, baseTitlePt_, true );
+    std::vector< HistosTrans > histosVecScaleTransNpv;
+    if ( npvBinning_ ) {
+      for ( unsigned uNpv = 0; uNpv < nNpvBins; ++uNpv ) {
+        const std::string binNpv( boost::lexical_cast< std::string >( uNpv ) );
+        const std::string nameScaleNpv( nameScale + "_NPV" + binNpv );
+        HistosTrans histosScaleTransNpv( histosVecTransNpv.at( uNpv ), nameScaleNpv, baseTitlePt_, true );
+        histosVecScaleTransNpv.push_back( histosScaleTransNpv );
+      }
+    }
     histosVecScaleTrans_.push_back( histosScaleTrans );
+    histosVecScaleTransVecNpv_.push_back( histosVecScaleTransNpv );
     // Loop over eta bins
     if ( fitEtaBins_ ) {
-      std::vector< HistosTransEta > histosScaleVecTransEta;
+      std::vector< HistosTransEta > histosVecScaleTransEta;
+      std::vector< std::vector< HistosTransEta > > histosVecVecScaleTransEtaNpv;
       for ( unsigned uEta = 0; uEta < nEtaBins; ++uEta ) {
         // Create histograms
         dirsOutObjCatSubFitEta_.back().at( uEta )->cd();
         if ( verbose_ > 2 ) gDirectory->pwd();
         const std::string binEta( gDirectory->GetName() );
-        const std::string nameEtaScale( nameScale + "_" + binEta );
-        HistosTransEta histosScaleTransEta( histosVecTransEta.at( uEta ), nameEtaScale, baseTitlePt_, true );
-        // Fill
-        histosScaleVecTransEta.push_back( histosScaleTransEta );
+        const std::string nameScaleEta( nameScale + "_" + binEta );
+        HistosTransEta histosScaleTransEta( histosVecTransEta.at( uEta ), nameScaleEta, baseTitlePt_, true );
+        std::vector< HistosTransEta > histosVecScaleTransEtaNpv;
+        if ( npvBinning_ ) {
+          for ( unsigned uNpv = 0; uNpv < nNpvBins; ++uNpv ) {
+            const std::string binNpv( boost::lexical_cast< std::string >( uNpv ) );
+            const std::string nameScaleEtaNpv( nameScaleEta + "_NPV" + binNpv );
+            HistosTransEta histosScaleTransEtaNpv( histosScaleTransEta, nameScaleEtaNpv, baseTitlePt_, true );
+            histosVecScaleTransEtaNpv.push_back( histosScaleTransEtaNpv );
+          }
+        }
+        histosVecScaleTransEta.push_back( histosScaleTransEta );
+        histosVecVecScaleTransEtaNpv.push_back( histosVecScaleTransEtaNpv );
       } // loop:uEta < nEtaBins
-      histosVecScaleVecTransEta_.push_back( histosScaleVecTransEta );
+      histosVecScaleTransVecEta_.push_back( histosVecScaleTransEta );
+      histosVecScaleTransVecEtaVecNpv_.push_back( histosVecVecScaleTransEtaNpv );
     }
     // Plot
     if ( plot_ ) {
-      plotFillPerCategoryBin( histosScaleTrans );
       TCanvas canvas;
+      plotFillPerCategoryBin( histosScaleTrans );
       histosVecScaleTrans_.back().histTransScaleMapPt->Draw( "ColZ" );
       for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosVecScaleTrans_.back().histTransScaleMapPt->GetName() + "." + formatPlots_.at( uForm )  ).c_str() );
+      if ( npvBinning_ ) {
+        for ( unsigned uNpv = 0; uNpv < nNpvBins; ++uNpv ) {
+          plotFillPerCategoryBin( histosVecScaleTransNpv.at( uNpv ) );
+          histosVecScaleTransVecNpv_.back().at( uNpv ).histTransScaleMapPt->Draw( "ColZ" );
+          for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosVecScaleTransVecNpv_.back().at( uNpv ).histTransScaleMapPt->GetName() + "." + formatPlots_.at( uForm )  ).c_str() );
+        }
+      }
       if ( fitEtaBins_ ) {
         for ( unsigned uEta = 0; uEta < nEtaBins; ++uEta ) {
-          histosVecScaleVecTransEta_.back().at( uEta ).histTransScaleMapPt->Draw( "ColZ" );
-          for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosVecScaleVecTransEta_.back().at( uEta ).histTransScaleMapPt->GetName() + "." + formatPlots_.at( uForm )  ).c_str() );
+          histosVecScaleTransVecEta_.back().at( uEta ).histTransScaleMapPt->Draw( "ColZ" );
+          for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosVecScaleTransVecEta_.back().at( uEta ).histTransScaleMapPt->GetName() + "." + formatPlots_.at( uForm )  ).c_str() );
+          if ( npvBinning_ ) {
+            for ( unsigned uNpv = 0; uNpv < nNpvBins; ++uNpv ) {
+              histosVecScaleTransVecEtaVecNpv_.back().at( uEta ).at( uNpv ).histTransScaleMapPt->Draw( "ColZ" );
+              for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosVecScaleTransVecEtaVecNpv_.back().at( uEta ).at( uNpv ).histTransScaleMapPt->GetName() + "." + formatPlots_.at( uForm )  ).c_str() );
+            }
+          }
         }
       }
     }
@@ -384,9 +464,19 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
     if ( verbose_ > 2 ) gDirectory->pwd();
     const std::string nameRebin( name + "_Rebin" );
     HistosTrans histosRebinTrans( objCat, nameRebin, configObjDeltaPtBins, configObjDeltaPtMax, nPtBins, dataContainer.ptBins(), nEtaBins, dataContainer.etaBins(), titleTrans_, baseTitlePt_, titlePtT_, titlePt_, titleEta_, histosTrans, configObjWidthFactor );
+    std::vector< HistosTrans > histosVecRebinTransNpv;
+    if ( npvBinning_ ) {
+      for ( unsigned uNpv = 0; uNpv < nNpvBins; ++uNpv ) {
+        const std::string binNpv( boost::lexical_cast< std::string >( uNpv ) );
+        const std::string nameRebinNpv( nameRebin + "_NPV" + binNpv );
+        HistosTrans histosRebinTransNpv( histosRebinTrans, nameRebinNpv, baseTitlePt_ );
+        histosVecRebinTransNpv.push_back( histosRebinTransNpv );
+      }
+    }
 
     // Loop over eta bins
-    std::vector< HistosTransEta > histosRebinVecTransEta;
+    std::vector< HistosTransEta > histosVecRebinTransEta;
+    std::vector< std::vector< HistosTransEta > > histosVecVecRebinTransEtaNpv;
     for ( unsigned uEta = 0; uEta < nEtaBins; ++uEta ) {
       // Create histograms
       dirsOutObjCatSubFitEta_.back().at( uEta )->cd();
@@ -394,17 +484,41 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
       const std::string binEta( gDirectory->GetName() );
       const std::string nameEtaRebin( nameRebin + "_" + binEta );
       HistosTransEta histosRebinTransEta( objCat, nameEtaRebin, configObjDeltaPtBins, configObjDeltaPtMax, nPtBins, dataContainer.ptBins(), titleTrans_, baseTitlePt_, titlePtT_, titlePt_, titleEta_, histosVecTransEta.at( uEta), configObjWidthFactor );
+      std::vector< HistosTransEta > histosVecRebinTransEtaNpv;
+      if ( npvBinning_ ) {
+        for ( unsigned uNpv = 0; uNpv < nNpvBins; ++uNpv ) {
+          const std::string binNpv( boost::lexical_cast< std::string >( uNpv ) );
+          const std::string nameEtaRebinNpv( nameEtaRebin + "_NPV" + binNpv );
+          HistosTransEta histosRebinTransEtaNpv( histosRebinTransEta, nameEtaRebinNpv, baseTitlePt_ );
+          histosVecRebinTransEtaNpv.push_back( histosRebinTransEtaNpv );
+        }
+      }
       // Fill
       if ( objCat == "UdscJet" || objCat == "BJet" ) {
-        fillPerCategoryBin( uEta, histosRebinTrans, histosRebinTransEta, configObjMinPt, configObjMaxEta, configObjMaxDR, configObjMinCSV, configObjMaxCSV, true );
+        fillPerCategoryBin( uEta, npvBins_.size(), histosRebinTrans, histosRebinTransEta, configObjMinPt, configObjMaxEta, configObjMaxDR, configObjMinCSV, configObjMaxCSV, true );
       }
       else {
-        fillPerCategoryBin( uEta, histosRebinTrans, histosRebinTransEta, configObjMinPt, configObjMaxEta, configObjMaxCSV, true );
+        fillPerCategoryBin( uEta, npvBins_.size(), histosRebinTrans, histosRebinTransEta, configObjMinPt, configObjMaxEta, configObjMaxCSV, true );
       }
-      histosRebinVecTransEta.push_back( histosRebinTransEta );
+      histosVecRebinTransEta.push_back( histosRebinTransEta );
+      if ( npvBinning_ ) {
+        for ( unsigned uNpv = 0; uNpv < nNpvBins; ++uNpv ) {
+          if ( objCat == "UdscJet" || objCat == "BJet" ) {
+          fillPerCategoryBin( uEta, uNpv, histosVecRebinTransNpv.at( uNpv ), histosVecRebinTransEtaNpv.at( uNpv ), configObjMinPt, configObjMaxEta, configObjMaxDR, configObjMinCSV, configObjMaxCSV );
+          }
+          else {
+          fillPerCategoryBin( uEta, uNpv, histosVecRebinTransNpv.at( uNpv ), histosVecRebinTransEtaNpv.at( uNpv ), configObjMinPt, configObjMaxEta, configObjMaxCSV );
+          }
+        }
+      }
+      histosVecVecRebinTransEtaNpv.push_back( histosVecRebinTransEtaNpv );
     } // loop:uEta < nEtaBins
     histosVecRebinTrans_.push_back( histosRebinTrans );
-    if ( fitEtaBins_ ) histosVecRebinVecTransEta_.push_back( histosRebinVecTransEta );
+    histosVecRebinTransVecNpv_.push_back( histosVecRebinTransNpv );
+    if ( fitEtaBins_ ) {
+      histosVecRebinTransVecEta_.push_back( histosVecRebinTransEta );
+      histosVecRebinTransVecEtaVecNpv_.push_back( histosVecVecRebinTransEtaNpv );
+    }
 
     // Add scaled re-binned histograms
     if ( verbose_ > 2 ) {
@@ -418,20 +532,42 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
     std::string nameRebinScale( name + "_RebinScale" );
     HistosTrans histosRebinScaleTrans( histosRebinTrans, nameRebinScale, baseTitlePt_, true );
     histosVecRebinScaleTrans_.push_back( histosRebinScaleTrans );
+    std::vector< HistosTrans > histosVecRebinScaleTransNpv;
+    if ( npvBinning_ ) {
+      for ( unsigned uNpv = 0; uNpv < nNpvBins; ++uNpv ) {
+        const std::string binNpv( boost::lexical_cast< std::string >( uNpv ) );
+        const std::string nameRebinScaleNpv( nameRebinScale + "_NPV" + binNpv );
+        HistosTrans histosRebinScaleTransNpv( histosVecRebinTransNpv.at( uNpv ), nameRebinScaleNpv, baseTitlePt_ );
+        histosVecRebinScaleTransNpv.push_back( histosRebinScaleTransNpv );
+      }
+    }
+    histosVecRebinScaleTransVecNpv_.push_back( histosVecRebinScaleTransNpv );
     // Loop over eta bins
     if ( fitEtaBins_ ) {
-      std::vector< HistosTransEta > histosRebinScaleVecTransEta;
+      std::vector< HistosTransEta > histosVecRebinScaleTransEta;
+      std::vector< std::vector< HistosTransEta > > histosVecVecRebinScaleTransEtaNpv;
       for ( unsigned uEta = 0; uEta < nEtaBins; ++uEta ) {
         // Create histograms
         dirsOutObjCatSubFitEta_.back().at( uEta )->cd();
         if ( verbose_ > 2 ) gDirectory->pwd();
         const std::string binEta( gDirectory->GetName() );
         const std::string nameEtaRebinScale( nameRebinScale + "_" + binEta );
-        HistosTransEta histosRebinScaleTransEta( histosVecRebinVecTransEta_.back().at( uEta ), nameEtaRebinScale, baseTitlePt_, true );
+        HistosTransEta histosRebinScaleTransEta( histosVecRebinTransEta.at( uEta ), nameEtaRebinScale, baseTitlePt_, true );
         // Fill
-        histosRebinScaleVecTransEta.push_back( histosRebinScaleTransEta );
+        histosVecRebinScaleTransEta.push_back( histosRebinScaleTransEta );
+        std::vector< HistosTransEta > histosVecRebinScaleTransEtaNpv;
+        if ( npvBinning_ ) {
+          for ( unsigned uNpv = 0; uNpv < nNpvBins; ++uNpv ) {
+            const std::string binNpv( boost::lexical_cast< std::string >( uNpv ) );
+            const std::string nameEtaRebinScaleNpv( nameEtaRebinScale + "_NPV" + binNpv );
+            HistosTransEta histosRebinScaleTransEtaNpv( histosVecVecRebinTransEtaNpv.at( uEta ).at( uNpv ), nameEtaRebinScaleNpv, baseTitlePt_, true );
+            histosVecRebinScaleTransEtaNpv.push_back( histosRebinScaleTransEtaNpv );
+          }
+          histosVecVecRebinScaleTransEtaNpv.push_back( histosVecRebinScaleTransEtaNpv );
+        }
       } // loop:uEta < nEtaBins
-      histosVecRebinScaleVecTransEta_.push_back( histosRebinScaleVecTransEta );
+      histosVecRebinScaleTransVecEta_.push_back( histosVecRebinScaleTransEta );
+      histosVecRebinScaleTransVecEtaVecNpv_.push_back( histosVecVecRebinScaleTransEtaNpv );
     }
 
   }
@@ -441,7 +577,7 @@ bool FitTopTransferFunctionsRunner::fillPerCategory( unsigned uCat )
 }
 
 
-void FitTopTransferFunctionsRunner::fillPerCategoryBin( unsigned uEta, HistosTrans& histosTrans, HistosTransEta& histosTransEta, double minPt, double maxEta, double maxDR, bool rebin )
+void FitTopTransferFunctionsRunner::fillPerCategoryBin( unsigned uEta, unsigned uNpv, HistosTrans& histosTrans, HistosTransEta& histosTransEta, double minPt, double maxEta, double maxDR, bool rebin )
 {
   TCanvas canvas;
   // Loop over pt bins
@@ -451,7 +587,49 @@ void FitTopTransferFunctionsRunner::fillPerCategoryBin( unsigned uEta, HistosTra
     for ( unsigned uEntry = 0; uEntry < objectData_.back().sizePt( uEta, uPt ); ++uEntry ) {
       const Double_t ptRef( refGen_ ? objectData_.back().ptGenPt( uEta, uPt ).at( uEntry ) : objectData_.back().ptPt( uEta, uPt ).at( uEntry ) );
       const Double_t etaRef( refGen_ ? objectData_.back().etaGenPt( uEta, uPt ).at( uEntry ) : objectData_.back().etaPt( uEta, uPt ).at( uEntry ) );
-      if ( ptRef >= minPt && std::fabs( etaRef ) < maxEta && reco::deltaR( objectData_.back().etaGenPt( uEta, uPt ).at( uEntry ), objectData_.back().phiGenPt( uEta, uPt ).at( uEntry ), objectData_.back().etaPt( uEta, uPt ).at( uEntry ), objectData_.back().phiPt( uEta, uPt ).at( uEntry ) ) <= maxDR ) {
+      if ( uNpv != npvBins_.size() && ( npvBins_.at( uNpv ) > objectData_.back().NPVObservedPt( uEta, uPt ).at( uEntry ) || objectData_.back().NPVObservedPt( uEta, uPt ).at( uEntry ) >= npvBins_.at( uNpv + 1 ) ) ) continue;
+      if ( ptRef < minPt  ) continue;
+      if ( std::fabs( etaRef ) >= maxEta ) continue;
+      if ( reco::deltaR( objectData_.back().etaGenPt( uEta, uPt ).at( uEntry ), objectData_.back().phiGenPt( uEta, uPt ).at( uEntry ), objectData_.back().etaPt( uEta, uPt ).at( uEntry ), objectData_.back().phiPt( uEta, uPt ).at( uEntry ) ) > maxDR ) continue;
+      const Double_t value( refGen_ ? objectData_.back().ptGenPt( uEta, uPt ).at( uEntry ) - objectData_.back().ptPt( uEta, uPt ).at( uEntry ) : objectData_.back().ptPt( uEta, uPt ).at( uEntry ) - objectData_.back().ptGenPt( uEta, uPt ).at( uEntry ) );
+      const Double_t weight( objectData_.back().weightPt( uEta, uPt ).at( uEntry ) );
+      if ( fitEtaBins_ ) histosTransEta.histVecPtTrans.at( uPt )->Fill( value, weight );
+      histosTrans.histVecPtTrans.at( uPt )->Fill( value, weight );
+      if ( fitEtaBins_ ) histosTransEta.histTrans->Fill( value, weight );
+      histosTrans.histTrans->Fill( value, weight );
+      if ( ! rebin ) {
+        const Double_t etaGenSymm( useSymm_ ? std::fabs( objectData_.back().etaGenPt( uEta, uPt ).at( uEntry ) ) : objectData_.back().etaGenPt( uEta, uPt ).at( uEntry ) );
+        const Double_t etaSymm( useSymm_ ? std::fabs( objectData_.back().etaPt( uEta, uPt ).at( uEntry ) ) : objectData_.back().etaPt( uEta, uPt ).at( uEntry ) );
+        const Double_t etaRef( refGen_ ? etaGenSymm : etaSymm );
+        if ( fitEtaBins_ ) histosTransEta.histTransMapPt->Fill( ptRef, value, weight );
+        histosTrans.histVecPtTransMapEta.at( uPt )->Fill( etaRef, value, weight);
+        histosTrans.histTransMapPt->Fill( ptRef, value, weight );
+        histosTrans.histTransMapEta->Fill( etaRef, value, weight );
+      }
+    } // loop: uEntry < objectData_.back().sizePt( uEta, uPt )
+  } // loop:uPt < nPtBins
+  if ( plot_ && ( ! rebin ) && fitEtaBins_ && ( npvBinning_ || uNpv == npvBins_.size() ) ) {
+    histosTransEta.histTransMapPt->Draw( "ColZ" );
+    for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosTransEta.histTransMapPt->GetName() + "." + formatPlots_.at( uForm )  ).c_str() );
+  }
+}
+
+
+void FitTopTransferFunctionsRunner::fillPerCategoryBin( unsigned uEta, unsigned uNpv, HistosTrans& histosTrans, HistosTransEta& histosTransEta, double minPt, double maxEta, double maxDR, double minCSV, double maxCSV, bool rebin )
+{
+  TCanvas canvas;
+  // Loop over pt bins
+  for ( unsigned uPt = 0; uPt < objectData_.back().nPtBins(); ++uPt ) {
+    if ( objectData_.back().sizePt( uEta, uPt ) == 0 ) continue;
+    // Loop over entries
+    for ( unsigned uEntry = 0; uEntry < objectData_.back().sizePt( uEta, uPt ); ++uEntry ) {
+      const Double_t ptRef( refGen_ ? objectData_.back().ptGenPt( uEta, uPt ).at( uEntry ) : objectData_.back().ptPt( uEta, uPt ).at( uEntry ) );
+      const Double_t etaRef( refGen_ ? objectData_.back().etaGenPt( uEta, uPt ).at( uEntry ) : objectData_.back().etaPt( uEta, uPt ).at( uEntry ) );
+      if ( uNpv != npvBins_.size() && ( npvBins_.at( uNpv ) > objectData_.back().NPVObservedPt( uEta, uPt ).at( uEntry ) || objectData_.back().NPVObservedPt( uEta, uPt ).at( uEntry ) >= npvBins_.at( uNpv + 1 ) ) ) continue;
+      if ( ptRef < minPt  ) continue;
+      if ( std::fabs( etaRef ) >= maxEta ) continue;
+      if ( reco::deltaR( objectData_.back().etaGenPt( uEta, uPt ).at( uEntry ), objectData_.back().phiGenPt( uEta, uPt ).at( uEntry ), objectData_.back().etaPt( uEta, uPt ).at( uEntry ), objectData_.back().phiPt( uEta, uPt ).at( uEntry ) ) > maxDR ) continue;
+      if ( minCSV < objectData_.back().tagCSVPt( uEta, uPt ).at( uEntry ) && objectData_.back().tagCSVPt( uEta, uPt ).at( uEntry ) <= maxCSV ) {
         const Double_t value( refGen_ ? objectData_.back().ptGenPt( uEta, uPt ).at( uEntry ) - objectData_.back().ptPt( uEta, uPt ).at( uEntry ) : objectData_.back().ptPt( uEta, uPt ).at( uEntry ) - objectData_.back().ptGenPt( uEta, uPt ).at( uEntry ) );
         const Double_t weight( objectData_.back().weightPt( uEta, uPt ).at( uEntry ) );
         if ( fitEtaBins_ ) histosTransEta.histVecPtTrans.at( uPt )->Fill( value, weight );
@@ -470,45 +648,7 @@ void FitTopTransferFunctionsRunner::fillPerCategoryBin( unsigned uEta, HistosTra
       }
     } // loop: uEntry < objectData_.back().sizePt( uEta, uPt )
   } // loop:uPt < nPtBins
-  if ( plot_ && ( ! rebin ) && fitEtaBins_ ) {
-    histosTransEta.histTransMapPt->Draw( "ColZ" );
-    for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosTransEta.histTransMapPt->GetName() + "." + formatPlots_.at( uForm )  ).c_str() );
-  }
-}
-
-
-void FitTopTransferFunctionsRunner::fillPerCategoryBin( unsigned uEta, HistosTrans& histosTrans, HistosTransEta& histosTransEta, double minPt, double maxEta, double maxDR, double minCSV, double maxCSV, bool rebin )
-{
-  TCanvas canvas;
-  // Loop over pt bins
-  for ( unsigned uPt = 0; uPt < objectData_.back().nPtBins(); ++uPt ) {
-    if ( objectData_.back().sizePt( uEta, uPt ) == 0 ) continue;
-    // Loop over entries
-    for ( unsigned uEntry = 0; uEntry < objectData_.back().sizePt( uEta, uPt ); ++uEntry ) {
-      const Double_t ptRef( refGen_ ? objectData_.back().ptGenPt( uEta, uPt ).at( uEntry ) : objectData_.back().ptPt( uEta, uPt ).at( uEntry ) );
-      const Double_t etaRef( refGen_ ? objectData_.back().etaGenPt( uEta, uPt ).at( uEntry ) : objectData_.back().etaPt( uEta, uPt ).at( uEntry ) );
-      if ( ptRef >= minPt && std::fabs( etaRef ) < maxEta && reco::deltaR( objectData_.back().etaGenPt( uEta, uPt ).at( uEntry ), objectData_.back().phiGenPt( uEta, uPt ).at( uEntry ), objectData_.back().etaPt( uEta, uPt ).at( uEntry ), objectData_.back().phiPt( uEta, uPt ).at( uEntry ) ) <= maxDR ) {
-        if ( minCSV < objectData_.back().tagCSVPt( uEta, uPt ).at( uEntry ) && objectData_.back().tagCSVPt( uEta, uPt ).at( uEntry ) <= maxCSV ) {
-          const Double_t value( refGen_ ? objectData_.back().ptGenPt( uEta, uPt ).at( uEntry ) - objectData_.back().ptPt( uEta, uPt ).at( uEntry ) : objectData_.back().ptPt( uEta, uPt ).at( uEntry ) - objectData_.back().ptGenPt( uEta, uPt ).at( uEntry ) );
-          const Double_t weight( objectData_.back().weightPt( uEta, uPt ).at( uEntry ) );
-          if ( fitEtaBins_ ) histosTransEta.histVecPtTrans.at( uPt )->Fill( value, weight );
-          histosTrans.histVecPtTrans.at( uPt )->Fill( value, weight );
-          if ( fitEtaBins_ ) histosTransEta.histTrans->Fill( value, weight );
-          histosTrans.histTrans->Fill( value, weight );
-          if ( ! rebin ) {
-            const Double_t etaGenSymm( useSymm_ ? std::fabs( objectData_.back().etaGenPt( uEta, uPt ).at( uEntry ) ) : objectData_.back().etaGenPt( uEta, uPt ).at( uEntry ) );
-            const Double_t etaSymm( useSymm_ ? std::fabs( objectData_.back().etaPt( uEta, uPt ).at( uEntry ) ) : objectData_.back().etaPt( uEta, uPt ).at( uEntry ) );
-            const Double_t etaRef( refGen_ ? etaGenSymm : etaSymm );
-            if ( fitEtaBins_ ) histosTransEta.histTransMapPt->Fill( ptRef, value, weight );
-            histosTrans.histVecPtTransMapEta.at( uPt )->Fill( etaRef, value, weight);
-            histosTrans.histTransMapPt->Fill( ptRef, value, weight );
-            histosTrans.histTransMapEta->Fill( etaRef, value, weight );
-          }
-        }
-      }
-    } // loop: uEntry < objectData_.back().sizePt( uEta, uPt )
-  } // loop:uPt < nPtBins
-  if ( plot_ && ( ! rebin ) && fitEtaBins_ ) {
+  if ( plot_ && ( ! rebin ) && fitEtaBins_ && ( npvBinning_ || uNpv == npvBins_.size() ) ) {
     histosTransEta.histTransMapPt->Draw( "ColZ" );
     for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosTransEta.histTransMapPt->GetName() + "." + formatPlots_.at( uForm )  ).c_str() );
   }
@@ -804,15 +944,30 @@ void FitTopTransferFunctionsRunner::fitPerCategoryLoop( const std::string& objCa
               << "    Fitting scaled distributions... " << std::endl;
   }
 
+  unsigned nNpvBins( npvBins_.size() );
+  if ( nNpvBins > 0 ) --nNpvBins;
+
   fitPerCategoryBin( objCat, dirsOutObjCatSubFit_.back(), transferVecRebinScale_.back(), transferVecRebinScaleVecPt_.back(), histosVecRebinScaleTrans_.back(), histosVecRebinScaleDependency_ );
+  if ( npvBinning_ ) {
+    dirsOutObjCatSubFit_.back()->cd();
+    for ( unsigned uNpv = 0; uNpv < nNpvBins; ++uNpv ) {
+      fitPerCategoryBin( objCat, histosVecRebinScaleTransVecNpv_.back().at( uNpv ) );
+    }
+  }
 
   // Loop over eta bins
   if ( fitEtaBins_ ) {
     std::vector< HistosDependency > histosVecDependencyEta;
     for ( unsigned uEta = 0; uEta < dirsOutObjCatSubFitEta_.back().size(); ++uEta ) {
-      fitPerCategoryBin( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecRebinScaleVecEta_.back().at( uEta ), transferVecRebinScaleVecEtaVecPt_.back().at( uEta ), histosVecRebinScaleVecTransEta_.back().at( uEta ), histosVecDependencyEta );
+      fitPerCategoryBin( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecRebinScaleVecEta_.back().at( uEta ), transferVecRebinScaleVecEtaVecPt_.back().at( uEta ), histosVecRebinScaleTransVecEta_.back().at( uEta ), histosVecDependencyEta );
+      if ( npvBinning_ ) {
+        dirsOutObjCatSubFitEta_.back().at( uEta )->cd();
+        for ( unsigned uNpv = 0; uNpv < nNpvBins; ++uNpv ) {
+          fitPerCategoryBin( objCat, histosVecRebinScaleTransVecEtaVecNpv_.back().at( uEta ).at( uNpv ) );
+        }
+      }
     } // loop: uEta < nEtaBins
-    histosVecRebinScaleVecDependencyEta_.push_back( histosVecDependencyEta );
+    histosVecRebinScaleDependencyVecEta_.push_back( histosVecDependencyEta );
   }
 }
 
@@ -848,6 +1003,44 @@ void FitTopTransferFunctionsRunner::fitPerCategoryBin( const std::string& objCat
         histosDependency.legVecPtPar.at( uPar )->Draw();
         for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histosDependency.histVecPtPar.at( uPar )->GetName() + "." + formatPlots_.at( uForm ) ).c_str() );
       }
+    }
+  }
+}
+
+
+void FitTopTransferFunctionsRunner::fitPerCategoryBin( const std::string& objCat, HistosTransEta& histosTransEta )
+{
+  TH1D* histTrans( histosTransEta.histTrans );
+  fitPerCategoryFit( histTrans, -1 );
+  if ( plot_ ) {
+    TCanvas canvas;
+    histTrans->Draw();
+    TLegend* legend( histosTransEta.legTrans );
+    std::string header( legend->GetHeader() );
+    header += ", scaled";
+    const TList* funcList( histTrans->GetListOfFunctions() );
+    legend->SetHeader( header.c_str() );
+    legend->AddEntry( histTrans, "MC", "LEP" );
+    legend->AddEntry( funcList->First(), "fitted 1-D transfer function", "L" );
+    legend->Draw();
+    for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histTrans->GetName() + "." + formatPlots_.at( uForm ) ).c_str() );
+  }
+
+  for ( unsigned uPt = 0; uPt < histosTransEta.histVecPtTrans.size(); ++uPt ) {
+    TH1D* histTransPt( histosTransEta.histVecPtTrans.at( uPt ) );
+    fitPerCategoryFit( histTransPt, uPt );
+    if ( plot_ ) {
+      TCanvas canvas;
+      histTransPt->Draw();
+      TLegend* legend( histosTransEta.legVecPtTrans.at( uPt ) );
+      std::string header( legend->GetHeader() );
+      header += ", scaled";
+      const TList* funcList( histTransPt->GetListOfFunctions() );
+      legend->SetHeader( header.c_str() );
+      legend->AddEntry( histTransPt, "MC", "LEP" );
+      legend->AddEntry( funcList->First(), "fitted 1-D transfer function", "L" );
+      legend->Draw();
+      for ( unsigned uForm = 0; uForm < formatPlots_.size(); ++uForm ) canvas.Print( std::string( pathPlots_ + histTransPt->GetName() + "." + formatPlots_.at( uForm ) ).c_str() );
     }
   }
 }
@@ -906,6 +1099,36 @@ void FitTopTransferFunctionsRunner::fitPerCategoryFit( TransferFunction& transfe
 }
 
 
+void FitTopTransferFunctionsRunner::fitPerCategoryFit( TH1D* histoTrans, int uPt )
+{
+  const Int_t nParFit( fitFunction_->GetNpar() );
+  const std::string nameTrans( histoTrans->GetName() );
+  const std::string nameTransFit( nameTrans + "_fit" );
+  TF1* fitTrans( new TF1( nameTransFit.c_str(), fitFunction_, std::max( histoTrans->GetXaxis()->GetXmin(), histoTrans->GetMean() - histoTrans->GetRMS() * fitRange_ ), std::min( histoTrans->GetXaxis()->GetXmax(), histoTrans->GetMean() + histoTrans->GetRMS() * fitRange_ ), nParFit ) );
+  initialiseFitParameters( fitTrans, &*histoTrans, fitFuncID_, true );
+  TFitResultPtr fitTransResultPtr( histoTrans->Fit( fitTrans, fitOptions_.c_str() ) );
+  if ( fitTransResultPtr >= 0 ) {
+    if ( verbose_ > 0 ) {
+      if ( histoTrans->GetEntries() < minEntriesFactor_ * histoTrans->GetNbinsX() || fitTransResultPtr->Status() == 0 || fitTransResultPtr->Prob() > 0. || fitTransResultPtr->Ndf() != 0. || std::find( excludeVec_.begin(), excludeVec_.end(), uPt ) == excludeVec_.end() ) {
+        std::cout << myName_ << " --> WARNING:" << std::endl
+                  << "    failing fit in directory "; gDirectory->pwd();
+        std::cout << "    '" << nameTrans << "'" << std::endl;
+        if ( fitTransResultPtr->Status() != 0 ) std::cout << "         status: " << fitTransResultPtr->Status() << std::endl;
+        if ( fitTransResultPtr->Prob() <= 0. )  std::cout << "         prob  : " << fitTransResultPtr->Prob()   << std::endl;
+        if ( fitTransResultPtr->Ndf() == 0. )   std::cout << "         ndf   : " << fitTransResultPtr->Ndf()    << std::endl;
+      }
+    }
+  }
+  else {
+    if ( verbose_ > 0 ) {
+      std::cout << myName_ << " --> WARNING:" << std::endl
+                << "    missing fit in directory "; gDirectory->pwd();
+      std::cout << "    '" << nameTrans << std::endl;
+    }
+  }
+}
+
+
 bool FitTopTransferFunctionsRunner::dependencyPerCategory( unsigned uCat )
 {
 
@@ -936,7 +1159,7 @@ void FitTopTransferFunctionsRunner::dependencyPerCategoryLoop( const std::string
   // Loop over eta bins
   if ( fitEtaBins_ ) {
     for ( unsigned uEta = 0; uEta < dirsOutObjCatSubFitEta_.back().size(); ++uEta ) {
-      dependencyPerCategoryBin( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecRebinScaleVecEta_.back().at( uEta ), histosVecRebinScaleVecDependencyEta_.back().at( uEta ) );
+      dependencyPerCategoryBin( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecRebinScaleVecEta_.back().at( uEta ), histosVecRebinScaleDependencyVecEta_.back().at( uEta ) );
     } // loop: uEta < nEtaBins
   }
 }
@@ -1045,12 +1268,16 @@ void FitTopTransferFunctionsRunner::transferPerCategoryLoop( const std::string& 
 
   if ( fit0D_ || fit1D_ ) transferPerCategoryBin( objCat, dirsOutObjCatSubFit_.back(), transferVecRebinScale_.back(), histosVecRebinScaleTrans_.back() );
   if ( fit2D_ ) transferPerCategoryFit( objCat, dirsOutObjCatSubFit_.back(), transferVecScale_.back(), histosVecScaleTrans_.back() );
+//   if ( npvBinning_ ) {
+//     for ( unsigned uNpv = 0; uNpv < nNpvBins; ++uNpv ) {
+//     }
+//   }
 
   // Loop over eta bins
   if ( fitEtaBins_ ) {
     for ( unsigned uEta = 0; uEta < dirsOutObjCatSubFitEta_.back().size(); ++uEta ) {
-      if ( fit0D_ || fit1D_ ) transferPerCategoryBin( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecRebinScaleVecEta_.back().at( uEta ), histosVecRebinScaleVecTransEta_.back().at( uEta ) );
-      if ( fit2D_ ) transferPerCategoryFit( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecScaleVecEta_.back().at( uEta ), histosVecScaleVecTransEta_.back().at( uEta ) );
+      if ( fit0D_ || fit1D_ ) transferPerCategoryBin( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecRebinScaleVecEta_.back().at( uEta ), histosVecRebinScaleTransVecEta_.back().at( uEta ) );
+      if ( fit2D_ ) transferPerCategoryFit( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecScaleVecEta_.back().at( uEta ), histosVecScaleTransVecEta_.back().at( uEta ) );
     } // loop: uEta < nEtaBins
   }
 }
@@ -1097,7 +1324,6 @@ void FitTopTransferFunctionsRunner::transferPerCategoryBin( const std::string& o
   }
   if ( plot_ ) {
     TCanvas canvas;
-//     histosTransEta.histVecPtTrans.at( uPt )->Draw();
     histosTransEta.histTrans->Draw();
     TLegend* legend( histosTransEta.legTrans );
     std::string header( legend->GetHeader() );
@@ -1257,7 +1483,7 @@ void FitTopTransferFunctionsRunner::compatibilityPerCategoryLoop( const std::str
     avPChi2VecRebinScaleTransEta_.push_back( std::vector< Double_t >() );
     avPKSVecRebinScaleTransEta_.push_back( std::vector< Double_t >() );
     for ( unsigned uEta = 0; uEta < dirsOutObjCatSubFitEta_.back().size(); ++uEta ) {
-      compatibilityPerCategoryBin( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecRebinScaleVecEta_.back().at( uEta ), histosVecRebinVecTransEta_.back().at( uEta ), uEta );
+      compatibilityPerCategoryBin( objCat, dirsOutObjCatSubFitEta_.back().at( uEta ), transferVecRebinScaleVecEta_.back().at( uEta ), histosVecRebinTransVecEta_.back().at( uEta ), uEta );
     } // loop: uEta < nEtaBins
   }
 }
@@ -1409,12 +1635,12 @@ void FitTopTransferFunctionsRunner::writeFilesPerCategoryLoop( const std::string
   // Loop over eta bins
   if ( fitEtaBins_ ) {
     for ( int uEta = 0; uEta < nEtaBins; ++uEta ) {
-      if ( fit1D_ ) writeFilesPerCategoryBin( objCat, transferVecRebinScaleVecEta_.back().at( uEta ), histosVecRebinVecTransEta_.back().at( uEta ).histTrans->GetName(), -1, uEta );
+      if ( fit1D_ ) writeFilesPerCategoryBin( objCat, transferVecRebinScaleVecEta_.back().at( uEta ), histosVecRebinTransVecEta_.back().at( uEta ).histTrans->GetName(), -1, uEta );
       // Loop over pt bins
       if ( fit0D_ ) {
         for ( int uPt = 0; uPt < nPtBins; ++uPt ) {
           const std::string binPt( boost::lexical_cast< std::string >( uPt ) );
-          std::string namePt( histosVecRebinVecTransEta_.back().at( uEta ).histTrans->GetName() );
+          std::string namePt( histosVecRebinTransVecEta_.back().at( uEta ).histTrans->GetName() );
           namePt.append( "_Pt" + binPt );
           writeFilesPerCategoryBin( objCat, transferVecRebinScaleVecEtaVecPt_.back().at( uEta ).at( uPt ), namePt, uPt, uEta );
         }

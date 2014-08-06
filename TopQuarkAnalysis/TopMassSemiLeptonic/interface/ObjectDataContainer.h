@@ -32,6 +32,8 @@ namespace my {
       std::vector< unsigned > sizePt( unsigned uEta ) const { return sizePt_.at( uEta ); };
       unsigned sizePt( unsigned uEta, unsigned uPt ) const { return sizePt_.at( uEta ).at( uPt ); };
       /// Get data
+      std::vector< std::vector< Float_t > > NPVTrue() const { return NPVTrueData_; };
+      std::vector< std::vector< Int_t   > > NPVObserved() const { return NPVObservedData_; };
       DataTable weight() const { return weightData_; };
       DataTable pt() const { return ptData_; };
       DataTable ptGen() const { return ptGenData_; };
@@ -42,6 +44,8 @@ namespace my {
       DataTable phi() const { return phiData_; };
       DataTable phiGen() const { return phiGenData_; };
       /// Get data per eta bin
+      std::vector< Float_t > NPVTrue( unsigned uEta ) const { return NPVTrueData_.at( uEta ); };
+      std::vector< Int_t   > NPVObserved( unsigned uEta ) const { return NPVObservedData_.at( uEta ); };
       std::vector< Double_t > weight( unsigned uEta ) const { return weightData_.at( uEta ); };
       std::vector< Double_t > pt( unsigned uEta ) const { return ptData_.at( uEta ); };
       std::vector< Double_t > ptGen( unsigned uEta ) const { return ptGenData_.at( uEta ); };
@@ -52,6 +56,8 @@ namespace my {
       std::vector< Double_t > phi( unsigned uEta ) const { return phiData_.at( uEta ); };
       std::vector< Double_t > phiGen( unsigned uEta ) const { return phiGenData_.at( uEta ); };
       /// Get data per eta/pt bin
+      std::vector< std::vector< Float_t > > NPVTruePt( unsigned uEta ) const { return NPVTrueDataPt_.at( uEta ); };
+      std::vector< std::vector< Int_t   > > NPVObservedPt( unsigned uEta ) const { return NPVObservedDataPt_.at( uEta ); };
       DataTable weightPt( unsigned uEta ) const { return weightDataPt_.at( uEta ); };
       DataTable ptPt( unsigned uEta ) const { return ptDataPt_.at( uEta ); };
       DataTable ptGenPt( unsigned uEta ) const { return ptGenDataPt_.at( uEta ); };
@@ -60,6 +66,8 @@ namespace my {
       DataTable phiPt( unsigned uEta ) const { return phiDataPt_.at( uEta ); };
       DataTable phiGenPt( unsigned uEta ) const { return phiGenDataPt_.at( uEta ); };
       /// Get data per eta per pt bin
+      std::vector< Float_t > NPVTruePt( unsigned uEta, unsigned uPt ) const { return NPVTrueDataPt_.at( uEta ).at( uPt ); };
+      std::vector< Int_t   > NPVObservedPt( unsigned uEta, unsigned uPt ) const { return NPVObservedDataPt_.at( uEta ).at( uPt ); };
       std::vector< Double_t > weightPt( unsigned uEta, unsigned uPt ) const { return weightDataPt_.at( uEta ).at( uPt ); };
       std::vector< Double_t > ptPt( unsigned uEta, unsigned uPt ) const { return ptDataPt_.at( uEta ).at( uPt ); };
       std::vector< Double_t > ptGenPt( unsigned uEta, unsigned uPt ) const { return ptGenDataPt_.at( uEta ).at( uPt ); };
@@ -79,6 +87,8 @@ namespace my {
       std::vector< unsigned >                sizeEta_;
       std::vector< std::vector< unsigned > > sizePt_;
       /// Data
+      std::vector< std::vector< Float_t > > NPVTrueData_;
+      std::vector< std::vector< Int_t   > > NPVObservedData_;
       DataTable weightData_;
       DataTable ptData_;
       DataTable ptGenData_;
@@ -89,6 +99,8 @@ namespace my {
       DataTable phiData_;
       DataTable phiGenData_;
       /// Data per pt bins
+      std::vector< std::vector< std::vector< Float_t > > > NPVTrueDataPt_;
+      std::vector< std::vector< std::vector< Int_t   > > > NPVObservedDataPt_;
       std::vector< DataTable > weightDataPt_;
       std::vector< DataTable > ptDataPt_;
       std::vector< DataTable > ptGenDataPt_;

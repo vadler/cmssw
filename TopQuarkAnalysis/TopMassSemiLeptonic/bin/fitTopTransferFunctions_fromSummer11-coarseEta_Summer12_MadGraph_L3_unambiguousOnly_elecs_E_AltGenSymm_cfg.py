@@ -28,23 +28,6 @@ fitTopTransferFunctions = cms.PSet(
         inputFile = cms.string('file:/afs/cern.ch/work/v/vadler/cms/Top/CMSSW_5_3_13/output/analyzeHitFit_fromSummer11-coarseEta_Summer12_MadGraph_L3_unambiguousOnly.root')
     ),
     objects = cms.PSet(
-        Mu = cms.PSet(
-            fitRange = cms.double(1.0),
-            minPt = cms.double(0.0),
-            widthFactor = cms.double(5.0),
-            maxEta = cms.double(999999.0),
-            fitMaxPt = cms.double(999999.0),
-            minEntriesFactor = cms.uint32(5),
-            fitEtaBins = cms.bool(True),
-            resolutionFunction = cms.string('linear'),
-            fitOptions = cms.string('IBRS+'),
-            deltaPtMax = cms.double(50.0),
-            deltaPtBins = cms.uint32(50),
-            exclude = cms.vuint32(0),
-            maxDR = cms.double(0.1),
-            fitFunction = cms.string('sGauss'),
-            dependencyFunction = cms.string('linear')
-        ),
         Elec = cms.PSet(
             fitRange = cms.double(1.0),
             minPt = cms.double(0.0),

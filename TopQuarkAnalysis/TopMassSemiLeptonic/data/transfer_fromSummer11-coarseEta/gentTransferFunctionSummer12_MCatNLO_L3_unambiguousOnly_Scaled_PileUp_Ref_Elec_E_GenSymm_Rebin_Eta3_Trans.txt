@@ -1,0 +1,20 @@
+for 1.566 <= |#eta| < 2.5
+--------------------------------------------------------------------------------
+
+FitFunction       : 	[0]*exp(-0.5*((x-[1])/[2])**2)/([2]*sqrt(2*pi))	(constructed from C++ class)
+DependencyFunction: 	[0]+[1]*x	(constructed from C++ class) 	on E_parton
+ResolutionFunction: 	[0]+[1]*x	(constructed from C++ class) 	on E_parton
+Comment           : 	E_parton <= 999999, E_parton >= 0, DeltaR(parton, reco) <= 0.1, minEntries / bins: 5
+
+Parameters 1D:
+[0]: 	0.896638+-0.00712064
+[1]: 	-4.43884+-0.0425297
+[2]: 	5.20551+-0.0580954
+[all]: 	(0.89663841361020635)*exp(-0.5*((x-(-4.4388428502550044))/(5.2055055598130053))**2)/((5.2055055598130053)*sqrt(2*pi))
+
+Parameters 2D:
+[0]: 	0.942922+(-0.000109612*E_parton)
+[1]: 	-1.51082+(-0.0169544*E_parton)
+[2]: 	3.06347+(0.0112824*E_parton)
+[all]: 	(0.942922+(-0.000109612*E_parton))*exp(-0.5*((x-(-1.51082+(-0.0169544*E_parton)))/(3.06347+(0.0112824*E_parton)))**2)/((3.06347+(0.0112824*E_parton))*sqrt(2*pi))
+

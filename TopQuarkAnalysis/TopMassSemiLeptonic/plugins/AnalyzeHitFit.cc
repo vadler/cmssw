@@ -944,7 +944,7 @@ void AnalyzeHitFit::fill( unsigned iCat, const edm::Handle< TtSemiLeptonicEvent 
       nPVObserved_ = iPileUp->getPU_NumInteractions();
       // Pile-up weight
       pileUpWeightTrue_     = lumiWeightTrue_.weight( nPVTrue_ );
-      pileUpWeightObserved_ = lumiWeightObserved_.weight( nPVObserved_ ); // FIXME: Is this the corrrect approach?
+      pileUpWeightObserved_ = lumiWeightObserved_.weight( nPVObserved_ ); // FIXME: Is this the correct approach?
       break;
     }
   }
@@ -987,7 +987,7 @@ void AnalyzeHitFit::fill( unsigned iCat, const edm::Handle< TtSemiLeptonicEvent 
     phiGen_  = ttGenEvent_->singleLepton()->phi();
     energy_     = ttSemiLeptonicEvent->singleLepton( TtEvent::kGenMatch )->energy();
     energyAlt_  = patElecs_->at( elecIndex ).ecalDrivenMomentum().energy();
-//     energyAlt_  = patElecs_->at( elecIndex ).correctedEcalEnergy()(); // ???
+//     energyAlt_  = patElecs_->at( elecIndex ).correctedEcalEnergy(); // ???
     energyGen_  = ttGenEvent_->singleLepton()->energy();
   }
   else if ( cat == "UdscJet" || ( cat == "Jet" && ! allJets ) ) {

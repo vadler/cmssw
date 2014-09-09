@@ -11,7 +11,7 @@ rfioInput = True
 # Origin of existing resolution functions
 era    = 'Summer11'
 #sample = 'Summer12_MadGraph_newElec'
-sample = 'Summer12_MCatNLO_newElec''
+sample = 'Summer12_MCatNLO_newElec'
 
 # Binning
 useEtaCoarseBins = True

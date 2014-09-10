@@ -16,7 +16,7 @@ fitTopTransferFunctions = cms.PSet(
         writeFiles = cms.bool(True),
         usePileUp = cms.bool(True),
         sample = cms.string('Summer12_MadGraph_L3_unambiguousOnly'),
-        pathPlots = cms.string('/afs/cern.ch/work/v/vadler/cms/Top/CMSSW_5_3_13/output/plots/fitTopTransferFunctions/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MadGraph_L3_unambiguousOnly_PileUp_Ref_'),
+        pathPlots = cms.string('/afs/cern.ch/work/v/vadler/cms/Top/CMSSW_5_3_13/output/plots/fitTopTransferFunctions/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MadGraph_L3_unambiguousOnly_PileUp_Ref_dGauss_'),
         formatPlots = cms.vstring('png', 'eps', 'pdf'),
         pileUp = cms.string('PileUpWeightTrue'),
         fit0D = cms.bool(True),
@@ -28,22 +28,39 @@ fitTopTransferFunctions = cms.PSet(
         inputFile = cms.string('file:/afs/cern.ch/work/v/vadler/cms/Top/CMSSW_5_3_13/output/analyzeHitFit_fromSummer11-coarseEta_Summer12_MadGraph_L3_unambiguousOnly.root')
     ),
     objects = cms.PSet(
-        Mu = cms.PSet(
-            fitRange = cms.double(1.0),
+        BJet = cms.PSet(
+            fitRange = cms.double(5.0),
             minPt = cms.double(0.0),
             widthFactor = cms.double(5.0),
             maxEta = cms.double(999999.0),
             fitMaxPt = cms.double(999999.0),
             minEntriesFactor = cms.uint32(5),
             fitEtaBins = cms.bool(True),
-            resolutionFunction = cms.string('linear'),
+            resolutionFunction = cms.string('squared'),
             fitOptions = cms.string('IBRS+'),
             deltaPtMax = cms.double(50.0),
             deltaPtBins = cms.uint32(50),
             exclude = cms.vuint32(0),
             maxDR = cms.double(0.1),
-            fitFunction = cms.string('sGauss'),
-            dependencyFunction = cms.string('linear')
+            fitFunction = cms.string('dGauss'),
+            dependencyFunction = cms.string('squared')
+        ),
+        UdscJet = cms.PSet(
+            fitRange = cms.double(5.0),
+            minPt = cms.double(0.0),
+            widthFactor = cms.double(5.0),
+            maxEta = cms.double(999999.0),
+            fitMaxPt = cms.double(999999.0),
+            minEntriesFactor = cms.uint32(5),
+            fitEtaBins = cms.bool(True),
+            resolutionFunction = cms.string('squared'),
+            fitOptions = cms.string('IBRS+'),
+            deltaPtMax = cms.double(50.0),
+            deltaPtBins = cms.uint32(50),
+            exclude = cms.vuint32(0),
+            maxDR = cms.double(0.1),
+            fitFunction = cms.string('dGauss'),
+            dependencyFunction = cms.string('squared')
         )
     )
 )

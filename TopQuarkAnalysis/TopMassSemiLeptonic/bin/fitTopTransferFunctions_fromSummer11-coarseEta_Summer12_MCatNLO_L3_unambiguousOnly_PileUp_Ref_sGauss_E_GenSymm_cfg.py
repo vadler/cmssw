@@ -29,7 +29,7 @@ fitTopTransferFunctions = cms.PSet(
     ),
     objects = cms.PSet(
         BJet = cms.PSet(
-            fitRange = cms.double(5.0),
+            fitRange = cms.double(1.0),
             minPt = cms.double(0.0),
             widthFactor = cms.double(5.0),
             maxEta = cms.double(999999.0),
@@ -46,7 +46,7 @@ fitTopTransferFunctions = cms.PSet(
             dependencyFunction = cms.string('squared')
         ),
         UdscJet = cms.PSet(
-            fitRange = cms.double(5.0),
+            fitRange = cms.double(1.0),
             minPt = cms.double(0.0),
             widthFactor = cms.double(5.0),
             maxEta = cms.double(999999.0),

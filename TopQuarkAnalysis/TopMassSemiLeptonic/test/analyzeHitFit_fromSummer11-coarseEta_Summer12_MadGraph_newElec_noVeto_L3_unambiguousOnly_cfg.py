@@ -10,8 +10,8 @@ rfioInput = True
 
 # Origin of existing resolution functions
 era    = 'Summer11'
-sample = 'Summer12_MadGraph_newElec_noVeto'
-#sample = 'Summer12_MCatNLO_newElec_noVeto''
+sample = 'Summer12_MadGraph_newElec'
+#sample = 'Summer12_MCatNLO_newElec'
 
 # Binning
 useEtaCoarseBins = True
@@ -110,7 +110,7 @@ ptBins = ''
 if usePtCoarseBins:
   ptBins = '-coarsePt'
 
-outputFile = '%s/output/analyzeHitFit_from%s%s%s_%s_%s_%s.root'%( os.getenv( "CMSSW_BASE" ), era, etaBins, ptBins, sample, jecLevel, matchAlgorithm )
+outputFile = '%s/output/analyzeHitFit_from%s%s%s_%s_noVeto_%s_%s.root'%( os.getenv( "CMSSW_BASE" ), era, etaBins, ptBins, sample, jecLevel, matchAlgorithm )
 
 if runTest:
   outputFile = outputFile.replace( 'root', 'test.root' )

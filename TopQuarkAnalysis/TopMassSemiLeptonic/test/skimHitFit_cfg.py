@@ -241,6 +241,7 @@ process.out.outputCommands.append( 'keep *_addPileupInfo_*_*' )
 process.out.outputCommands.append( 'keep edmTriggerResults_*_*_*' )
 process.out.outputCommands.append( 'keep *_offlinePrimaryVertices_*_*' )
 process.out.outputCommands.append( 'keep *_%s_*_*'%( pvCollection ) )
+process.out.outputCommands.append( 'keep *_kt6PFJets_rho_RECO' )
 
 process.patPF2PATSequence.remove( process.ak7GenJetsNoNu )
 process.patPF2PATSequence.remove( process.iterativeCone5GenJetsNoNu )

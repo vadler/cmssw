@@ -10,12 +10,13 @@ jetEtaBins      = cms.vdouble( -2.500, -2.322, -2.172, -2.043, -1.930, -1.830, -
 metEtaBins      = cms.vdouble()
 
 muonEtaCoarseBins     = cms.vdouble( -2.4, -2.1, -1.3, -0.9, 0.0, 0.9, 1.3, 2.1, 2.4 )
-#electronEtaCoarseBins = cms.vdouble( -2.500, -1.479, -0.870, 0.000, 0.870, 1.479, 2.500 ) # w/o gap veto
 electronEtaCoarseBins = cms.vdouble( -2.500, -1.5660, -1.4442, -0.870, 0.000, 0.870, 1.4442, 1.5660, 2.500 )
 udscJetEtaCoarseBins  = cms.vdouble( -2.500, -1.479, -0.870, 0.000, 0.870, 1.479, 2.500 )
 bJetEtaCoarseBins     = cms.vdouble( -2.500, -1.479, -0.870, 0.000, 0.870, 1.479, 2.500 )
 jetEtaCoarseBins      = cms.vdouble( -2.500, -1.479, -0.870, 0.000, 0.870, 1.479, 2.500 )
 metEtaCoarseBins      = cms.vdouble()
+
+electronEtaCoarseBinsNoVeto = cms.vdouble( -2.500, -1.479, -0.870, 0.000, 0.870, 1.479, 2.500 )
 
 # Pt bins
 

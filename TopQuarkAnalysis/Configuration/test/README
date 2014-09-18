@@ -3,8 +3,8 @@ Environment:
 ============
 
 ssh lxplus.cern.ch
-cmsrel CMSSW_5_3_18
-cd CMSSW_5_3_18/src
+cmsrel CMSSW_5_3_20
+cd CMSSW_5_3_20/src
 cmsenv
 git cms-addpkg TopQuarkAnalysis/Configuration
 git cms-addpkg EgammaAnalysis/ElectronTools

@@ -98,7 +98,7 @@ postfixNonIsoE = 'NonIsoE'
 #electronSelect = 'pt > 20. && abs(eta) < 2.5 && electronID("mvaTrigV0") > 0.' # RefSel (min. for veto)
 electronSelect = ''
 # electron event selection
-electronCut  = 'et > 10. && abs(eta) < 2.5'
+electronCut  = 'pt > 10. && abs(eta) < 2.5'
 electronsMin = 0
 if pfElectronIsoUseEArho:
   # Used Delta beta machinerie
@@ -603,6 +603,25 @@ if usePfElectronIsoConeR03:
 else:
   if pfElectronIsoUseEArho:
     process.patElectrons.isolationValues.user = cms.VInputTag( cms.InputTag( "elPFIsoValueEA04" ) )
+from EgammaAnalysis.ElectronTools.electronRegressionEnergyProducer_cfi import eleRegressionEnergy
+process.patElectronsWithRegression = eleRegressionEnergy.clone( inputElectronsTag = cms.InputTag( 'patElectrons' )
+                                                              , vertexCollection  = cms.InputTag( pvCollection )
+                                                              )
+process.load( "EgammaAnalysis.ElectronTools.calibratedPatElectrons_cfi" )
+process.calibratedPatElectrons.inputPatElectronsTag = cms.InputTag( 'patElectronsWithRegression' )
+process.calibratedPatElectrons.isMC                 = True
+process.calibratedPatElectrons.inputDataset         = 'Summer12'
+#process.calibratedPatElectrons.inputDataset         = 'Summer12_LegacyPaper'
+process.RandomNumberGeneratorService = cms.Service(
+  "RandomNumberGeneratorService"
+, calibratedPatElectrons = cms.PSet( initialSeed = cms.untracked.uint32( 1 )
+                                   , engineName  = cms.untracked.string('TRandom3')
+                                   )
+)
+process.patPF2PATSequence.replace( process.patElectrons
+                                 , process.patElectrons + process.patElectronsWithRegression + process.calibratedPatElectrons
+                                 )
+process.selectedPatElectrons.src = cms.InputTag( 'calibratedPatElectrons' )
 process.selectedPatElectrons.cut = electronSelect
 process.cleanPatElectrons.src           = cms.InputTag( 'patElectrons' )
 process.cleanPatElectrons.preselection  = electronCut
@@ -691,10 +710,18 @@ if writeNonIsoMuons:
   if runOnMC:
     getattr(process,'muonMatch'+postfixNonIsoMu).src = "pfSelectedMuons" + postfixNonIsoMu
   getattr(process,'patMuons'+postfixNonIsoMu).pfMuonSource = "pfSelectedMuons" + postfixNonIsoMu
+  randomNumberGeneratorPSet = cms.PSet( initialSeed = cms.untracked.uint32( 2 )
+                                      , engineName  = cms.untracked.string('TRandom3')
+                                      )
+  setattr( process.RandomNumberGeneratorService, 'calibratedPatElectrons' + postfixNonIsoMu, randomNumberGeneratorPSet )
 if writeNonIsoElectrons:
   cloneProcessingSnippet(process,process.patPF2PATSequence,postfixNonIsoE)
   getattr(process,'pfNoElectron'+postfixNonIsoE).topCollection = "pfSelectedElectrons" + postfixNonIsoE
   getattr(process,'patElectrons'+postfixNonIsoE).pfElectronSource = "pfSelectedElectrons" + postfixNonIsoE
+  randomNumberGeneratorPSet = cms.PSet( initialSeed = cms.untracked.uint32( 3 )
+                                      , engineName  = cms.untracked.string('TRandom3')
+                                      )
+  setattr( process.RandomNumberGeneratorService, 'calibratedPatElectrons' + postfixNonIsoE, randomNumberGeneratorPSet )
 
 ### TQAF
 

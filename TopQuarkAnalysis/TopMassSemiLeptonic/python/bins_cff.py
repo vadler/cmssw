@@ -33,3 +33,66 @@ udscJetPtCoarseBins  = cms.vdouble( 0., 30., 50., 70., 90., 120., 200., 500. )
 bJetPtCoarseBins     = cms.vdouble( 0., 30., 50., 70., 90., 120., 200., 500. )
 jetPtCoarseBins      = cms.vdouble( 0., 30., 50., 70., 90., 120., 200., 500. )
 metPtCoarseBins      = cms.vdouble( 0., 10., 29., 44., 59., 80., 122., 300. )
+
+# Pt bins (Shannon)
+
+udscJetPtBinsCoarseEtaShannon  = cms.VPSet(
+  cms.PSet(
+    bins = cms.vdouble( 0., 100., 125., 150., 200., 5000. )
+  ),
+  cms.PSet(
+    bins = cms.vdouble( 0., 50., 60., 70., 80., 90., 100., 125., 150., 200., 5000. )
+  ),
+  cms.PSet(
+    bins = cms.vdouble( 0., 20., 40., 50., 60., 70., 80., 90., 100., 125., 150., 200., 5000. )
+  ),
+  cms.PSet(
+    bins = cms.vdouble( 0., 20., 40., 50., 60., 70., 80., 90., 100., 125., 150., 200., 5000. )
+  ),
+  cms.PSet(
+    bins = cms.vdouble( 0., 50., 60., 70., 80., 90., 100., 125., 150., 200., 5000. )
+  ),
+  cms.PSet(
+    bins = cms.vdouble( 0., 100., 125., 150., 200., 5000. )
+  )
+)
+bJetPtBinsCoarseEtaShannon  = cms.VPSet(
+  cms.PSet(
+    bins = cms.vdouble( 0., 100., 125., 150., 200., 5000. )
+  ),
+  cms.PSet(
+    bins = cms.vdouble( 0., 50., 60., 70., 80., 90., 100., 125., 150., 200., 5000. )
+  ),
+  cms.PSet(
+    bins = cms.vdouble( 0., 20., 40., 50., 60., 70., 80., 90., 100., 125., 150., 200., 5000. )
+  ),
+  cms.PSet(
+    bins = cms.vdouble( 0., 20., 40., 50., 60., 70., 80., 90., 100., 125., 150., 200., 5000. )
+  ),
+  cms.PSet(
+    bins = cms.vdouble( 0., 50., 60., 70., 80., 90., 100., 125., 150., 200., 5000. )
+  ),
+  cms.PSet(
+    bins = cms.vdouble( 0., 100., 125., 150., 200., 5000. )
+  )
+)
+jetPtBinsCoarseEtaShannon  = cms.VPSet(
+  cms.PSet(
+    bins = cms.vdouble( 0., 100., 125., 150., 200., 5000. )
+  ),
+  cms.PSet(
+    bins = cms.vdouble( 0., 50., 60., 70., 80., 90., 100., 125., 150., 200., 5000. )
+  ),
+  cms.PSet(
+    bins = cms.vdouble( 0., 20., 40., 50., 60., 70., 80., 90., 100., 125., 150., 200., 5000. )
+  ),
+  cms.PSet(
+    bins = cms.vdouble( 0., 20., 40., 50., 60., 70., 80., 90., 100., 125., 150., 200., 5000. )
+  ),
+  cms.PSet(
+    bins = cms.vdouble( 0., 50., 60., 70., 80., 90., 100., 125., 150., 200., 5000. )
+  ),
+  cms.PSet(
+    bins = cms.vdouble( 0., 100., 125., 150., 200., 5000. )
+  )
+)

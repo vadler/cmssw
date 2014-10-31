@@ -5,13 +5,18 @@ import FWCore.ParameterSet.Config as cms
 ### Steering
 
 # Misc
-runTest   = True
-rfioInput = False
+runTest   = False
+rfioInput = True
 
 # Origin of existing resolution functions
 era    = 'Summer11'
 sample = 'Summer12_MadGraph_newElec'
 #sample = 'Summer12_MCatNLO_newElec'
+
+# b-tags
+#minBTag  = 0.898 # CSVT
+minBTag  = 0.679 # CSVM
+minBTags = 2
 
 # Binning
 useEtaCoarseBins = True
@@ -360,6 +365,8 @@ process.analyzeHitFit.udscJetPtBins  = cms.VPSet( udscJetPtBinsCoarseEtaShannon 
 process.analyzeHitFit.bJetPtBins     = cms.VPSet( bJetPtBinsCoarseEtaShannon )
 process.analyzeHitFit.jetPtBins      = cms.VPSet( jetPtBinsCoarseEtaShannon )
 process.analyzeHitFit.metPtBins      = metPtBins
+process.analyzeHitFit.minBTag  = cms.double( minBTag )
+process.analyzeHitFit.minBTags = cms.uint32( minBTags )
 if runTest:
   pathPlots = pathPlots.replace( 'analyzeHitFit_from', 'test-analyzeHitFit_from', 1 )
 if not rfioInput:

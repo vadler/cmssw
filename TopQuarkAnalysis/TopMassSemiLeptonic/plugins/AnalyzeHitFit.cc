@@ -92,6 +92,8 @@ class AnalyzeHitFit : public edm::EDAnalyzer {
     std::vector< std::vector< double > > ptBins_;
     std::vector< std::vector< std::vector< double > > > ptBinsVector_;
     std::vector< bool > useBinVector_;
+    double minBTag_;
+    unsigned minBTags_;
 
     /// Constants
     // Object categories
@@ -196,8 +198,13 @@ AnalyzeHitFit::AnalyzeHitFit( const edm::ParameterSet & iConfig )
 , allJets_( iConfig.getParameter< bool >( "allJets" ) )
 , pathPlots_( iConfig.getParameter< std::string >( "pathPlots" ) )
 , plot_( ! pathPlots_.empty() )
+, minBTag_( 0. )
+, minBTags_( 0 )
 , filledEvents_( 0 )
 {
+
+  if ( iConfig.existsAs< double >( "minBTag" ) )    minBTag_  = iConfig.getParameter< double >( "minBTag" );
+  if ( iConfig.existsAs< unsigned >( "minBTags" ) ) minBTags_ = iConfig.getParameter< unsigned >( "minBTags" );
 
   lumiWeightTrue_     = edm::LumiReWeighting( pileUpFileMC_.fullPath(), pileUpFileDataTrue_.fullPath()    , "pileup", "pileup" );
   lumiWeightObserved_ = edm::LumiReWeighting( pileUpFileMC_.fullPath(), pileUpFileDataObserved_.fullPath(), "pileup", "pileup" );
@@ -547,12 +554,6 @@ void AnalyzeHitFit::analyze( const edm::Event & iEvent, const edm::EventSetup & 
   // MC
   if ( iEvent.isRealData() ) return;
 
-  // TQAF semi-leptonic events
-  edm::Handle< TtSemiLeptonicEvent > ttSemiLeptonicEventMuons;
-  iEvent.getByLabel( ttSemiLeptonicEventMuonsTag_, ttSemiLeptonicEventMuons );
-  edm::Handle< TtSemiLeptonicEvent > ttSemiLeptonicEventElecs;
-  iEvent.getByLabel( ttSemiLeptonicEventElecsTag_, ttSemiLeptonicEventElecs );
-
   // PAT objects
   edm::Handle< pat::MuonCollection > patMuons;
   iEvent.getByLabel( patMuonsTag_, patMuons );
@@ -563,238 +564,250 @@ void AnalyzeHitFit::analyze( const edm::Event & iEvent, const edm::EventSetup & 
   edm::Handle< pat::METCollection > patMETs;
   iEvent.getByLabel( patMETsTag_, patMETs );
 
-  // Pile-up
-  edm::Handle< std::vector< PileupSummaryInfo > > pileUp;
-  iEvent.getByLabel( "addPileupInfo", pileUp );
+  // b-tag requirement
+  unsigned btags( 0 );
+  for ( size_t iJet = 0; iJet < patJets->size(); ++iJet ) {
+    if ( patJets->at( iJet ).bDiscriminator( "combinedSecondaryVertexBJetTags" ) > minBTag_ ) ++btags;
+  }
+  if ( btags < minBTags_ ) {
+    edm::LogInfo( "AnalyzeHitFit" ) << "...fail b-tag requirement";
+    return;
+  }
 
   // TQAF MC event
   edm::Handle< TtGenEvent > ttGenEvent;
   iEvent.getByLabel( ttGenEventTag_, ttGenEvent );
 
   // Semi-leptonic signal event
-  if (    ttGenEvent->isTtBar()
-       && ( ttGenEvent->isSemiLeptonic( WDecay::kMuon ) || ttGenEvent->isSemiLeptonic( WDecay::kElec ) )
-     ) {
+  if ( ! (ttGenEvent->isTtBar() && ( ttGenEvent->isSemiLeptonic( WDecay::kMuon ) || ttGenEvent->isSemiLeptonic( WDecay::kElec ) ) ) ) {
+    edm::LogInfo( "AnalyzeHitFit" ) << "...no signal event";
+    return;
+  } // Semi-leptonic signal event
+
+  // TQAF semi-leptonic events
+  edm::Handle< TtSemiLeptonicEvent > ttSemiLeptonicEventMuons;
+  iEvent.getByLabel( ttSemiLeptonicEventMuonsTag_, ttSemiLeptonicEventMuons );
+  edm::Handle< TtSemiLeptonicEvent > ttSemiLeptonicEventElecs;
+  iEvent.getByLabel( ttSemiLeptonicEventElecsTag_, ttSemiLeptonicEventElecs );
 
     // Valid full TTbar MC matching
-    if (  ( ttSemiLeptonicEventMuons.isValid() && ttSemiLeptonicEventMuons->isHypoValid( TtEvent::kGenMatch ) )
-       || ( ttSemiLeptonicEventElecs.isValid() && ttSemiLeptonicEventElecs->isHypoValid( TtEvent::kGenMatch ) )
-       ) {
+  if ( ! ( ( ttSemiLeptonicEventMuons.isValid() && ttSemiLeptonicEventMuons->isHypoValid( TtEvent::kGenMatch ) ) || ( ttSemiLeptonicEventElecs.isValid() && ttSemiLeptonicEventElecs->isHypoValid( TtEvent::kGenMatch ) ) ) ) {
+    edm::LogInfo( "AnalyzeHitFit" ) << "...no valid MC match";
+    return;
+  } // Valid full TTbar MC matching
 
-      for ( unsigned iCat = 0; iCat < objCats_.size(); ++iCat ) {
-        const std::string cat( objCats_.at( iCat ) );
-        // Initialise variables
-        nPVTrue_              = -1.;
-        nPVObserved_          = -1;
-        pileUpWeightTrue_     =  0.;
-        pileUpWeightObserved_ =  0.;
-        binEta_              = -1;
-        binEtaAlt_           = -1;
-        binEtaGenJet_        = -1;
-        binEtaGenJetAlt_     = -1;
-        binEtaGen_           = -1;
-        binEtaSymm_          = -1;
-        binEtaSymmAlt_       = -1;
-        binEtaSymmGen_       = -1;
-        binEtaSymmGenJet_    = -1;
-        binEtaSymmGenJetAlt_ = -1;
-        pt_           = -9.;
-        ptAlt_        = -9.;
-        ptGenJet_     = -9.;
-        ptGenJetAlt_  = -9.;
-        ptGen_        = -9.;
-        eta_          = -9.;
-        etaAlt_       = -9.;
-        etaGenJet_    = -9.;
-        etaGenJetAlt_ = -9.;
-        etaGen_       = -9.;
-        phi_          = -9.;
-        phiAlt_       = -9.;
-        phiGenJet_    = -9.;
-        phiGenJetAlt_ = -9.;
-        phiGen_       = -9.;
-        energy_          = -9.;
-        energyAlt_       = -9.;
-        energyGenJet_    = -9.;
-        energyGenJetAlt_ = -9.;
-        energyGen_       = -9.;
-        tagCSV_       = -9.;
-        // Fill variables
-        if ( objCats_.at( iCat ) == "Mu" ) {
-          if ( ttGenEvent->isSemiLeptonic( WDecay::kMuon ) ) {
-            if ( ttSemiLeptonicEventMuons.isValid() && ttSemiLeptonicEventMuons->isHypoValid( TtEvent::kGenMatch )  ) {
-              fill( iCat, ttSemiLeptonicEventMuons, patMuons, patElecs, patJets, patMETs, pileUp, ttGenEvent );
-            }
-            else edm::LogInfo( "AnalyzeHitFit" ) << "...no valid MC match in muon channel";
-          }
-        }
-        else if ( objCats_.at( iCat ) == "Elec" ) {
-          if ( ttGenEvent->isSemiLeptonic( WDecay::kElec ) ) {
-            if ( ttSemiLeptonicEventElecs.isValid() && ttSemiLeptonicEventElecs->isHypoValid( TtEvent::kGenMatch ) ) {
-              fill( iCat, ttSemiLeptonicEventElecs, patMuons, patElecs, patJets, patMETs, pileUp, ttGenEvent );
-            }
-            else edm::LogInfo( "AnalyzeHitFit" ) << "...no valid MC match in electron channel";
-          }
-        }
-        else {
-          if ( ttGenEvent->isSemiLeptonic( WDecay::kMuon ) && ttSemiLeptonicEventMuons.isValid() && ttSemiLeptonicEventMuons->isHypoValid( TtEvent::kGenMatch )  ) {
-            fill( iCat, ttSemiLeptonicEventMuons, patMuons, patElecs, patJets, patMETs, pileUp, ttGenEvent );
-          }
-          else if ( ttGenEvent->isSemiLeptonic( WDecay::kElec ) && ttSemiLeptonicEventElecs.isValid() && ttSemiLeptonicEventElecs->isHypoValid( TtEvent::kGenMatch ) ) {
-            fill( iCat, ttSemiLeptonicEventElecs, patMuons, patElecs, patJets, patMETs, pileUp, ttGenEvent );
-          }
-          else edm::LogInfo( "AnalyzeHitFit" ) << "...no valid MC match in both channel";
-        }
-        // Fill tree
-        catData_.at( iCat )->Fill();
+  // Pile-up
+  edm::Handle< std::vector< PileupSummaryInfo > > pileUp;
+  iEvent.getByLabel( "addPileupInfo", pileUp );
 
-        // Do it again for jets
-        if ( cat == "UdscJet" || cat == "BJet" || cat == "Jet" ) {
-          // Do it again
-          nPVTrue_              = -1.;
-          nPVObserved_          = -1;
-          pileUpWeightTrue_     =  0.;
-          pileUpWeightObserved_ =  0.;
-          binEta_              = -1;
-          binEtaAlt_           = -1;
-          binEtaGenJet_        = -1;
-          binEtaGenJetAlt_     = -1;
-          binEtaGen_           = -1;
-          binEtaSymm_          = -1;
-          binEtaSymmAlt_       = -1;
-          binEtaSymmGen_       = -1;
-          binEtaSymmGenJet_    = -1;
-          binEtaSymmGenJetAlt_ = -1;
-          pt_           = -9.;
-          ptAlt_        = -9.;
-          ptGenJet_     = -9.;
-          ptGenJetAlt_  = -9.;
-          ptGen_        = -9.;
-          eta_          = -9.;
-          etaAlt_       = -9.;
-          etaGenJet_    = -9.;
-          etaGenJetAlt_ = -9.;
-          etaGen_       = -9.;
-          phi_          = -9.;
-          phiAlt_       = -9.;
-          phiGenJet_    = -9.;
-          phiGenJetAlt_ = -9.;
-          phiGen_       = -9.;
-          energy_          = -9.;
-          energyAlt_       = -9.;
-          energyGenJet_    = -9.;
-          energyGenJetAlt_ = -9.;
-          energyGen_       = -9.;
-          tagCSV_       = -9.;
-          if ( ttSemiLeptonicEventMuons.isValid() && ttSemiLeptonicEventMuons->isHypoValid( TtEvent::kGenMatch )  ) {
-            fill( iCat, ttSemiLeptonicEventMuons, patMuons, patElecs, patJets, patMETs, pileUp, ttGenEvent, true );
-          }
-          else if ( ttSemiLeptonicEventElecs.isValid() && ttSemiLeptonicEventElecs->isHypoValid( TtEvent::kGenMatch ) ) {
-            fill( iCat, ttSemiLeptonicEventElecs, patMuons, patElecs, patJets, patMETs, pileUp, ttGenEvent, true );
-          }
-          else edm::LogInfo( "AnalyzeHitFit" ) << "...no valid MC match in both channel";
-          catData_.at( iCat )->Fill();
+  for ( unsigned iCat = 0; iCat < objCats_.size(); ++iCat ) {
+    const std::string cat( objCats_.at( iCat ) );
+    // Initialise variables
+    nPVTrue_              = -1.;
+    nPVObserved_          = -1;
+    pileUpWeightTrue_     =  0.;
+    pileUpWeightObserved_ =  0.;
+    binEta_              = -1;
+    binEtaAlt_           = -1;
+    binEtaGenJet_        = -1;
+    binEtaGenJetAlt_     = -1;
+    binEtaGen_           = -1;
+    binEtaSymm_          = -1;
+    binEtaSymmAlt_       = -1;
+    binEtaSymmGen_       = -1;
+    binEtaSymmGenJet_    = -1;
+    binEtaSymmGenJetAlt_ = -1;
+    pt_           = -9.;
+    ptAlt_        = -9.;
+    ptGenJet_     = -9.;
+    ptGenJetAlt_  = -9.;
+    ptGen_        = -9.;
+    eta_          = -9.;
+    etaAlt_       = -9.;
+    etaGenJet_    = -9.;
+    etaGenJetAlt_ = -9.;
+    etaGen_       = -9.;
+    phi_          = -9.;
+    phiAlt_       = -9.;
+    phiGenJet_    = -9.;
+    phiGenJetAlt_ = -9.;
+    phiGen_       = -9.;
+    energy_          = -9.;
+    energyAlt_       = -9.;
+    energyGenJet_    = -9.;
+    energyGenJetAlt_ = -9.;
+    energyGen_       = -9.;
+    tagCSV_       = -9.;
+    // Fill variables
+    if ( objCats_.at( iCat ) == "Mu" ) {
+      if ( ttGenEvent->isSemiLeptonic( WDecay::kMuon ) ) {
+        if ( ttSemiLeptonicEventMuons.isValid() && ttSemiLeptonicEventMuons->isHypoValid( TtEvent::kGenMatch )  ) {
+          fill( iCat, ttSemiLeptonicEventMuons, patMuons, patElecs, patJets, patMETs, pileUp, ttGenEvent );
         }
-
-        // Do it again for all jets
-        if ( cat == "Jet" ) {
-          // Do it again
-          nPVTrue_              = -1.;
-          nPVObserved_          = -1;
-          pileUpWeightTrue_     =  0.;
-          pileUpWeightObserved_ =  0.;
-          binEta_              = -1;
-          binEtaAlt_           = -1;
-          binEtaGenJet_        = -1;
-          binEtaGenJetAlt_     = -1;
-          binEtaGen_           = -1;
-          binEtaSymm_          = -1;
-          binEtaSymmAlt_       = -1;
-          binEtaSymmGen_       = -1;
-          binEtaSymmGenJet_    = -1;
-          binEtaSymmGenJetAlt_ = -1;
-          pt_           = -9.;
-          ptAlt_        = -9.;
-          ptGenJet_     = -9.;
-          ptGenJetAlt_  = -9.;
-          ptGen_        = -9.;
-          eta_          = -9.;
-          etaAlt_       = -9.;
-          etaGenJet_    = -9.;
-          etaGenJetAlt_ = -9.;
-          etaGen_       = -9.;
-          phi_          = -9.;
-          phiAlt_       = -9.;
-          phiGenJet_    = -9.;
-          phiGenJetAlt_ = -9.;
-          phiGen_       = -9.;
-          energy_          = -9.;
-          energyAlt_       = -9.;
-          energyGenJet_    = -9.;
-          energyGenJetAlt_ = -9.;
-          energyGen_       = -9.;
-          tagCSV_       = -9.;
-          if ( ttSemiLeptonicEventMuons.isValid() && ttSemiLeptonicEventMuons->isHypoValid( TtEvent::kGenMatch )  ) {
-            fill( iCat, ttSemiLeptonicEventMuons, patMuons, patElecs, patJets, patMETs, pileUp, ttGenEvent, false, true );
-          }
-          else if ( ttSemiLeptonicEventElecs.isValid() && ttSemiLeptonicEventElecs->isHypoValid( TtEvent::kGenMatch ) ) {
-            fill( iCat, ttSemiLeptonicEventElecs, patMuons, patElecs, patJets, patMETs, pileUp, ttGenEvent, false, true );
-          }
-          else edm::LogInfo( "AnalyzeHitFit" ) << "...no valid MC match in both channel";
-          catData_.at( iCat )->Fill();
-          // ...and again
-          nPVTrue_              = -1.;
-          nPVObserved_          = -1;
-          pileUpWeightTrue_     =  0.;
-          pileUpWeightObserved_ =  0.;
-          binEta_              = -1;
-          binEtaAlt_           = -1;
-          binEtaGenJet_        = -1;
-          binEtaGenJetAlt_     = -1;
-          binEtaGen_           = -1;
-          binEtaSymm_          = -1;
-          binEtaSymmAlt_       = -1;
-          binEtaSymmGen_       = -1;
-          binEtaSymmGenJet_    = -1;
-          binEtaSymmGenJetAlt_ = -1;
-          pt_           = -9.;
-          ptAlt_        = -9.;
-          ptGenJet_     = -9.;
-          ptGenJetAlt_  = -9.;
-          ptGen_        = -9.;
-          eta_          = -9.;
-          etaAlt_       = -9.;
-          etaGenJet_    = -9.;
-          etaGenJetAlt_ = -9.;
-          etaGen_       = -9.;
-          phi_          = -9.;
-          phiAlt_       = -9.;
-          phiGenJet_    = -9.;
-          phiGenJetAlt_ = -9.;
-          phiGen_       = -9.;
-          energy_          = -9.;
-          energyAlt_       = -9.;
-          energyGenJet_    = -9.;
-          energyGenJetAlt_ = -9.;
-          energyGen_       = -9.;
-          tagCSV_       = -9.;
-          if ( ttSemiLeptonicEventMuons.isValid() && ttSemiLeptonicEventMuons->isHypoValid( TtEvent::kGenMatch )  ) {
-            fill( iCat, ttSemiLeptonicEventMuons, patMuons, patElecs, patJets, patMETs, pileUp, ttGenEvent, true, true );
-          }
-          else if ( ttSemiLeptonicEventElecs.isValid() && ttSemiLeptonicEventElecs->isHypoValid( TtEvent::kGenMatch ) ) {
-            fill( iCat, ttSemiLeptonicEventElecs, patMuons, patElecs, patJets, patMETs, pileUp, ttGenEvent, true, true );
-          }
-          else edm::LogInfo( "AnalyzeHitFit" ) << "...no valid MC match in both channel";
-          catData_.at( iCat )->Fill();
-        }
+        else edm::LogInfo( "AnalyzeHitFit" ) << "...no valid MC match in muon channel";
       }
-      ++filledEvents_;
+    }
+    else if ( objCats_.at( iCat ) == "Elec" ) {
+      if ( ttGenEvent->isSemiLeptonic( WDecay::kElec ) ) {
+        if ( ttSemiLeptonicEventElecs.isValid() && ttSemiLeptonicEventElecs->isHypoValid( TtEvent::kGenMatch ) ) {
+          fill( iCat, ttSemiLeptonicEventElecs, patMuons, patElecs, patJets, patMETs, pileUp, ttGenEvent );
+        }
+        else edm::LogInfo( "AnalyzeHitFit" ) << "...no valid MC match in electron channel";
+      }
+    }
+    else {
+      if ( ttGenEvent->isSemiLeptonic( WDecay::kMuon ) && ttSemiLeptonicEventMuons.isValid() && ttSemiLeptonicEventMuons->isHypoValid( TtEvent::kGenMatch )  ) {
+        fill( iCat, ttSemiLeptonicEventMuons, patMuons, patElecs, patJets, patMETs, pileUp, ttGenEvent );
+      }
+      else if ( ttGenEvent->isSemiLeptonic( WDecay::kElec ) && ttSemiLeptonicEventElecs.isValid() && ttSemiLeptonicEventElecs->isHypoValid( TtEvent::kGenMatch ) ) {
+        fill( iCat, ttSemiLeptonicEventElecs, patMuons, patElecs, patJets, patMETs, pileUp, ttGenEvent );
+      }
+      else edm::LogInfo( "AnalyzeHitFit" ) << "...no valid MC match in both channel";
+    }
+    // Fill tree
+    catData_.at( iCat )->Fill();
 
-    } // Valid full TTbar MC matching
-    else edm::LogInfo( "AnalyzeHitFit" ) << "...no valid MC match";
+    // Do it again for jets
+    if ( cat == "UdscJet" || cat == "BJet" || cat == "Jet" ) {
+      // Do it again
+      nPVTrue_              = -1.;
+      nPVObserved_          = -1;
+      pileUpWeightTrue_     =  0.;
+      pileUpWeightObserved_ =  0.;
+      binEta_              = -1;
+      binEtaAlt_           = -1;
+      binEtaGenJet_        = -1;
+      binEtaGenJetAlt_     = -1;
+      binEtaGen_           = -1;
+      binEtaSymm_          = -1;
+      binEtaSymmAlt_       = -1;
+      binEtaSymmGen_       = -1;
+      binEtaSymmGenJet_    = -1;
+      binEtaSymmGenJetAlt_ = -1;
+      pt_           = -9.;
+      ptAlt_        = -9.;
+      ptGenJet_     = -9.;
+      ptGenJetAlt_  = -9.;
+      ptGen_        = -9.;
+      eta_          = -9.;
+      etaAlt_       = -9.;
+      etaGenJet_    = -9.;
+      etaGenJetAlt_ = -9.;
+      etaGen_       = -9.;
+      phi_          = -9.;
+      phiAlt_       = -9.;
+      phiGenJet_    = -9.;
+      phiGenJetAlt_ = -9.;
+      phiGen_       = -9.;
+      energy_          = -9.;
+      energyAlt_       = -9.;
+      energyGenJet_    = -9.;
+      energyGenJetAlt_ = -9.;
+      energyGen_       = -9.;
+      tagCSV_       = -9.;
+      if ( ttSemiLeptonicEventMuons.isValid() && ttSemiLeptonicEventMuons->isHypoValid( TtEvent::kGenMatch )  ) {
+        fill( iCat, ttSemiLeptonicEventMuons, patMuons, patElecs, patJets, patMETs, pileUp, ttGenEvent, true );
+      }
+      else if ( ttSemiLeptonicEventElecs.isValid() && ttSemiLeptonicEventElecs->isHypoValid( TtEvent::kGenMatch ) ) {
+        fill( iCat, ttSemiLeptonicEventElecs, patMuons, patElecs, patJets, patMETs, pileUp, ttGenEvent, true );
+      }
+      else edm::LogInfo( "AnalyzeHitFit" ) << "...no valid MC match in both channel";
+      catData_.at( iCat )->Fill();
+    }
 
-  } // Semi-leptonic signal event
-  else edm::LogInfo( "AnalyzeHitFit" ) << "...no signal event";
+    // Do it again for all jets
+    if ( cat == "Jet" ) {
+      // Do it again
+      nPVTrue_              = -1.;
+      nPVObserved_          = -1;
+      pileUpWeightTrue_     =  0.;
+      pileUpWeightObserved_ =  0.;
+      binEta_              = -1;
+      binEtaAlt_           = -1;
+      binEtaGenJet_        = -1;
+      binEtaGenJetAlt_     = -1;
+      binEtaGen_           = -1;
+      binEtaSymm_          = -1;
+      binEtaSymmAlt_       = -1;
+      binEtaSymmGen_       = -1;
+      binEtaSymmGenJet_    = -1;
+      binEtaSymmGenJetAlt_ = -1;
+      pt_           = -9.;
+      ptAlt_        = -9.;
+      ptGenJet_     = -9.;
+      ptGenJetAlt_  = -9.;
+      ptGen_        = -9.;
+      eta_          = -9.;
+      etaAlt_       = -9.;
+      etaGenJet_    = -9.;
+      etaGenJetAlt_ = -9.;
+      etaGen_       = -9.;
+      phi_          = -9.;
+      phiAlt_       = -9.;
+      phiGenJet_    = -9.;
+      phiGenJetAlt_ = -9.;
+      phiGen_       = -9.;
+      energy_          = -9.;
+      energyAlt_       = -9.;
+      energyGenJet_    = -9.;
+      energyGenJetAlt_ = -9.;
+      energyGen_       = -9.;
+      tagCSV_       = -9.;
+      if ( ttSemiLeptonicEventMuons.isValid() && ttSemiLeptonicEventMuons->isHypoValid( TtEvent::kGenMatch )  ) {
+        fill( iCat, ttSemiLeptonicEventMuons, patMuons, patElecs, patJets, patMETs, pileUp, ttGenEvent, false, true );
+      }
+      else if ( ttSemiLeptonicEventElecs.isValid() && ttSemiLeptonicEventElecs->isHypoValid( TtEvent::kGenMatch ) ) {
+        fill( iCat, ttSemiLeptonicEventElecs, patMuons, patElecs, patJets, patMETs, pileUp, ttGenEvent, false, true );
+      }
+      else edm::LogInfo( "AnalyzeHitFit" ) << "...no valid MC match in both channel";
+      catData_.at( iCat )->Fill();
+      // ...and again
+      nPVTrue_              = -1.;
+      nPVObserved_          = -1;
+      pileUpWeightTrue_     =  0.;
+      pileUpWeightObserved_ =  0.;
+      binEta_              = -1;
+      binEtaAlt_           = -1;
+      binEtaGenJet_        = -1;
+      binEtaGenJetAlt_     = -1;
+      binEtaGen_           = -1;
+      binEtaSymm_          = -1;
+      binEtaSymmAlt_       = -1;
+      binEtaSymmGen_       = -1;
+      binEtaSymmGenJet_    = -1;
+      binEtaSymmGenJetAlt_ = -1;
+      pt_           = -9.;
+      ptAlt_        = -9.;
+      ptGenJet_     = -9.;
+      ptGenJetAlt_  = -9.;
+      ptGen_        = -9.;
+      eta_          = -9.;
+      etaAlt_       = -9.;
+      etaGenJet_    = -9.;
+      etaGenJetAlt_ = -9.;
+      etaGen_       = -9.;
+      phi_          = -9.;
+      phiAlt_       = -9.;
+      phiGenJet_    = -9.;
+      phiGenJetAlt_ = -9.;
+      phiGen_       = -9.;
+      energy_          = -9.;
+      energyAlt_       = -9.;
+      energyGenJet_    = -9.;
+      energyGenJetAlt_ = -9.;
+      energyGen_       = -9.;
+      tagCSV_       = -9.;
+      if ( ttSemiLeptonicEventMuons.isValid() && ttSemiLeptonicEventMuons->isHypoValid( TtEvent::kGenMatch )  ) {
+        fill( iCat, ttSemiLeptonicEventMuons, patMuons, patElecs, patJets, patMETs, pileUp, ttGenEvent, true, true );
+      }
+      else if ( ttSemiLeptonicEventElecs.isValid() && ttSemiLeptonicEventElecs->isHypoValid( TtEvent::kGenMatch ) ) {
+        fill( iCat, ttSemiLeptonicEventElecs, patMuons, patElecs, patJets, patMETs, pileUp, ttGenEvent, true, true );
+      }
+      else edm::LogInfo( "AnalyzeHitFit" ) << "...no valid MC match in both channel";
+      catData_.at( iCat )->Fill();
+    }
+  }
+  ++filledEvents_;
 
 }
 

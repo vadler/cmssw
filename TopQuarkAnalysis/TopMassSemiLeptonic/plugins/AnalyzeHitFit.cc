@@ -578,7 +578,7 @@ void AnalyzeHitFit::analyze( const edm::Event & iEvent, const edm::EventSetup & 
   }
   // b-tags
   unsigned btags( 0 );
-  for ( size_t iJet = 0; iJet < std::max((unsigned)( patJets->size() ), maxBTagJets_); ++iJet ) {
+  for ( size_t iJet = 0; iJet < std::min((unsigned)( patJets->size() ), maxBTagJets_); ++iJet ) {
     if ( patJets->at( iJet ).bDiscriminator( "combinedSecondaryVertexBJetTags" ) > minBTag_ ) ++btags;
   }
   if ( btags < minBTags_ ) {

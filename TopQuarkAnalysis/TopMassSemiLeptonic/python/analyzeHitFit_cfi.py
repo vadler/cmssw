@@ -30,6 +30,12 @@ analyzeHitFit = cms.EDAnalyzer(
   # JEC level to be considered
 , jecLevel = cms.string( 'L3Absolute' )
 
+  # Selection
+, maxJets     = cms.uint32( 99 )
+, minBTag     = cms.double( 0. )
+, minBTags    = cms.uint32( 0 )
+, maxBTagJets = cms.uint32( 99 )
+
   # Add branch for all jets
 , allJets = cms.bool( False )
 

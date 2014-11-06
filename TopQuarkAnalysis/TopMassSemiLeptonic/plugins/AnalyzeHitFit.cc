@@ -92,8 +92,10 @@ class AnalyzeHitFit : public edm::EDAnalyzer {
     std::vector< std::vector< double > > ptBins_;
     std::vector< std::vector< std::vector< double > > > ptBinsVector_;
     std::vector< bool > useBinVector_;
-    double minBTag_;
+    unsigned maxJets_;
+    double   minBTag_;
     unsigned minBTags_;
+    unsigned maxBTagJets_;
 
     /// Constants
     // Object categories
@@ -198,13 +200,17 @@ AnalyzeHitFit::AnalyzeHitFit( const edm::ParameterSet & iConfig )
 , allJets_( iConfig.getParameter< bool >( "allJets" ) )
 , pathPlots_( iConfig.getParameter< std::string >( "pathPlots" ) )
 , plot_( ! pathPlots_.empty() )
+, maxJets_( 99 )
 , minBTag_( 0. )
 , minBTags_( 0 )
+, maxBTagJets_( 99 )
 , filledEvents_( 0 )
 {
 
-  if ( iConfig.existsAs< double >( "minBTag" ) )    minBTag_  = iConfig.getParameter< double >( "minBTag" );
-  if ( iConfig.existsAs< unsigned >( "minBTags" ) ) minBTags_ = iConfig.getParameter< unsigned >( "minBTags" );
+  if ( iConfig.existsAs< unsigned >( "maxJets" ) )     maxJets_     = iConfig.getParameter< unsigned >( "maxJets" );
+  if ( iConfig.existsAs< double >( "minBTag" ) )       minBTag_     = iConfig.getParameter< double >( "minBTag" );
+  if ( iConfig.existsAs< unsigned >( "minBTags" ) )    minBTags_    = iConfig.getParameter< unsigned >( "minBTags" );
+  if ( iConfig.existsAs< unsigned >( "maxBTagJets" ) ) maxBTagJets_ = iConfig.getParameter< unsigned >( "maxBTagJets" );
 
   lumiWeightTrue_     = edm::LumiReWeighting( pileUpFileMC_.fullPath(), pileUpFileDataTrue_.fullPath()    , "pileup", "pileup" );
   lumiWeightObserved_ = edm::LumiReWeighting( pileUpFileMC_.fullPath(), pileUpFileDataObserved_.fullPath(), "pileup", "pileup" );
@@ -564,9 +570,15 @@ void AnalyzeHitFit::analyze( const edm::Event & iEvent, const edm::EventSetup & 
   edm::Handle< pat::METCollection > patMETs;
   iEvent.getByLabel( patMETsTag_, patMETs );
 
-  // b-tag requirement
+  // Selection
+  // # of jets
+  if ( patJets->size() > maxJets_ ) {
+    edm::LogInfo( "AnalyzeHitFit" ) << "...fail max # of jets requirement (" << patJets->size() << " > " << maxJets_ << ")";
+    return;
+  }
+  // b-tags
   unsigned btags( 0 );
-  for ( size_t iJet = 0; iJet < patJets->size(); ++iJet ) {
+  for ( size_t iJet = 0; iJet < std::max((unsigned)( patJets->size() ), maxBTagJets_); ++iJet ) {
     if ( patJets->at( iJet ).bDiscriminator( "combinedSecondaryVertexBJetTags" ) > minBTag_ ) ++btags;
   }
   if ( btags < minBTags_ ) {

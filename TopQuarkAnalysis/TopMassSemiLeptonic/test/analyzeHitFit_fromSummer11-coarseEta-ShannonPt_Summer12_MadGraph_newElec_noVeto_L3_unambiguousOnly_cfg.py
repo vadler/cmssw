@@ -14,9 +14,11 @@ sample = 'Summer12_MadGraph_newElec'
 #sample = 'Summer12_MCatNLO_newElec'
 
 # b-tags
-#minBTag  = 0.898 # CSVT
-minBTag  = 0.679 # CSVM
-minBTags = 2
+maxJets     = 99
+#minBTag    = 0.898 # CSVT
+minBTag     = 0.679 # CSVM
+minBTags    = 2
+maxBTagJets = 4
 
 # Binning
 useEtaCoarseBins = True
@@ -365,8 +367,10 @@ process.analyzeHitFit.udscJetPtBins  = cms.VPSet( udscJetPtBinsCoarseEtaShannon 
 process.analyzeHitFit.bJetPtBins     = cms.VPSet( bJetPtBinsCoarseEtaShannon )
 process.analyzeHitFit.jetPtBins      = cms.VPSet( jetPtBinsCoarseEtaShannon )
 process.analyzeHitFit.metPtBins      = metPtBins
-process.analyzeHitFit.minBTag  = cms.double( minBTag )
-process.analyzeHitFit.minBTags = cms.uint32( minBTags )
+process.analyzeHitFit.maxJets     = maxJets
+process.analyzeHitFit.minBTag     = minBTag
+process.analyzeHitFit.minBTags    = minBTags
+process.analyzeHitFit.maxBTagJets = maxBTagJets
 if runTest:
   pathPlots = pathPlots.replace( 'analyzeHitFit_from', 'test-analyzeHitFit_from', 1 )
 if not rfioInput:

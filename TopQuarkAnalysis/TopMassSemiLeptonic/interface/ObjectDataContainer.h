@@ -21,9 +21,12 @@ namespace my {
       /// Get binning
       std::vector< Double_t > etaBins() const { return etaBins_; };
       std::vector< Double_t > ptBins() const { return ptBins_; };
+      std::vector< std::vector< Double_t > > etaPtBins() const { return etaPtBins_; };
       /// Get number of bins
       unsigned nEtaBins() const { return etaBins_.size() - 1; };
       unsigned nPtBins() const { return ptBins_.size() - 1; };
+      unsigned nEtaPtBins() const { return etaPtBins_.size(); };
+      unsigned nEtaPtBins( unsigned uEta ) const { return etaPtBins_.at( uEta ).size() - 1; };
       /// Get sizes
       std::vector< unsigned >                sizeEta() const { return sizeEta_; };
       std::vector< std::vector< unsigned > > sizePt() const { return sizePt_; };
@@ -83,6 +86,7 @@ namespace my {
       /// Binning
       std::vector< Double_t > etaBins_;
       std::vector< Double_t > ptBins_;
+      std::vector< std::vector< Double_t > > etaPtBins_;
       /// Sizes
       std::vector< unsigned >                sizeEta_;
       std::vector< std::vector< unsigned > > sizePt_;

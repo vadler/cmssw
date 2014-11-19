@@ -3,6 +3,8 @@
 #include <cmath>
 #include <cassert>
 
+#include "boost/lexical_cast.hpp"
+
 #include <TH1D.h>
 #include <TTree.h>
 
@@ -39,6 +41,22 @@ ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory*
   }
   ptBins_.push_back( histPtBins->GetBinLowEdge( histPtBins->GetNbinsX() ) + histPtBins->GetBinWidth( histPtBins->GetNbinsX() ) );
 //   if ( fitMaxPt_ > ptBins_.back() ) fitMaxPt_ = ptBins_.back();
+  if ( ! objMetLike ) {
+    for ( Int_t iEta = histEtaBins->GetNbinsX() - ( etaBins_.size() - 1 ); iEta < histEtaBins->GetNbinsX(); ++iEta ) {
+      const std::string etaBin( boost::lexical_cast< std::string >( iEta ) );
+      TH1D * histEtaPtBins( ( TH1D* )( dirInCat->Get( std::string( objCat + "_binsPt_Eta" + etaBin ).c_str() ) ) );
+      if ( ! histEtaPtBins ) {
+        etaPtBins_.clear();
+        break;
+      }
+      std::vector< Double_t > ptBins;
+      for ( Int_t iPt = 0; iPt < histEtaPtBins->GetNbinsX(); ++iPt ) {
+        ptBins.push_back( histEtaPtBins->GetBinLowEdge( iPt + 1 ) );
+      }
+      ptBins.push_back( histEtaPtBins->GetBinLowEdge( histEtaPtBins->GetNbinsX() ) + histEtaPtBins->GetBinWidth( histEtaPtBins->GetNbinsX() ) );
+      etaPtBins_.push_back( ptBins );
+    }
+  }
 
   // Get data
   sizeEta_.reserve( nEtaBins() );
@@ -174,21 +192,40 @@ ObjectDataContainer::ObjectDataContainer( const std::string& objCat, TDirectory*
         ptGenVal = useNonT ? ptGenData_[ uEta ][ uEntry ] * std::cosh( etaGenData_[ uEta ][ uEntry ] ) : ptGenData_[ uEta ][ uEntry ];
       }
       Double_t ptRef( refGen ? ptGenVal : ptVal );
-      for ( unsigned uPt = 0; uPt < nPtBins(); ++uPt ) {
-        if ( ptBins_[ uPt ] <= ptRef && ptRef < ptBins_[ uPt + 1 ] ) {
-          sizePt[ uPt ] += 1;
-          NPVTrueEtaBin[ uPt ].push_back( NPVTrueData_[ uEta ][ uEntry ] );
-          NPVObservedEtaBin[ uPt ].push_back( NPVObservedData_[ uEta ][ uEntry ] );
-          weightEtaBin[ uPt ].push_back( weightData_[ uEta ][ uEntry ] );
-          ptEtaBin[ uPt ].push_back( ptVal );
-          ptGenEtaBin[ uPt ].push_back( ptGenVal );
-          etaEtaBin[ uPt ].push_back( etaData_[ uEta ][ uEntry ] );
-          etaGenEtaBin[ uPt ].push_back( etaGenData_[ uEta ][ uEntry ] );
-          phiEtaBin[ uPt ].push_back( phiData_[ uEta ][ uEntry ] );
-          phiGenEtaBin[ uPt ].push_back( phiGenData_[ uEta ][ uEntry ] );
-          break;
-        }
-      } // loop: uPt < nPtBins()
+      if ( nEtaPtBins() == nEtaBins() ) { // FIXME: pt-binning for all eta screwed!!!
+        for ( unsigned uPt = 0; uPt < nEtaPtBins( uEta ); ++uPt ) {
+          if ( etaPtBins_[ uEta ][ uPt ] <= ptRef && ptRef < etaPtBins_[ uEta ][ uPt + 1 ] ) {
+            sizePt[ uPt ] += 1;
+            NPVTrueEtaBin[ uPt ].push_back( NPVTrueData_[ uEta ][ uEntry ] );
+            NPVObservedEtaBin[ uPt ].push_back( NPVObservedData_[ uEta ][ uEntry ] );
+            weightEtaBin[ uPt ].push_back( weightData_[ uEta ][ uEntry ] );
+            ptEtaBin[ uPt ].push_back( ptVal );
+            ptGenEtaBin[ uPt ].push_back( ptGenVal );
+            etaEtaBin[ uPt ].push_back( etaData_[ uEta ][ uEntry ] );
+            etaGenEtaBin[ uPt ].push_back( etaGenData_[ uEta ][ uEntry ] );
+            phiEtaBin[ uPt ].push_back( phiData_[ uEta ][ uEntry ] );
+            phiGenEtaBin[ uPt ].push_back( phiGenData_[ uEta ][ uEntry ] );
+            break;
+          }
+        } // loop: uPt < nPtBins()
+      }
+      else {
+        for ( unsigned uPt = 0; uPt < nPtBins(); ++uPt ) {
+          if ( ptBins_[ uPt ] <= ptRef && ptRef < ptBins_[ uPt + 1 ] ) {
+            sizePt[ uPt ] += 1;
+            NPVTrueEtaBin[ uPt ].push_back( NPVTrueData_[ uEta ][ uEntry ] );
+            NPVObservedEtaBin[ uPt ].push_back( NPVObservedData_[ uEta ][ uEntry ] );
+            weightEtaBin[ uPt ].push_back( weightData_[ uEta ][ uEntry ] );
+            ptEtaBin[ uPt ].push_back( ptVal );
+            ptGenEtaBin[ uPt ].push_back( ptGenVal );
+            etaEtaBin[ uPt ].push_back( etaData_[ uEta ][ uEntry ] );
+            etaGenEtaBin[ uPt ].push_back( etaGenData_[ uEta ][ uEntry ] );
+            phiEtaBin[ uPt ].push_back( phiData_[ uEta ][ uEntry ] );
+            phiGenEtaBin[ uPt ].push_back( phiGenData_[ uEta ][ uEntry ] );
+            break;
+          }
+        } // loop: uPt < nPtBins()
+      }
     } // loop: uEntry < sizeEta_[ uEta ]
     NPVTrueDataPt_.push_back( NPVTrueEtaBin );
     NPVObservedDataPt_.push_back( NPVObservedEtaBin );

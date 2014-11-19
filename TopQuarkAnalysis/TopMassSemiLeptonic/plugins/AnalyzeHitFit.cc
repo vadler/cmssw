@@ -16,6 +16,7 @@
 
 
 #include <vector>
+#include <set>
 #include <map>
 #include <string>
 
@@ -293,12 +294,19 @@ AnalyzeHitFit::AnalyzeHitFit( const edm::ParameterSet & iConfig )
       useBinVector_.push_back( true );
       std::vector< edm::ParameterSet > ptBinsVPSet( iConfig.getParameter< std::vector< edm::ParameterSet > >( ptBinParams.at( iCat ) ) );
       std::vector< std::vector< double > > ptBins;
+      std::set< double > allPtBins;
       for ( unsigned iPSet = 0; iPSet < ptBinsVPSet.size(); ++iPSet ) {
         ptBins.push_back( ptBinsVPSet.at( iPSet ).getParameter< std::vector< double > >( "bins" ) );
+        for ( unsigned iBin = 0; iBin < ptBins.back().size(); ++iBin ) {
+          allPtBins.insert( ptBins.back().at( iBin ) );
+        }
       }
       ptBinsVector_.push_back( ptBins );
-      std::vector< double > emptyBins;
-      ptBins_.push_back( emptyBins );
+      std::vector< double > ptBinning;
+      for ( std::set< double >::const_iterator iBinning = allPtBins.begin(); iBinning != allPtBins.end(); ++iBinning ) {
+        ptBinning.push_back( *iBinning );
+      }
+      ptBins_.push_back( ptBinning );
     }
 
   }
@@ -328,14 +336,12 @@ AnalyzeHitFit::AnalyzeHitFit( const edm::ParameterSet & iConfig )
         sstrPt << ptBinsVector_.at( iCat ).at( iEta ).back() << std::endl;
       }
     }
-    else {
-      if ( ptBins_.at( iCat ).size() < 2 )
-        edm::LogError( "AnalyzeHitFit" ) << objCats_.at( iCat ) << ": less than 2 p_t bin bounderies found";
-      for ( unsigned iPt = 0; iPt < ptBins_.at( iCat ).size() - 1; ++iPt ) {
-        sstrPt << ptBins_.at( iCat ).at( iPt ) << ", ";
-      }
-      sstrPt << ptBins_.at( iCat ).back() << std::endl;
+    if ( ptBins_.at( iCat ).size() < 2 )
+      edm::LogError( "AnalyzeHitFit" ) << objCats_.at( iCat ) << ": less than 2 p_t bin bounderies found";
+    for ( unsigned iPt = 0; iPt < ptBins_.at( iCat ).size() - 1; ++iPt ) {
+      sstrPt << ptBins_.at( iCat ).at( iPt ) << ", ";
     }
+    sstrPt << ptBins_.at( iCat ).back() << " (all)" << std::endl;
   }
   edm::LogInfo( "AnalyzeHitFit" ) << "Eta binning\n" << sstrEta.str();
   edm::LogInfo( "AnalyzeHitFit" ) << "Pt binning\n" << sstrPt.str();
@@ -423,24 +429,22 @@ void AnalyzeHitFit::beginJob()
         delete histo_PtBins_;
       }
     }
-    else {
-      TH1D * histo_PtBins_ = dir.make< TH1D >( std::string( cat + "_binsPt" ).c_str(), cat.c_str(), ptBins_.at( iCat ).size() - 1, ptBins_.at( iCat ).data() );
-      histo_PtBins_->SetXTitle( "p_{t} (GeV)" );
-      histo_PtBins_->SetYTitle( "bin" );
-      histo_PtBins_->GetYaxis()->SetRangeUser( -1., ptBins_.at( iCat ).size() );
-      for ( unsigned iPt = 0; iPt < ptBins_.at( iCat ).size() - 1; ++iPt ) {
-        histo_PtBins_->Fill( ( ptBins_.at( iCat ).at( iPt ) + ptBins_.at( iCat ).at( iPt + 1 ) ) / 2., iPt ); // fill bin with mean
-      }
-      histo_PtBins_->Write();
-      if ( plot_ ) {
-        my::setPlotEnvironment( gStyle );
-        TCanvas c1( "c1" );
-        c1.cd();
-        histo_PtBins_->Draw();
-        c1.Print( std::string( pathPlots_ + histo_PtBins_->GetName() + ".png" ).c_str() );
-      }
-      delete histo_PtBins_;
+    TH1D * histo_PtBins_ = dir.make< TH1D >( std::string( cat + "_binsPt" ).c_str(), cat.c_str(), ptBins_.at( iCat ).size() - 1, ptBins_.at( iCat ).data() );
+    histo_PtBins_->SetXTitle( "p_{t} (GeV)" );
+    histo_PtBins_->SetYTitle( "bin" );
+    histo_PtBins_->GetYaxis()->SetRangeUser( -1., ptBins_.at( iCat ).size() );
+    for ( unsigned iPt = 0; iPt < ptBins_.at( iCat ).size() - 1; ++iPt ) {
+      histo_PtBins_->Fill( ( ptBins_.at( iCat ).at( iPt ) + ptBins_.at( iCat ).at( iPt + 1 ) ) / 2., iPt ); // fill bin with mean
     }
+    histo_PtBins_->Write();
+    if ( plot_ ) {
+      my::setPlotEnvironment( gStyle );
+      TCanvas c1( "c1" );
+      c1.cd();
+      histo_PtBins_->Draw();
+      c1.Print( std::string( pathPlots_ + histo_PtBins_->GetName() + ".png" ).c_str() );
+    }
+    delete histo_PtBins_;
 
     // N-tuple
     catData_.push_back( dir.make< TTree >( std::string( cat + "_data" ).c_str(), std::string( cat + " data" ).c_str() ) );

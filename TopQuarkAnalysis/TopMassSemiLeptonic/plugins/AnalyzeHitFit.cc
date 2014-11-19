@@ -1,16 +1,6 @@
-// -*- C++ -*-
-//
-// Package:    TopMassSemiLeptonic
-// Class:      AnalyzeHitFit
-//
-// $Id: AnalyzeHitFit.cc,v 1.1 2011/08/31 14:45:53 vadler Exp $
-//
 /**
   \class    AnalyzeHitFit AnalyzeHitFit.cc "TopQuarkAnalysis/TopMassSemiLeptonic/plugins/AnalyzeHitFit.cc"
-  \brief    Fill histograms and n-tuples for HitFit resolution function determination
-
-
-
+  \brief    Fill histograms and n-tuples for MadWeight transfer functions' and HitFit resolution functions' determination
   \author   Volker Adler
 */
 
@@ -119,6 +109,9 @@ class AnalyzeHitFit : public edm::EDAnalyzer {
     Double_t energy_;
     Int_t    binEta_;                // eta bin number as determined by 'getEtaBin'
     Int_t    binEtaSymm_;            // symmetrised eta bin number as determined by 'getEtaBin'
+    Int_t    binPt_;                // eta bin number as determined by 'getEtaBin'
+    Int_t    binEtaPt_;            // symmetrised eta bin number as determined by 'getEtaBin'
+    Int_t    binEtaSymmPt_;            // symmetrised eta bin number as determined by 'getEtaBin'
     // reconstructed alternative
     Double_t ptAlt_;
     Double_t etaAlt_;
@@ -126,6 +119,9 @@ class AnalyzeHitFit : public edm::EDAnalyzer {
     Double_t energyAlt_;
     Int_t    binEtaAlt_;             // eta bin number as determined by 'getEtaBin'
     Int_t    binEtaSymmAlt_;         // symmetrised eta bin number as determined by 'getEtaBin'
+    Int_t    binPtAlt_;                // eta bin number as determined by 'getEtaBin'
+    Int_t    binEtaPtAlt_;            // symmetrised eta bin number as determined by 'getEtaBin'
+    Int_t    binEtaSymmPtAlt_;            // symmetrised eta bin number as determined by 'getEtaBin'
     // recostructed from generated
     Double_t ptGenJet_;
     Double_t etaGenJet_;
@@ -133,6 +129,9 @@ class AnalyzeHitFit : public edm::EDAnalyzer {
     Double_t energyGenJet_;
     Int_t    binEtaGenJet_;          // eta bin number as determined by 'getEtaBin'
     Int_t    binEtaSymmGenJet_;      // symmetrised eta bin number as determined by 'getEtaBin'
+    Int_t    binPtGenJet_;                // eta bin number as determined by 'getEtaBin'
+    Int_t    binEtaPtGenJet_;            // symmetrised eta bin number as determined by 'getEtaBin'
+    Int_t    binEtaSymmPtGenJet_;            // symmetrised eta bin number as determined by 'getEtaBin'
     // recostructed alternative from generated
     Double_t ptGenJetAlt_;
     Double_t etaGenJetAlt_;
@@ -140,6 +139,9 @@ class AnalyzeHitFit : public edm::EDAnalyzer {
     Double_t energyGenJetAlt_;
     Int_t    binEtaGenJetAlt_;       // eta bin number as determined by 'getEtaBin'
     Int_t    binEtaSymmGenJetAlt_;   // symmetrised eta bin number as determined by 'getEtaBin'
+    Int_t    binPtGenJetAlt_;                // eta bin number as determined by 'getEtaBin'
+    Int_t    binEtaPtGenJetAlt_;            // symmetrised eta bin number as determined by 'getEtaBin'
+    Int_t    binEtaSymmPtGenJetAlt_;            // symmetrised eta bin number as determined by 'getEtaBin'
     // generated
     Double_t ptGen_;
     Double_t etaGen_;
@@ -147,12 +149,17 @@ class AnalyzeHitFit : public edm::EDAnalyzer {
     Double_t energyGen_;
     Int_t    binEtaGen_;             // eta bin number as determined by 'getEtaBin'
     Int_t    binEtaSymmGen_;         // symmetrised eta bin number as determined by 'getEtaBin'
+    Int_t    binPtGen_;                // eta bin number as determined by 'getEtaBin'
+    Int_t    binEtaPtGen_;            // symmetrised eta bin number as determined by 'getEtaBin'
+    Int_t    binEtaSymmPtGen_;            // symmetrised eta bin number as determined by 'getEtaBin'
     // additional
     Double_t tagCSV_;                // CSV b-tag discriminator value
 
     /// Private functions
 
     unsigned getEtaBin( unsigned iCat, double eta, bool symm = false );
+    unsigned getPtBin( unsigned iCat, double pt );
+    unsigned getEtaPtBin( unsigned iCat, double eta, double pt, bool symm = false );
 
     // Fill n-tuples
     void fill( unsigned iCat, const edm::Handle< TtSemiLeptonicEvent > & ttSemiLeptonicEvent, edm::Handle< pat::MuonCollection > & patMuons, edm::Handle< pat::ElectronCollection > & patElecs, edm::Handle< pat::JetCollection > & patJets, edm::Handle< pat::METCollection > & patMETs, edm::Handle< std::vector< PileupSummaryInfo > > & pileUp, edm::Handle< TtGenEvent > & ttGenEvent, bool repeat = false, bool allJets = false );
@@ -452,38 +459,53 @@ void AnalyzeHitFit::beginJob()
     catData_.back()->Branch( "NPVObserved"         , &nPVObserved_         , "nPVObserved/I" );
     catData_.back()->Branch( "PileUpWeightTrue"    , &pileUpWeightTrue_    , "pileUpWeightTrue/D" );
     catData_.back()->Branch( "PileUpWeightObserved", &pileUpWeightObserved_, "pileUpWeightObserved/D" );
-    catData_.back()->Branch( "Pt"        , &pt_        , "pt/D" );
-    catData_.back()->Branch( "Eta"       , &eta_       , "eta/D" );
-    catData_.back()->Branch( "Phi"       , &phi_       , "phi/D" );
-    catData_.back()->Branch( "Energy"    , &energy_    , "energy/D" );
-    catData_.back()->Branch( "BinEta"    , &binEta_    , "binEta/I" );
-    catData_.back()->Branch( "BinEtaSymm", &binEtaSymm_, "binEtaSymm/I" );
-    catData_.back()->Branch( "PtAlt"        , &ptAlt_        , "ptAlt/D" );
-    catData_.back()->Branch( "EtaAlt"       , &etaAlt_       , "etaAlt/D" );
-    catData_.back()->Branch( "PhiAlt"       , &phiAlt_       , "phiAlt/D" );
-    catData_.back()->Branch( "EnergyAlt"    , &energyAlt_    , "energyAlt/D" );
-    catData_.back()->Branch( "BinEtaAlt"    , &binEtaAlt_    , "binEtaAlt/I" );
-    catData_.back()->Branch( "BinEtaSymmAlt", &binEtaSymmAlt_, "binEtaSymmAlt/I" );
+    catData_.back()->Branch( "Pt"          , &pt_        , "pt/D" );
+    catData_.back()->Branch( "Eta"         , &eta_       , "eta/D" );
+    catData_.back()->Branch( "Phi"         , &phi_       , "phi/D" );
+    catData_.back()->Branch( "Energy"      , &energy_    , "energy/D" );
+    catData_.back()->Branch( "BinEta"      , &binEta_    , "binEta/I" );
+    catData_.back()->Branch( "BinEtaSymm"  , &binEtaSymm_, "binEtaSymm/I" );
+    catData_.back()->Branch( "BinPt"       , &binPt_     , "binPt/I" );
+    catData_.back()->Branch( "BinEtaPt"    , &binEtaPt_  , "binEtaPt/I" );
+    catData_.back()->Branch( "BinEtaSymmPt", &binEtaSymmPt_, "binEtaSymmPt/I" );
+    catData_.back()->Branch( "PtAlt"          , &ptAlt_        , "ptAlt/D" );
+    catData_.back()->Branch( "EtaAlt"         , &etaAlt_       , "etaAlt/D" );
+    catData_.back()->Branch( "PhiAlt"         , &phiAlt_       , "phiAlt/D" );
+    catData_.back()->Branch( "EnergyAlt"      , &energyAlt_    , "energyAlt/D" );
+    catData_.back()->Branch( "BinEtaAlt"      , &binEtaAlt_    , "binEtaAlt/I" );
+    catData_.back()->Branch( "BinEtaSymmAlt"  , &binEtaSymmAlt_, "binEtaSymmAlt/I" );
+    catData_.back()->Branch( "BinPtAlt"       , &binPtAlt_     , "binPtAlt/I" );
+    catData_.back()->Branch( "BinEtaPtAlt"    , &binEtaPtAlt_  , "binEtaPtAlt/I" );
+    catData_.back()->Branch( "BinEtaSymmPtAlt", &binEtaSymmPtAlt_  , "binEtaSymmPtAlt/I" );
     if ( cat == "UdscJet" || cat == "BJet" ) {
-      catData_.back()->Branch( "PtGenJet"        , &ptGenJet_        , "ptGenJet/D" );
-      catData_.back()->Branch( "EtaGenJet"       , &etaGenJet_       , "etaGenJet/D" );
-      catData_.back()->Branch( "PhiGenJet"       , &phiGenJet_       , "phiGenJet/D" );
-      catData_.back()->Branch( "EnergyGenJet"    , &energyGenJet_    , "energyGenJet/D" );
-      catData_.back()->Branch( "BinEtaGenJet"    , &binEtaGenJet_    , "binEtaGenJet/I" );
-      catData_.back()->Branch( "BinEtaSymmGenJet", &binEtaSymmGenJet_, "binEtaSymmGenJet/I" );
-      catData_.back()->Branch( "PtGenJetAlt"        , &ptGenJetAlt_        , "ptGenJetAlt/D" );
-      catData_.back()->Branch( "EtaGenJetAlt"       , &etaGenJetAlt_       , "etaGenJetAlt/D" );
-      catData_.back()->Branch( "PhiGenJetAlt"       , &phiGenJetAlt_       , "phiGenJetAlt/D" );
-      catData_.back()->Branch( "EnergyGenJetAlt"    , &energyGenJetAlt_    , "energyGenJetAlt/D" );
-      catData_.back()->Branch( "BinEtaGenJetAlt"    , &binEtaGenJetAlt_    , "binEtaGenJetAlt/I" );
-      catData_.back()->Branch( "BinEtaSymmGenJetAlt", &binEtaSymmGenJetAlt_, "binEtaSymmGenJetAlt/I" );
+      catData_.back()->Branch( "PtGenJet"          , &ptGenJet_        , "ptGenJet/D" );
+      catData_.back()->Branch( "EtaGenJet"         , &etaGenJet_       , "etaGenJet/D" );
+      catData_.back()->Branch( "PhiGenJet"         , &phiGenJet_       , "phiGenJet/D" );
+      catData_.back()->Branch( "EnergyGenJet"      , &energyGenJet_    , "energyGenJet/D" );
+      catData_.back()->Branch( "BinEtaGenJet"      , &binEtaGenJet_    , "binEtaGenJet/I" );
+      catData_.back()->Branch( "BinEtaSymmGenJet"  , &binEtaSymmGenJet_, "binEtaSymmGenJet/I" );
+      catData_.back()->Branch( "BinPtGenJet"       , &binPtGenJet_     , "binPtGenJet/I" );
+      catData_.back()->Branch( "BinEtaPtGenJet"    , &binEtaPtGenJet_  , "binEtaPtGenJet/I" );
+      catData_.back()->Branch( "BinEtaSymmPtGenJet", &binEtaSymmPtGenJet_  , "binEtaSymmPtGenJet/I" );
+      catData_.back()->Branch( "PtGenJetAlt"          , &ptGenJetAlt_        , "ptGenJetAlt/D" );
+      catData_.back()->Branch( "EtaGenJetAlt"         , &etaGenJetAlt_       , "etaGenJetAlt/D" );
+      catData_.back()->Branch( "PhiGenJetAlt"         , &phiGenJetAlt_       , "phiGenJetAlt/D" );
+      catData_.back()->Branch( "EnergyGenJetAlt"      , &energyGenJetAlt_    , "energyGenJetAlt/D" );
+      catData_.back()->Branch( "BinEtaGenJetAlt"      , &binEtaGenJetAlt_    , "binEtaGenJetAlt/I" );
+      catData_.back()->Branch( "BinEtaSymmGenJetAlt"  , &binEtaSymmGenJetAlt_, "binEtaSymmGenJetAlt/I" );
+      catData_.back()->Branch( "BinPtGenJetAlt"       , &binPtGenJetAlt_     , "binPtGenJetAlt/I" );
+      catData_.back()->Branch( "BinEtaPtGenJetAlt"    , &binEtaPtGenJetAlt_  , "binEtaPtGenJetAlt/I" );
+      catData_.back()->Branch( "BinEtaSymmPtGenJetAlt", &binEtaSymmPtGenJetAlt_  , "binEtaSymmPtGenJetAlt/I" );
     }
-    catData_.back()->Branch( "PtGen"        , &ptGen_        , "ptGen/D" );
-    catData_.back()->Branch( "EtaGen"       , &etaGen_       , "etaGen/D" );
-    catData_.back()->Branch( "PhiGen"       , &phiGen_       , "phiGen/D" );
-    catData_.back()->Branch( "EnergyGen"    , &energyGen_    , "energyGen/D" );
-    catData_.back()->Branch( "BinEtaGen"    , &binEtaGen_    , "binEtaGen/I" );
-    catData_.back()->Branch( "BinEtaSymmGen", &binEtaSymmGen_, "binEtaSymmGen/I" );
+    catData_.back()->Branch( "PtGen"          , &ptGen_        , "ptGen/D" );
+    catData_.back()->Branch( "EtaGen"         , &etaGen_       , "etaGen/D" );
+    catData_.back()->Branch( "PhiGen"         , &phiGen_       , "phiGen/D" );
+    catData_.back()->Branch( "EnergyGen"      , &energyGen_    , "energyGen/D" );
+    catData_.back()->Branch( "BinEtaGen"      , &binEtaGen_    , "binEtaGen/I" );
+    catData_.back()->Branch( "BinEtaSymmGen"  , &binEtaSymmGen_, "binEtaSymmGen/I" );
+    catData_.back()->Branch( "BinPtGen"       , &binPtGen_     , "binPtGen/I" );
+    catData_.back()->Branch( "BinEtaPtGen"    , &binEtaPtGen_  , "binEtaPtGen/I" );
+    catData_.back()->Branch( "BinEtaSymmPtGen", &binEtaSymmPtGen_  , "binEtaSymmPtGen/I" );
     if ( cat == "UdscJet" || cat == "BJet" ) {
       catData_.back()->Branch( "TagCSV", &tagCSV_, "tagCSV/D" );
     }
@@ -633,6 +655,21 @@ void AnalyzeHitFit::analyze( const edm::Event & iEvent, const edm::EventSetup & 
     binEtaSymmGen_       = -1;
     binEtaSymmGenJet_    = -1;
     binEtaSymmGenJetAlt_ = -1;
+    binPt_             = -1;
+    binPtAlt_          = -1;
+    binPtGenJet_       = -1;
+    binPtGenJetAlt_    = -1;
+    binPtGen_          = -1;
+    binEtaPt_          = -1;
+    binEtaPtAlt_       = -1;
+    binEtaPtGen_       = -1;
+    binEtaPtGenJet_    = -1;
+    binEtaPtGenJetAlt_ = -1;
+    binEtaSymmPt_          = -1;
+    binEtaSymmPtAlt_       = -1;
+    binEtaSymmPtGen_       = -1;
+    binEtaSymmPtGenJet_    = -1;
+    binEtaSymmPtGenJetAlt_ = -1;
     pt_           = -9.;
     ptAlt_        = -9.;
     ptGenJet_     = -9.;
@@ -1017,6 +1054,38 @@ unsigned AnalyzeHitFit::getEtaBin( unsigned iCat, double eta, bool symm )
 }
 
 
+unsigned AnalyzeHitFit::getPtBin( unsigned iCat, double pt )
+{
+
+  std::vector< double > ptBins( ptBins_.at( iCat ) );
+  for ( unsigned iPt = 0; iPt < ptBins.size() - 1; ++iPt ) {
+    if ( ptBins.at( iPt ) <= pt && pt < ptBins.at( iPt + 1 ) ) return iPt;
+  }
+
+  return ptBins.size();
+
+}
+
+
+unsigned AnalyzeHitFit::getEtaPtBin( unsigned iCat, double eta, double pt, bool symm )
+{
+
+  if ( ! useBinVector_.at( iCat ) ) return getPtBin( iCat, pt );
+
+  unsigned iEta( getEtaBin( iCat, eta, symm ) );
+  unsigned nEtaBins( symm ? etaSymmBins_.at( iCat ).size() : etaBins_.at( iCat ).size() );
+  if ( iEta == nEtaBins ) return ptBins_.at( iCat ).size();
+
+  std::vector< double > ptBins( ptBinsVector_.at( iCat ).at( iEta ) );
+  for ( unsigned iPt = 0; iPt < ptBins.size() - 1; ++iPt ) {
+    if ( ptBins.at( iPt ) <= pt && pt < ptBins.at( iPt + 1 ) ) return iPt;
+  }
+
+  return ptBins_.at( iCat ).size();
+
+}
+
+
 void AnalyzeHitFit::fill( unsigned iCat, const edm::Handle< TtSemiLeptonicEvent > & ttSemiLeptonicEvent, edm::Handle< pat::MuonCollection > & patMuons, edm::Handle< pat::ElectronCollection > & patElecs, edm::Handle< pat::JetCollection > & patJets, edm::Handle< pat::METCollection > & patMETs, edm::Handle< std::vector< PileupSummaryInfo > > & pileUp, edm::Handle< TtGenEvent > & ttGenEvent, bool repeat, bool allJets )
 {
 
@@ -1208,46 +1277,129 @@ void AnalyzeHitFit::fill( unsigned iCat, const edm::Handle< TtSemiLeptonicEvent 
     return;
   }
 
+  unsigned iPt;
+  if ( pt_ != -9. ) {
+    iPt = getPtBin( iCat, pt_ );
+    if ( iPt < ptBins_.at( iCat ).size() ) binPt_ = iPt;
+  }
+  if ( ptAlt_ != -9. ) {
+    iPt = getPtBin( iCat, ptAlt_ );
+    if ( iPt < ptBins_.at( iCat ).size() ) binPtAlt_ = iPt;
+  }
+  if ( ptGenJet_ != -9. ) {
+    iPt = getPtBin( iCat, ptGenJet_ );
+    if ( iPt < ptBins_.at( iCat ).size() ) binPtGenJet_ = iPt;
+  }
+  if ( ptGenJetAlt_ != -9. ) {
+    iPt = getPtBin( iCat, ptGenJetAlt_ );
+    if ( iPt < ptBins_.at( iCat ).size() ) binPtGenJetAlt_ = iPt;
+  }
+  if ( ptGen_ != -9. ) {
+    iPt = getPtBin( iCat, ptGen_ );
+    if ( iPt < ptBins_.at( iCat ).size() ) binPtGen_ = iPt;
+  }
+
   unsigned iEta;
+  unsigned iEtaPt;
   if ( eta_ != -9. ) {
     iEta = getEtaBin( iCat, eta_ );
-    if ( iEta < etaBins_.at( iCat ).size() ) binEta_ = iEta;
+    if ( iEta < etaBins_.at( iCat ).size() ) {
+      binEta_ = iEta;
+      if ( pt_ != -9. ) {
+        iEtaPt = getEtaPtBin( iCat, eta_, pt_ );
+        if ( iEtaPt < ptBins_.at( iCat ).size() ) binEtaPt_ = iEtaPt;
+      }
+    }
   }
   if ( etaAlt_ != -9. ) {
     iEta = getEtaBin( iCat, etaAlt_ );
-    if ( iEta < etaBins_.at( iCat ).size() ) binEtaAlt_ = iEta;
+    if ( iEta < etaBins_.at( iCat ).size() ) {
+      binEtaAlt_ = iEta;
+      if ( ptAlt_ != -9. ) {
+        iEtaPt = getEtaPtBin( iCat, etaAlt_, ptAlt_ );
+        if ( iEtaPt < ptBins_.at( iCat ).size() ) binEtaPtAlt_ = iEtaPt;
+      }
+    }
   }
   if ( etaGenJet_ != -9. ) {
     iEta = getEtaBin( iCat, etaGenJet_ );
-    if ( iEta < etaBins_.at( iCat ).size() ) binEtaGenJet_ = iEta;
+    if ( iEta < etaBins_.at( iCat ).size() ) {
+      binEtaGenJet_ = iEta;
+      if ( ptGenJet_ != -9. ) {
+        iEtaPt = getEtaPtBin( iCat, etaGenJet_, ptGenJet_ );
+        if ( iEtaPt < ptBins_.at( iCat ).size() ) binEtaPtGenJet_ = iEtaPt;
+      }
+    }
   }
   if ( etaGenJetAlt_ != -9. ) {
     iEta = getEtaBin( iCat, etaGenJetAlt_ );
-    if ( iEta < etaBins_.at( iCat ).size() ) binEtaGenJetAlt_ = iEta;
+    if ( iEta < etaBins_.at( iCat ).size() ) {
+      binEtaGenJetAlt_ = iEta;
+      if ( ptGenJetAlt_ != -9. ) {
+        iEtaPt = getEtaPtBin( iCat, etaGenJetAlt_, ptGenJetAlt_ );
+        if ( iEtaPt < ptBins_.at( iCat ).size() ) binEtaPtGenJetAlt_ = iEtaPt;
+      }
+    }
   }
   if ( etaGen_ != -9. ) {
     iEta = getEtaBin( iCat, etaGen_ );
-    if ( iEta < etaBins_.at( iCat ).size() ) binEtaGen_ = iEta;
+    if ( iEta < etaBins_.at( iCat ).size() ) {
+      binEtaGen_ = iEta;
+      if ( ptGen_ != -9. ) {
+        iEtaPt = getEtaPtBin( iCat, etaGen_, ptGen_ );
+        if ( iEtaPt < ptBins_.at( iCat ).size() ) binEtaPtGen_ = iEtaPt;
+      }
+    }
   }
   if ( eta_ != -9. ) {
     iEta = getEtaBin( iCat, eta_, true );
-    if ( iEta < etaSymmBins_.at( iCat ).size() ) binEtaSymm_ = iEta;
+    if ( iEta < etaSymmBins_.at( iCat ).size() ) {
+      binEtaSymm_ = iEta;
+      if ( pt_ != -9. ) {
+        iEtaPt = getEtaPtBin( iCat, eta_, pt_, true );
+        if ( iEtaPt < ptBins_.at( iCat ).size() ) binEtaSymmPt_ = iEtaPt;
+      }
+    }
   }
   if ( etaAlt_ != -9. ) {
     iEta = getEtaBin( iCat, etaAlt_, true );
-    if ( iEta < etaSymmBins_.at( iCat ).size() ) binEtaSymmAlt_ = iEta;
+    if ( iEta < etaSymmBins_.at( iCat ).size() ) {
+      binEtaSymmAlt_ = iEta;
+      if ( ptAlt_ != -9. ) {
+        iEtaPt = getEtaPtBin( iCat, etaAlt_, ptAlt_, true );
+        if ( iEtaPt < ptBins_.at( iCat ).size() ) binEtaSymmPtAlt_ = iEtaPt;
+      }
+    }
   }
   if ( etaGenJet_ != -9. ) {
     iEta = getEtaBin( iCat, etaGenJet_, true );
-    if ( iEta < etaSymmBins_.at( iCat ).size() ) binEtaSymmGenJet_ = iEta;
+    if ( iEta < etaSymmBins_.at( iCat ).size() ) {
+      binEtaSymmGenJet_ = iEta;
+      if ( ptGenJet_ != -9. ) {
+        iEtaPt = getEtaPtBin( iCat, etaGenJet_, ptGenJet_, true );
+        if ( iEtaPt < ptBins_.at( iCat ).size() ) binEtaSymmPtGenJet_ = iEtaPt;
+      }
+    }
   }
   if ( etaGenJetAlt_ != -9. ) {
     iEta = getEtaBin( iCat, etaGenJetAlt_, true );
-    if ( iEta < etaSymmBins_.at( iCat ).size() ) binEtaSymmGenJetAlt_ = iEta;
+    if ( iEta < etaSymmBins_.at( iCat ).size() ) {
+      binEtaSymmGenJetAlt_ = iEta;
+      if ( ptGenJetAlt_ != -9. ) {
+        iEtaPt = getEtaPtBin( iCat, etaGenJetAlt_, ptGenJetAlt_, true );
+        if ( iEtaPt < ptBins_.at( iCat ).size() ) binEtaSymmPtGenJetAlt_ = iEtaPt;
+      }
+    }
   }
   if ( etaGen_ != -9. ) {
     iEta = getEtaBin( iCat, etaGen_, true );
-    if ( iEta < etaSymmBins_.at( iCat ).size() ) binEtaSymmGen_ = iEta;
+    if ( iEta < etaSymmBins_.at( iCat ).size() ) {
+      binEtaSymmGen_ = iEta;
+      if ( ptGen_ != -9. ) {
+        iEtaPt = getEtaPtBin( iCat, etaGen_, ptGen_, true );
+        if ( iEtaPt < ptBins_.at( iCat ).size() ) binEtaSymmPtGen_ = iEtaPt;
+      }
+    }
   }
 
 }

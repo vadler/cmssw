@@ -55,10 +55,10 @@ electronsSelectIsoPf = 0.5
 electronSelectPf     = 'pt > 5. && gsfTrackRef.isNonnull && gsfTrackRef.trackerExpectedHitsInner.numberOfLostHits < 2'
 # electron object selection
 electronUsePV        = False
-electronSelectBase   = 'et > 20. && (chargedHadronIso+max(0.,neutralHadronIso+photonIso-1.*userIsolation("User1Iso")))/pt < 0.15 && abs(eta) < 3.0 && (1. >= electronID("mvaTrigV0") && electronID("mvaTrigV0") >= 0.)'
-electronSelectHitFit = electronSelectBase + ' && abs(eta) < 2.5 && passConversionVeto'
-electronSelect       = electronSelectBase + ' && abs(eta) < 2.5'
-electronSelectSignal = 'et > 30. && abs(eta) < 2.5 && !(1.4442 < abs(superCluster.eta) && abs(superCluster.eta) < 1.5660) && abs(dB) < 0.02 && electronID("mvaTrigV0") > 0.5 && (chargedHadronIso+max(0.,neutralHadronIso+photonIso-1.0*userIsolation("User1Iso")))/pt < 0.1 && passConversionVeto && gsfTrack.trackerExpectedHitsInner.numberOfHits <= 0'
+electronSelectBase   = 'ecalDrivenMomentum.pt > 20. && (chargedHadronIso+max(0.,neutralHadronIso+photonIso-1.*userIsolation("User1Iso")))/ecalDrivenMomentum.pt < 0.15 && abs(ecalDrivenMomentum.eta) < 3.0 && (1. >= electronID("mvaTrigV0") && electronID("mvaTrigV0") >= 0.)'
+electronSelectHitFit = electronSelectBase + ' && abs(ecalDrivenMomentum.eta) < 2.5 && passConversionVeto'
+electronSelect       = electronSelectBase + ' && abs(ecalDrivenMomentum.eta) < 2.5'
+electronSelectSignal = 'ecalDrivenMomentum.pt > 30. && abs(ecalDrivenMomentum.eta) < 2.5 && !(1.4442 < abs(superCluster.eta) && abs(superCluster.eta) < 1.5660) && abs(dB) < 0.02 && electronID("mvaTrigV0") > 0.5 && (chargedHadronIso+max(0.,neutralHadronIso+photonIso-1.0*userIsolation("User1Iso")))/ecalDrivenMomentum.pt < 0.1 && passConversionVeto && gsfTrack.trackerExpectedHitsInner.numberOfHits <= 0'
 electronSelectSignalJetDR = 0.3
 # counters for electron channel
 selectedElectronsMin = 1

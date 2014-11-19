@@ -17,7 +17,7 @@ sample = 'Summer12_MadGraph_newElec'
 maxJets     = 99
 #minBTag    = 0.898 # CSVT
 minBTag     = 0.679 # CSVM
-minBTags    = 2
+minBTags    = 0
 maxBTagJets = 4
 
 # Binning

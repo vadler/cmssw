@@ -153,7 +153,9 @@ class AnalyzeHitFit : public edm::EDAnalyzer {
     Int_t    binEtaPtGen_;            // symmetrised eta bin number as determined by 'getEtaBin'
     Int_t    binEtaSymmPtGen_;            // symmetrised eta bin number as determined by 'getEtaBin'
     // additional
+    Int_t    nJets_;
     Double_t tagCSV_;                // CSV b-tag discriminator value
+    Double_t tagListCSV_[ 99 ];          // CSV b-tag discriminator value
 
     /// Private functions
 
@@ -507,7 +509,9 @@ void AnalyzeHitFit::beginJob()
     catData_.back()->Branch( "BinEtaPtGen"    , &binEtaPtGen_  , "binEtaPtGen/I" );
     catData_.back()->Branch( "BinEtaSymmPtGen", &binEtaSymmPtGen_  , "binEtaSymmPtGen/I" );
     if ( cat == "UdscJet" || cat == "BJet" ) {
+      catData_.back()->Branch( "nJets", &nJets_, "nJets/I" );
       catData_.back()->Branch( "TagCSV", &tagCSV_, "tagCSV/D" );
+      catData_.back()->Branch( "TagListCSV", tagListCSV_, "taglistCSV[nJets]/D" );
     }
 
     for ( unsigned iProp = 0; iProp < kinProps_.size(); ++iProp ) {
@@ -603,13 +607,21 @@ void AnalyzeHitFit::analyze( const edm::Event & iEvent, const edm::EventSetup & 
     return;
   }
   // b-tags
-  unsigned btags( 0 );
-  for ( size_t iJet = 0; iJet < std::min((unsigned)( patJets->size() ), maxBTagJets_); ++iJet ) {
-    if ( patJets->at( iJet ).bDiscriminator( "combinedSecondaryVertexBJetTags" ) > minBTag_ ) ++btags;
+  if ( minBTags_ > 0 ) {
+    unsigned btags( 0 );
+    for ( size_t iJet = 0; iJet < std::min((unsigned)( patJets->size() ), maxBTagJets_); ++iJet ) {
+      if ( patJets->at( iJet ).bDiscriminator( "combinedSecondaryVertexBJetTags" ) > minBTag_ ) ++btags;
+    }
+    if ( btags < minBTags_ ) {
+      edm::LogInfo( "AnalyzeHitFit" ) << "...fail b-tag requirement";
+      return;
+    }
   }
-  if ( btags < minBTags_ ) {
-    edm::LogInfo( "AnalyzeHitFit" ) << "...fail b-tag requirement";
-    return;
+
+  // Save selection info
+  nJets_ = patJets->size();
+  for ( size_t iJet = 0; iJet < ( size_t )nJets_; ++iJet ) {
+    tagListCSV_[ iJet ] = patJets->at( iJet ).bDiscriminator( "combinedSecondaryVertexBJetTags" );
   }
 
   // TQAF MC event

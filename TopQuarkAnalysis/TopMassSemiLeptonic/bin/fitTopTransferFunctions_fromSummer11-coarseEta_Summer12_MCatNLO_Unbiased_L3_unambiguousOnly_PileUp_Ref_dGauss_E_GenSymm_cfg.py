@@ -10,7 +10,7 @@ fitTopTransferFunctions = cms.PSet(
     io = cms.PSet(
         overwrite = cms.bool(True),
         plot = cms.bool(True),
-        outputFile = cms.string('file:/afs/cern.ch/work/v/vadler/cms/Top/CMSSW_5_3_13/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MCatNLO_Unbiased_L3_unambiguousOnly.root'),
+        outputFile = cms.string('file:/afs/cern.ch/work/v/vadler/cms/Top/CMSSW_5_3_13/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MCatNLO_Unbiased_L3_unambiguousOnly_PileUp.root'),
         pathOut = cms.string(''),
         refSel = cms.bool(True),
         writeFiles = cms.bool(False),
@@ -25,7 +25,7 @@ fitTopTransferFunctions = cms.PSet(
         histAddEdges = cms.bool(True),
         fitEtaBins = cms.bool(True),
         fullStats = cms.bool(True),
-        inputFile = cms.string('file:/afs/cern.ch/work/v/vadler/cms/Top/CMSSW_5_3_13/output/analyzeHitFit_fromSummer11-coarseEta_Summer12_MCatNLO_Unbiased_L3_unambiguousOnly_PileUp.root')
+        inputFile = cms.string('file:/afs/cern.ch/work/v/vadler/cms/Top/CMSSW_5_3_13/output/analyzeHitFit_fromSummer11-coarseEta_Summer12_MCatNLO_Unbiased_L3_unambiguousOnly.root')
     ),
     objects = cms.PSet(
         BJet = cms.PSet(

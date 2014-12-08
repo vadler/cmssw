@@ -1,4 +1,0 @@
-#!/bin/tcsh
-cd ~/work/cms/Top/CMSSW_5_3_13/src/
-cmsenv
-fitTopTransferFunctions TopQuarkAnalysis/TopMassSemiLeptonic/bin/fitTopTransferFunctions_fromSummer11-coarseEta-ShannonPt_Summer12_MadGraph_newElec_noVeto_L3_unambiguousOnly_PileUp_Ref_dGauss_E_GenSymm_cfg.py >&! ~/work/cms/Top/CMSSW_5_3_13/output/fitTopTransferFunctions_fromSummer11-coarseEta-ShannonPt_Summer12_MadGraph_newElec_noVeto_L3_unambiguousOnly_PileUp_Ref_dGauss_E_GenSymm.log

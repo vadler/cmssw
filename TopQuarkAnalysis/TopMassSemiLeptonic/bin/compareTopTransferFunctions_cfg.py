@@ -33,37 +33,37 @@ compareTopTransferFunctions.compare = cms.PSet(
 
 ### Input Files ###
 
-label = 'MadGraph_elecKinematics'
-compareTopTransferFunctions.compare.inputFiles.Default = cms.PSet( # "Default" *must* exist!
-  fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MadGraph_newElec_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
-, legendLabel = cms.string( 're-calibrated kinematics' )
-, useAlt     = cms.bool( False )
-, useNonT    = cms.bool( True )
-, useNonP    = cms.bool( True )
-, refGen     = cms.bool( True )
-, refSel     = cms.bool( True )
-, cycle    = cms.int32( 1 )
-)
-compareTopTransferFunctions.compare.inputFiles.Compare1 = cms.PSet(
-  fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MadGraph_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
-, legendLabel = cms.string( 'GSF kinematics from PF' )
-, useAlt     = cms.bool( True )
-, useNonT    = cms.bool( True )
-, useNonP    = cms.bool( True )
-, refGen     = cms.bool( True )
-, refSel     = cms.bool( True )
-, cycle    = cms.int32( 1 )
-)
-compareTopTransferFunctions.compare.inputFiles.Compare2 = cms.PSet(
-  fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MadGraph_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
-, legendLabel = cms.string( 'PF kinematics' )
-, useAlt     = cms.bool( False )
-, useNonT    = cms.bool( True )
-, useNonP    = cms.bool( True )
-, refGen     = cms.bool( True )
-, refSel     = cms.bool( True )
-, cycle    = cms.int32( 1 )
-)
+#label = 'MadGraph_elecKinematics'
+#compareTopTransferFunctions.compare.inputFiles.Default = cms.PSet( # "Default" *must* exist!
+  #fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MadGraph_newElec_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
+#, legendLabel = cms.string( 're-calibrated kinematics' )
+#, useAlt     = cms.bool( False )
+#, useNonT    = cms.bool( True )
+#, useNonP    = cms.bool( True )
+#, refGen     = cms.bool( True )
+#, refSel     = cms.bool( True )
+#, cycle    = cms.int32( 1 )
+#)
+#compareTopTransferFunctions.compare.inputFiles.Compare1 = cms.PSet(
+  #fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MadGraph_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
+#, legendLabel = cms.string( 'GSF kinematics from PF' )
+#, useAlt     = cms.bool( True )
+#, useNonT    = cms.bool( True )
+#, useNonP    = cms.bool( True )
+#, refGen     = cms.bool( True )
+#, refSel     = cms.bool( True )
+#, cycle    = cms.int32( 1 )
+#)
+#compareTopTransferFunctions.compare.inputFiles.Compare2 = cms.PSet(
+  #fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MadGraph_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
+#, legendLabel = cms.string( 'PF kinematics' )
+#, useAlt     = cms.bool( False )
+#, useNonT    = cms.bool( True )
+#, useNonP    = cms.bool( True )
+#, refGen     = cms.bool( True )
+#, refSel     = cms.bool( True )
+#, cycle    = cms.int32( 1 )
+#)
 
 #label = 'MCatNLO_elecKinematics'
 #compareTopTransferFunctions.compare.inputFiles.Default = cms.PSet( # "Default" *must* exist!
@@ -128,6 +128,82 @@ compareTopTransferFunctions.compare.inputFiles.Compare2 = cms.PSet(
 #, refSel     = cms.bool( True )
 #, cycle    = cms.int32( 1 )
 #)
+
+##label = 'MCatNLO_jetBias'
+##compareTopTransferFunctions.compare.inputFiles.Default = cms.PSet( # "Default" *must* exist!
+  ##fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MCatNLO_UnbiasedE_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
+##, legendLabel = cms.string( 'unbiased jet selection (E)' )
+##, useAlt     = cms.bool( False )
+##, useNonT    = cms.bool( True )
+##, useNonP    = cms.bool( True )
+##, refGen     = cms.bool( True )
+##, refSel     = cms.bool( True )
+##, cycle    = cms.int32( 1 )
+##)
+##compareTopTransferFunctions.compare.inputFiles.Compare1 = cms.PSet(
+  ##fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MCatNLO_Unbiased_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
+##, legendLabel = cms.string( 'unbiased jet selection' )
+##, useAlt     = cms.bool( False )
+##, useNonT    = cms.bool( True )
+##, useNonP    = cms.bool( True )
+##, refGen     = cms.bool( True )
+##, refSel     = cms.bool( True )
+##, cycle    = cms.int32( 1 )
+##)
+##compareTopTransferFunctions.compare.inputFiles.Compare2 = cms.PSet(
+  ##fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MCatNLO_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
+##, legendLabel = cms.string( 'original jet selection' )
+##, useAlt     = cms.bool( False )
+##, useNonT    = cms.bool( True )
+##, useNonP    = cms.bool( True )
+##, refGen     = cms.bool( True )
+##, refSel     = cms.bool( True )
+##, cycle    = cms.int32( 1 )
+##)
+
+#label = 'MadGraph_bTag'
+#compareTopTransferFunctions.compare.inputFiles.Default = cms.PSet(
+  #fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MadGraph_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
+#, legendLabel = cms.string( 'original jet selection' )
+#, useAlt     = cms.bool( False )
+#, useNonT    = cms.bool( True )
+#, useNonP    = cms.bool( True )
+#, refGen     = cms.bool( True )
+#, refSel     = cms.bool( True )
+#, cycle    = cms.int32( 1 )
+#)
+#compareTopTransferFunctions.compare.inputFiles.Compare1 = cms.PSet(
+  #fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MadGraph_L3_unambiguousOnly_bTag_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
+#, legendLabel = cms.string( 'jet selection with CSVT requirement/veto' )
+#, useAlt     = cms.bool( False )
+#, useNonT    = cms.bool( True )
+#, useNonP    = cms.bool( True )
+#, refGen     = cms.bool( True )
+#, refSel     = cms.bool( True )
+#, cycle    = cms.int32( 1 )
+#)
+
+##label = 'MCatNLO_bTag'
+##compareTopTransferFunctions.compare.inputFiles.Default = cms.PSet(
+  ##fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MCatNLO_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
+##, legendLabel = cms.string( 'original jet selection' )
+##, useAlt     = cms.bool( False )
+##, useNonT    = cms.bool( True )
+##, useNonP    = cms.bool( True )
+##, refGen     = cms.bool( True )
+##, refSel     = cms.bool( True )
+##, cycle    = cms.int32( 1 )
+##)
+##compareTopTransferFunctions.compare.inputFiles.Compare1 = cms.PSet(
+  ##fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MCatNLO_L3_unambiguousOnly_bTag_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
+##, legendLabel = cms.string( 'jet selection with CSVT requirement/veto' )
+##, useAlt     = cms.bool( False )
+##, useNonT    = cms.bool( True )
+##, useNonP    = cms.bool( True )
+##, refGen     = cms.bool( True )
+##, refSel     = cms.bool( True )
+##, cycle    = cms.int32( 1 )
+##)
 
 ### Paths ###
 

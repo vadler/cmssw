@@ -33,6 +33,72 @@ compareTopTransferFunctions.compare = cms.PSet(
 
 ### Input Files ###
 
+##label = 'Generators'
+##compareTopTransferFunctions.compare.inputFiles.Default = cms.PSet( # "Default" *must* exist!
+  ##fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MadGraph_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
+##, legendLabel = cms.string( 'MadGraph' )
+##, useAlt     = cms.bool( False )
+##, useNonT    = cms.bool( True )
+##, useNonP    = cms.bool( True )
+##, refGen     = cms.bool( True )
+##, refSel     = cms.bool( True )
+##, cycle    = cms.int32( 1 )
+##)
+##compareTopTransferFunctions.compare.inputFiles.Compare1 = cms.PSet(
+  ##fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MCatNLO_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
+##, legendLabel = cms.string( 'MC@NLO' )
+##, useAlt     = cms.bool( False )
+##, useNonT    = cms.bool( True )
+##, useNonP    = cms.bool( True )
+##, refGen     = cms.bool( True )
+##, refSel     = cms.bool( True )
+##, cycle    = cms.int32( 1 )
+##)
+
+#label = 'MadGraph_functions'
+#compareTopTransferFunctions.compare.inputFiles.Default = cms.PSet( # "Default" *must* exist!
+  #fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MadGraph_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
+#, legendLabel = cms.string( 'single Gaussian' )
+#, useAlt     = cms.bool( False )
+#, useNonT    = cms.bool( True )
+#, useNonP    = cms.bool( True )
+#, refGen     = cms.bool( True )
+#, refSel     = cms.bool( True )
+#, cycle    = cms.int32( 1 )
+#)
+#compareTopTransferFunctions.compare.inputFiles.Compare1 = cms.PSet(
+  #fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MadGraph_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
+#, legendLabel = cms.string( 'double Gaussian' )
+#, useAlt     = cms.bool( False )
+#, useNonT    = cms.bool( True )
+#, useNonP    = cms.bool( True )
+#, refGen     = cms.bool( True )
+#, refSel     = cms.bool( True )
+#, cycle    = cms.int32( -1 )
+#)
+
+##label = 'MCatNLO_functions'
+##compareTopTransferFunctions.compare.inputFiles.Default = cms.PSet( # "Default" *must* exist!
+  ##fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MCatNLO_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
+##, legendLabel = cms.string( 'single Gaussian' )
+##, useAlt     = cms.bool( False )
+##, useNonT    = cms.bool( True )
+##, useNonP    = cms.bool( True )
+##, refGen     = cms.bool( True )
+##, refSel     = cms.bool( True )
+##, cycle    = cms.int32( 1 )
+##)
+##compareTopTransferFunctions.compare.inputFiles.Compare1 = cms.PSet(
+  ##fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MCatNLO_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
+##, legendLabel = cms.string( 'double Gaussian' )
+##, useAlt     = cms.bool( False )
+##, useNonT    = cms.bool( True )
+##, useNonP    = cms.bool( True )
+##, refGen     = cms.bool( True )
+##, refSel     = cms.bool( True )
+##, cycle    = cms.int32( -1 )
+##)
+
 #label = 'MadGraph_elecKinematics'
 #compareTopTransferFunctions.compare.inputFiles.Default = cms.PSet( # "Default" *must* exist!
   #fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MadGraph_newElec_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
@@ -269,7 +335,8 @@ print '-----------'
 # DEBUG BEGIN
 print 'Reference: ', compareTopTransferFunctions.compare.inputFiles.Default.fileName.value()
 print 'Compare 1: ', compareTopTransferFunctions.compare.inputFiles.Compare1.fileName.value()
-print 'Compare 2: ', compareTopTransferFunctions.compare.inputFiles.Compare2.fileName.value()
+if hasattr( compareTopTransferFunctions.compare.inputFiles, 'Compare2' ):
+  print 'Compare 2: ', compareTopTransferFunctions.compare.inputFiles.Compare2.fileName.value()
 # DEBUG END
 if compareTopTransferFunctions.io.plot.value() is True:
   print

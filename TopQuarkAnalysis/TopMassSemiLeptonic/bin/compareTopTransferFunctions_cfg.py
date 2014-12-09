@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 
 ### Switches ###
 
-test = False
+test = True
 
 ### Configuration ###
 
@@ -55,7 +55,29 @@ compareTopTransferFunctions.compare = cms.PSet(
 ##, cycle    = cms.int32( 1 )
 ##)
 
-#label = 'MadGraph_functions'
+#label = 'MadGraph_functions_elecs'
+#compareTopTransferFunctions.compare.inputFiles.Default = cms.PSet( # "Default" *must* exist!
+  #fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MadGraph_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
+#, legendLabel = cms.string( 'single Gaussian' )
+#, useAlt     = cms.bool( True )
+#, useNonT    = cms.bool( True )
+#, useNonP    = cms.bool( True )
+#, refGen     = cms.bool( True )
+#, refSel     = cms.bool( True )
+#, cycle    = cms.int32( 1 )
+#)
+#compareTopTransferFunctions.compare.inputFiles.Compare1 = cms.PSet(
+  #fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MadGraph_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
+#, legendLabel = cms.string( 'double Gaussian' )
+#, useAlt     = cms.bool( True )
+#, useNonT    = cms.bool( True )
+#, useNonP    = cms.bool( True )
+#, refGen     = cms.bool( True )
+#, refSel     = cms.bool( True )
+#, cycle    = cms.int32( 3 )
+#)
+
+#label = 'MadGraph_functions_muons'
 #compareTopTransferFunctions.compare.inputFiles.Default = cms.PSet( # "Default" *must* exist!
   #fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MadGraph_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
 #, legendLabel = cms.string( 'single Gaussian' )
@@ -74,30 +96,96 @@ compareTopTransferFunctions.compare = cms.PSet(
 #, useNonP    = cms.bool( True )
 #, refGen     = cms.bool( True )
 #, refSel     = cms.bool( True )
-#, cycle    = cms.int32( -1 )
+#, cycle    = cms.int32( 3 )
 #)
 
-##label = 'MCatNLO_functions'
-##compareTopTransferFunctions.compare.inputFiles.Default = cms.PSet( # "Default" *must* exist!
-  ##fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MCatNLO_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
-##, legendLabel = cms.string( 'single Gaussian' )
-##, useAlt     = cms.bool( False )
-##, useNonT    = cms.bool( True )
-##, useNonP    = cms.bool( True )
-##, refGen     = cms.bool( True )
-##, refSel     = cms.bool( True )
-##, cycle    = cms.int32( 1 )
-##)
-##compareTopTransferFunctions.compare.inputFiles.Compare1 = cms.PSet(
-  ##fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MCatNLO_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
-##, legendLabel = cms.string( 'double Gaussian' )
-##, useAlt     = cms.bool( False )
-##, useNonT    = cms.bool( True )
-##, useNonP    = cms.bool( True )
-##, refGen     = cms.bool( True )
-##, refSel     = cms.bool( True )
-##, cycle    = cms.int32( -1 )
-##)
+#label = 'MadGraph_functions_jets'
+#compareTopTransferFunctions.compare.inputFiles.Default = cms.PSet( # "Default" *must* exist!
+  #fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MadGraph_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
+#, legendLabel = cms.string( 'double Gaussian' )
+#, useAlt     = cms.bool( False )
+#, useNonT    = cms.bool( True )
+#, useNonP    = cms.bool( True )
+#, refGen     = cms.bool( True )
+#, refSel     = cms.bool( True )
+#, cycle    = cms.int32( 1 )
+#)
+#compareTopTransferFunctions.compare.inputFiles.Compare1 = cms.PSet(
+  #fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MadGraph_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
+#, legendLabel = cms.string( 'single Gaussian' )
+#, useAlt     = cms.bool( False )
+#, useNonT    = cms.bool( True )
+#, useNonP    = cms.bool( True )
+#, refGen     = cms.bool( True )
+#, refSel     = cms.bool( True )
+#, cycle    = cms.int32( 3 )
+#)
+
+#label = 'MCatNLO_functions_elecs'
+#compareTopTransferFunctions.compare.inputFiles.Default = cms.PSet( # "Default" *must* exist!
+  #fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MCatNLO_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
+#, legendLabel = cms.string( 'single Gaussian' )
+#, useAlt     = cms.bool( True )
+#, useNonT    = cms.bool( True )
+#, useNonP    = cms.bool( True )
+#, refGen     = cms.bool( True )
+#, refSel     = cms.bool( True )
+#, cycle    = cms.int32( 1 )
+#)
+#compareTopTransferFunctions.compare.inputFiles.Compare1 = cms.PSet(
+  #fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MCatNLO_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
+#, legendLabel = cms.string( 'double Gaussian' )
+#, useAlt     = cms.bool( True )
+#, useNonT    = cms.bool( True )
+#, useNonP    = cms.bool( True )
+#, refGen     = cms.bool( True )
+#, refSel     = cms.bool( True )
+#, cycle    = cms.int32( 3 )
+#)
+
+#label = 'MCatNLO_functions_muons'
+#compareTopTransferFunctions.compare.inputFiles.Default = cms.PSet( # "Default" *must* exist!
+  #fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MCatNLO_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
+#, legendLabel = cms.string( 'single Gaussian' )
+#, useAlt     = cms.bool( False )
+#, useNonT    = cms.bool( True )
+#, useNonP    = cms.bool( True )
+#, refGen     = cms.bool( True )
+#, refSel     = cms.bool( True )
+#, cycle    = cms.int32( 1 )
+#)
+#compareTopTransferFunctions.compare.inputFiles.Compare1 = cms.PSet(
+  #fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MCatNLO_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
+#, legendLabel = cms.string( 'double Gaussian' )
+#, useAlt     = cms.bool( False )
+#, useNonT    = cms.bool( True )
+#, useNonP    = cms.bool( True )
+#, refGen     = cms.bool( True )
+#, refSel     = cms.bool( True )
+#, cycle    = cms.int32( 3 )
+#)
+
+#label = 'MCatNLO_functions_jets'
+#compareTopTransferFunctions.compare.inputFiles.Default = cms.PSet( # "Default" *must* exist!
+  #fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MCatNLO_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
+#, legendLabel = cms.string( 'double Gaussian' )
+#, useAlt     = cms.bool( False )
+#, useNonT    = cms.bool( True )
+#, useNonP    = cms.bool( True )
+#, refGen     = cms.bool( True )
+#, refSel     = cms.bool( True )
+#, cycle    = cms.int32( 1 )
+#)
+#compareTopTransferFunctions.compare.inputFiles.Compare1 = cms.PSet(
+  #fileName = cms.string( 'file:%s/output/fitTopTransferFunctions_fromSummer11-coarseEta_Summer12_MCatNLO_L3_unambiguousOnly_PileUp.root'%( os.getenv( "CMSSW_BASE" ) ) )
+#, legendLabel = cms.string( 'single Gaussian' )
+#, useAlt     = cms.bool( False )
+#, useNonT    = cms.bool( True )
+#, useNonP    = cms.bool( True )
+#, refGen     = cms.bool( True )
+#, refSel     = cms.bool( True )
+#, cycle    = cms.int32( 3 )
+#)
 
 #label = 'MadGraph_elecKinematics'
 #compareTopTransferFunctions.compare.inputFiles.Default = cms.PSet( # "Default" *must* exist!
@@ -342,7 +430,7 @@ if compareTopTransferFunctions.io.plot.value() is True:
   print
   print 'Plots destination:'
   print '------------------'
-  print pathPlots + '*.png'
+  print pathPlots + '*.*'
 print
 print 'Log file destination:'
 print '---------------------'

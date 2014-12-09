@@ -433,17 +433,17 @@ int CompareTopTransferFunctionsRunner::run()
         histo.replace( pos, 4, strPt_[ default_ ] );
         pos = histo.find( "_XXX" );
       }
-      const int cycle( cycles_[ 0 ] );
+      const int cycle( cycles_[ default_ ] );
       std::string refCycle( "" );
       if ( cycle > 0 ) {
         refCycle.append( ";" );
         refCycle.append( boost::lexical_cast< std::string >( cycle ) );
       }
-      const std::string refNamecycle( histo + refCycle );
+      const std::string refNameCycle( histo + refCycle );
       if ( verbose_ > 3 ) {
-        std::cout << "    loading   : " << refNamecycle << std::endl;
+        std::cout << "    loading   : " << refNameCycle << std::endl;
       }
-      TH1D* refHisto( ( TH1D* )( gDirectory->Get( refNamecycle.c_str() ) ) );
+      TH1D* refHisto( ( TH1D* )( gDirectory->Get( refNameCycle.c_str() ) ) );
       refHisto->SetLineColor( kRed );
       refHisto->SetMarkerColor( kRed );
       refHisto->SetFillColor( kYellow );
@@ -492,11 +492,18 @@ int CompareTopTransferFunctionsRunner::run()
           overlayCycle.append( ";" );
           overlayCycle.append( boost::lexical_cast< std::string >( cycle2 ) );
         }
-        const std::string overlayNamecycle( histo2 + overlayCycle );
-        if ( verbose_ > 3 ) {
-          std::cout << "    overlaying: " << overlayNamecycle << std::endl;
+        const std::string overlayNameCycle( histo2 + overlayCycle );
+        TH1D* overlayHisto( ( TH1D* )( pwds_[ index ]->Get( overlayNameCycle.c_str() ) ) );
+        if ( !overlayHisto ) {
+          if ( verbose_ > 1 ) {
+            std::cout << myName_ << " --> WARNING:" << std::endl;
+            std::cout << "    overlaying: " << overlayNameCycle << " not found" << std::endl;
+          }
+          continue;
         }
-        TH1D* overlayHisto( ( TH1D* )( pwds_[ index ]->Get( overlayNamecycle.c_str() ) ) );
+        if ( verbose_ > 3 ) {
+          std::cout << "    overlaying: " << overlayNameCycle << std::endl;
+        }
         overlayHisto->SetLineColor( kBlue + uFile ); // FIXME: How to loop over (pretty) colors
         overlayHisto->SetMarkerColor( kBlue + uFile ); // FIXME: How to loop over (pretty) colors
         overlayHisto->SetStats( setStats );
@@ -539,17 +546,17 @@ int CompareTopTransferFunctionsRunner::run()
           histo.replace( pos, 4, strPt_[ default_ ] );
           pos = histo.find( "_XXX" );
         }
-        const int cycle( cycles_[ 0 ] );
+        const int cycle( cycles_[ default_ ] );
         std::string refCycle( "" );
         if ( cycle > 0 ) {
           refCycle.append( ";" );
           refCycle.append( boost::lexical_cast< std::string >( cycle ) );
         }
-        const std::string refNamecycle( histo + refCycle );
+        const std::string refNameCycle( histo + refCycle );
         if ( verbose_ > 3 ) {
-          std::cout << "    loading   : " << refNamecycle << std::endl;
+          std::cout << "    loading   : " << refNameCycle << std::endl;
         }
-        TH1D* refHisto( ( TH1D* )( gDirectory->Get( refNamecycle.c_str() ) ) );
+        TH1D* refHisto( ( TH1D* )( gDirectory->Get( refNameCycle.c_str() ) ) );
         refHisto->SetLineColor( kRed );
         refHisto->SetMarkerColor( kRed );
         refHisto->SetFillColor( kYellow );
@@ -597,11 +604,18 @@ int CompareTopTransferFunctionsRunner::run()
             overlayCycle.append( ";" );
             overlayCycle.append( boost::lexical_cast< std::string >( cycle2 ) );
           }
-          const std::string overlayNamecycle( histo2 + overlayCycle );
-          if ( verbose_ > 3 ) {
-            std::cout << "    overlaying: " << overlayNamecycle << std::endl;
+          const std::string overlayNameCycle( histo2 + overlayCycle );
+          TH1D* overlayHisto( ( TH1D* )( pwdsEta_[ index ][ uEta ]->Get( overlayNameCycle.c_str() ) ) );
+          if ( !overlayHisto ) {
+            if ( verbose_ > 1 ) {
+              std::cout << myName_ << " --> WARNING:" << std::endl;
+              std::cout << "    overlaying: " << overlayNameCycle << " not found" << std::endl;
+            }
+            continue;
           }
-          TH1D* overlayHisto( ( TH1D* )( pwdsEta_[ index ][ uEta ]->Get( overlayNamecycle.c_str() ) ) );
+          if ( verbose_ > 3 ) {
+            std::cout << "    overlaying: " << overlayNameCycle << std::endl;
+          }
           overlayHisto->SetLineColor( kBlue + uFile ); // FIXME: How to loop over (pretty) colors
           overlayHisto->SetMarkerColor( kBlue + uFile ); // FIXME: How to loop over (pretty) colors
           overlayHisto->SetStats( setStats );

@@ -38,8 +38,13 @@ FitTopTransferFunctionsRunner::FitTopTransferFunctionsRunner( const std::string&
 , useNonT_( config_.getParameter< bool >( "useNonT" ) )
 , useNonP_( config_.getParameter< bool >( "useNonP" ) )
 , refGen_( config_.getParameter< bool >( "refGen" ) )
+, refDelta_( true )
 , objCats_( config_.getParameter< edm::ParameterSet >( "objects" ).getParameterNamesForType< edm::ParameterSet >() )
 {
+
+  if ( config_.existsAs< bool >( "refDelta" ) ) {
+    refDelta_ = config_.getParameter< bool >( "refDelta" );
+  }
 
   if ( verbose_ > 1 ) {
     std::cout << std::endl
@@ -91,7 +96,10 @@ FitTopTransferFunctionsRunner::FitTopTransferFunctionsRunner( const std::string&
   titlePt_         = refGen_  ? titlePtT_ + "^{GEN} (GeV)" : titlePtT_ + " (GeV)";
   baseTitleEta_    = useSymm_ ? "|#eta|" : "#eta";
   titleEta_        = refGen_  ? baseTitleEta_ + "^{GEN}" : baseTitleEta_ + "^{RECO}";
-  titleTrans_      = "#Delta" + titlePtT_ + " (GeV)";
+  titleTrans_      = titlePtT_;
+  if ( refDelta_ ) titleTrans_  = "#Delta" + titlePtT_;
+  else             titleTrans_.append( refGen_ ? "^{RECO}" : "^{GEN}" );
+  titleTrans_.append( " (GeV)" );
 //   titleTransMean_  = "#mu of " + titleTrans_;
 //   titleTransNorm_  = "c of " + titleTrans_;
 //   titleTransSigma_ = "#sigma of " + titleTrans_;
@@ -586,12 +594,14 @@ void FitTopTransferFunctionsRunner::fillPerCategoryBin( unsigned uEta, unsigned 
     // Loop over entries
     for ( unsigned uEntry = 0; uEntry < objectData_.back().sizePt( uEta, uPt ); ++uEntry ) {
       const Double_t ptRef( refGen_ ? objectData_.back().ptGenPt( uEta, uPt ).at( uEntry ) : objectData_.back().ptPt( uEta, uPt ).at( uEntry ) );
+      const Double_t ptNonRef( refGen_ ? objectData_.back().ptPt( uEta, uPt ).at( uEntry ) : objectData_.back().ptGenPt( uEta, uPt ).at( uEntry ) );
       const Double_t etaRef( refGen_ ? objectData_.back().etaGenPt( uEta, uPt ).at( uEntry ) : objectData_.back().etaPt( uEta, uPt ).at( uEntry ) );
       if ( uNpv != npvBins_.size() && ( npvBins_.at( uNpv ) > objectData_.back().NPVObservedPt( uEta, uPt ).at( uEntry ) || objectData_.back().NPVObservedPt( uEta, uPt ).at( uEntry ) >= npvBins_.at( uNpv + 1 ) ) ) continue;
       if ( ptRef < minPt  ) continue;
       if ( std::fabs( etaRef ) >= maxEta ) continue;
       if ( reco::deltaR( objectData_.back().etaGenPt( uEta, uPt ).at( uEntry ), objectData_.back().phiGenPt( uEta, uPt ).at( uEntry ), objectData_.back().etaPt( uEta, uPt ).at( uEntry ), objectData_.back().phiPt( uEta, uPt ).at( uEntry ) ) > maxDR ) continue;
-      const Double_t value( refGen_ ? objectData_.back().ptGenPt( uEta, uPt ).at( uEntry ) - objectData_.back().ptPt( uEta, uPt ).at( uEntry ) : objectData_.back().ptPt( uEta, uPt ).at( uEntry ) - objectData_.back().ptGenPt( uEta, uPt ).at( uEntry ) );
+      const Double_t valueDelta( ptRef - ptNonRef );
+      const Double_t value( refDelta_ ? valueDelta : ptNonRef );
       const Double_t weight( objectData_.back().weightPt( uEta, uPt ).at( uEntry ) );
       if ( fitEtaBins_ ) histosTransEta.histVecPtTrans.at( uPt )->Fill( value, weight );
       histosTrans.histVecPtTrans.at( uPt )->Fill( value, weight );
@@ -624,13 +634,15 @@ void FitTopTransferFunctionsRunner::fillPerCategoryBin( unsigned uEta, unsigned 
     // Loop over entries
     for ( unsigned uEntry = 0; uEntry < objectData_.back().sizePt( uEta, uPt ); ++uEntry ) {
       const Double_t ptRef( refGen_ ? objectData_.back().ptGenPt( uEta, uPt ).at( uEntry ) : objectData_.back().ptPt( uEta, uPt ).at( uEntry ) );
+      const Double_t ptNonRef( refGen_ ? objectData_.back().ptPt( uEta, uPt ).at( uEntry ) : objectData_.back().ptGenPt( uEta, uPt ).at( uEntry ) );
       const Double_t etaRef( refGen_ ? objectData_.back().etaGenPt( uEta, uPt ).at( uEntry ) : objectData_.back().etaPt( uEta, uPt ).at( uEntry ) );
       if ( uNpv != npvBins_.size() && ( npvBins_.at( uNpv ) > objectData_.back().NPVObservedPt( uEta, uPt ).at( uEntry ) || objectData_.back().NPVObservedPt( uEta, uPt ).at( uEntry ) >= npvBins_.at( uNpv + 1 ) ) ) continue;
       if ( ptRef < minPt  ) continue;
       if ( std::fabs( etaRef ) >= maxEta ) continue;
       if ( reco::deltaR( objectData_.back().etaGenPt( uEta, uPt ).at( uEntry ), objectData_.back().phiGenPt( uEta, uPt ).at( uEntry ), objectData_.back().etaPt( uEta, uPt ).at( uEntry ), objectData_.back().phiPt( uEta, uPt ).at( uEntry ) ) > maxDR ) continue;
       if ( minCSV < objectData_.back().tagCSVPt( uEta, uPt ).at( uEntry ) && objectData_.back().tagCSVPt( uEta, uPt ).at( uEntry ) <= maxCSV ) {
-        const Double_t value( refGen_ ? objectData_.back().ptGenPt( uEta, uPt ).at( uEntry ) - objectData_.back().ptPt( uEta, uPt ).at( uEntry ) : objectData_.back().ptPt( uEta, uPt ).at( uEntry ) - objectData_.back().ptGenPt( uEta, uPt ).at( uEntry ) );
+        const Double_t valueDelta( ptRef - ptNonRef );
+        const Double_t value( refDelta_ ? valueDelta : ptNonRef );
         const Double_t weight( objectData_.back().weightPt( uEta, uPt ).at( uEntry ) );
         if ( fitEtaBins_ ) histosTransEta.histVecPtTrans.at( uPt )->Fill( value, weight );
         histosTrans.histVecPtTrans.at( uPt )->Fill( value, weight );

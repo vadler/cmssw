@@ -31,6 +31,7 @@ namespace my {
       bool                       useNonT_;
       bool                       useNonP_;
       bool                       refGen_;
+      bool                       refDelta_;
       bool                       writeFiles_;
       bool                       fit0D_;
       bool                       fit1D_;
